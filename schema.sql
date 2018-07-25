@@ -15,7 +15,7 @@ CREATE TABLE variants (
   mc TEXT, -- TODO: NA VS. "-"?
   af_exac TEXT,
   af_tgp TEXT,
-  allele_id TEXT,
+  allele_id INTEGER CHECK (allele_id >= 0),
   clndn TEXT,
   clnsig TEXT,
   dbvarid TEXT,
@@ -28,11 +28,11 @@ CREATE TABLE variants (
   mh_1l INTEGER NOT NULL CHECK (mh_1l >= 0), -- Number of First Consecutive Matches
   hom TEXT, -- Decimal field with precision 1 or 2
   nbmm INTEGER NOT NULL CHECK (nbmm >= 0),
-  mh_dist INTEGER CHECK (mh_dist >= 0 or mh_dist IS NULL),
+  mh_dist INTEGER CHECK (mh_dist >= 0),
   mh_seq_1 TEXT,
   mh_seq_2 TEXT,
-  pam_mot INTEGER CHECK (pam_mot >= 0 OR pam_mot IS NULL), -- NULL means NA
-  pam_uniq INTEGER CHECK (pam_uniq >= 0 OR pam_uniq IS NULL), -- NULL means NA
-  guides_no_ot INTEGER CHECK (guides_min_ot >= 0 OR guides_min_ot IS NULL), -- NULL means NA
-  guides_min_ot INTEGER CHECK (guides_min_ot >= 0 OR guides_min_ot IS NULL) -- NULL means NA
+  pam_mot INTEGER CHECK (pam_mot >= 0), -- NULL means NA
+  pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
+  guides_no_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
+  guides_min_ot INTEGER CHECK (guides_min_ot >= 0) -- NULL means NA
 );

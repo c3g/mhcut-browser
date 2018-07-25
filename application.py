@@ -8,8 +8,7 @@ from typing import Pattern
 
 CHR_DOMAIN = re.compile("^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
 POS_INT_DOMAIN = re.compile("^[1-9]\d*")
-
-SORT_DIRECTIONS = {"ASC", "DESC"}
+SORT_ORDER_DOMAIN = re.compile("^(ASC|DESC)$")
 
 app = Flask(__name__)
 
@@ -41,8 +40,19 @@ def index():
     items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
     chromosome = verify_domain(request.args.get("chr", "any"), CHR_DOMAIN)
     c = get_db().cursor()
-    c.execute("SELECT * FROM variants WHERE chr = :chr OR :chr = 'any' ORDER BY id LIMIT :items_per_page OFFSET :start",
-              {"start": (page - 1) * items_per_page, "chr": chromosome, "items_per_page": items_per_page})
+    c.execute("PRAGMA table_info(variants)")
+    columns = [dict(i)["name"] for i in c.fetchall()]
+    sort_by = verify_domain(request.args.get("sort_by", "id"), re.compile("^({})$".format("|".join(columns))))
+    sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
+    c.execute(
+        "SELECT * FROM variants WHERE chr = :chr OR :chr = 'any' ORDER BY {} {} "
+        "LIMIT :items_per_page OFFSET :start".format(sort_by, sort_order),
+        {
+            "start": (page - 1) * items_per_page,
+            "chr": chromosome,
+            "items_per_page": items_per_page
+        }
+    )
     return json.jsonify([dict(i) for i in c.fetchall()])
 
 

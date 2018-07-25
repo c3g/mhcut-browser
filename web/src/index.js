@@ -5,6 +5,7 @@ let itemsPerPage = 100;
 let loadedEntries = [];
 let totalCount = 0;
 let fields = [];
+let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
 
@@ -13,13 +14,20 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
         fetch(new Request("/api/entries")),
         fetch(new Request("/api/fields")),
+        fetch(new Request("/api/metadata"))
     ]).then(rs => Promise.all(rs.map(r => r.json()))).then(data => {
         loadedEntries = data[0];
         totalCount = parseInt(data[1], 10);
         fields = data[2];
+        metadata = data[3];
         populateEntryTable();
         updatePagination();
         updateTableColumnHeaders();
+
+        d3.select("#start").attr("min", metadata["min_pos"]);
+        d3.select("#start").attr("max", metadata["max_pos"]);
+        d3.select("#end").attr("min", metadata["min_pos"]);
+        d3.select("#end").attr("max", metadata["max_pos"]);
 
         d3.select("#prev-page").on("click", () => {
             page = Math.max(page - 1, 1);

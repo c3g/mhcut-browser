@@ -70,6 +70,13 @@ def fields():
     return json.jsonify([dict(i) for i in c.fetchall()])
 
 
+@app.route("/metadata", methods=["GET"])
+def metadata():
+    c = get_db().cursor()
+    c.execute("SELECT MIN(start) AS min_pos, MAX(end) AS max_pos FROM variants")
+    return json.jsonify(dict(c.fetchone()))
+
+
 @app.teardown_appcontext
 def close_connection(_exception):
     db = getattr(g, "_database", None)

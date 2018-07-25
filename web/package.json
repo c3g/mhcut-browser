@@ -1,0 +1,21 @@
+{
+  "name": "tsv-browser-web",
+  "version": "0.1.0",
+  "description": "A TSV browser for SNP data.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "npx webpack --watch --mode development",
+    "build": "npx webpack --mode production",
+    "build-dev": "npx webpack --mode development"
+  },
+  "author": "David Lougheed <david.lougheed@mail.mcgill.ca>",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "webpack": "^4.16.2",
+    "webpack-cli": "^3.1.0"
+  },
+  "dependencies": {
+    "d3": "^5.5.0"
+  }
+}

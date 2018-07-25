@@ -140,6 +140,15 @@ table#entry-table thead th {
     font-size: 0.8rem;
     font-family: "Roboto Mono", monospace;
     color: #444;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+table#entry-table thead th span.material-icons {
+    margin-left: 2px;
+    vertical-align: top;
+    font-size: 1.1rem;
+    color: #999;
 }
 
 table#entry-table tbody tr:nth-child(even) td {

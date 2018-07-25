@@ -5,6 +5,8 @@ let itemsPerPage = 100;
 let loadedEntries = [];
 let totalCount = 0;
 let fields = [];
+let sortBy = "id";
+let sortOrder = "ASC";
 
 document.addEventListener("DOMContentLoaded", function () {
     Promise.all([
@@ -17,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fields = data[2];
         populateEntryTable();
         updatePagination();
+        updateTableColumnHeaders();
 
         d3.select("#prev-page").on("click", () => {
             page = Math.max(page - 1, 1);
@@ -35,12 +38,27 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         d3.select("#table-display").classed("loading", false);
+
+        d3.selectAll("table#entry-table thead th").data(fields, f => f["name"]).on("click", f => {
+            if (sortBy === f["name"]) {
+                sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");
+            } else {
+                sortOrder = "ASC";
+                sortBy = f["name"];
+            }
+
+            updateTableColumnHeaders();
+
+            page = 1;
+            reloadPage();
+        });
     });
 });
 
 function populateEntryTable() {
     const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(fields, f => f["name"]);
-    tableColumns.enter().append("th").text(f => f["name"]); // TODO: Use original column name for display
+    // TODO: Use original column name for display
+    tableColumns.enter().append("th").text(f => f["name"]).append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
 
     const tableRows = d3.select("table#entry-table tbody").selectAll("tr").data(loadedEntries, e => e["id"]);
@@ -55,10 +73,11 @@ function populateEntryTable() {
 
 function formatEntryCell(e, f) {
     if (f["name"] === "rs") {
+        if (e["rs"] === null) return "-";
         return `<a href="https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${e["rs"]}"
                    target="_blank" rel="noopener">${e["rs"]}</a>`
     }
-    if (f["name"] === "gene_info" && e["gene_info"] !== "-") {
+    if (f["name"] === "gene_info" && e["gene_info"] !== "-" && e["gene_info"] !== "NA") {
         return e["gene_info"]
             .split("|")
             .map(og => `<a href="https://www.ncbi.nlm.nih.gov/gene/${og.split(":")[1]}/"
@@ -69,7 +88,13 @@ function formatEntryCell(e, f) {
         return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
                    target="_blank" rel="noopener">${e["allele_id"]}</a>`
     }
-    return e[f["name"]] === null ? "NA" : e[f["name"]];
+    return e[f["name"]] === null ? "NA" : e[f["name"]]; // TODO: Maybe shouldn't always be NA
+}
+
+function updateTableColumnHeaders() {
+    d3.selectAll("table#entry-table thead th").data(fields, f => f["name"])
+        .select("span.material-icons")
+        .text(f => (sortBy === f["name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
 }
 
 function updatePagination() {
@@ -84,7 +109,15 @@ function reloadPage() {
     let transitionEnded = false;
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
         .on("transitionend", () => transitionEnded = true);
-    return fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`))
+    let url = new URL("/api/", window.location.origin);
+    let params = {
+        page: page.toString(10),
+        items_per_page: itemsPerPage,
+        sort_by: sortBy,
+        sort_order: sortOrder
+    };
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    return fetch(new Request(url.toString()))
         .then(r => r.json())
         .then(data => {
             loadedEntries = data;

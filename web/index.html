@@ -36,7 +36,7 @@
 </main>
 <aside id="filter-options">
     <h1>TSV Browser</h1>
-    <h2>FILTER OPTIONS</h2>
+    <h2>FILTERS</h2>
     <h3>Position</h3>
     <h4>Chromosome</h4>
     <label for="chr1"><input type="checkbox" name="chr1" id="chr1"> chr1</label>
@@ -52,7 +52,22 @@
         <option value="within">Contained in Range</option>
         <option value="not-within">Is Not Contained in Range</option>
     </select>
-    <button id="apply-filters">Filter</button>
+    <h4>Gene Location</h4>
+    <label class="checkbox-label" for="intergenic">
+        <input type="checkbox" name="intergenic" id="intergenic"> intergenic
+    </label>
+    <label class="checkbox-label" for="intronic">
+        <input type="checkbox" name="intronic" id="intronic"> intronic
+    </label>
+    <label class="checkbox-label" for="exonic">
+        <input type="checkbox" name="exonic" id="exonic"> exonic
+    </label>
+    <h3>Field Search</h3>
+    <label for="search-query">Search Query</label>
+    <input type="text" name="search-query" id="search-query">
+    <button>Advanced Search</button>
+    <hr>
+    <button id="apply-filters">Apply Filters</button>
 </aside>
 </body>
 </html>

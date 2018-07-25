@@ -162,11 +162,11 @@ aside#filter-options h3 {
 }
 
 aside#filter-options h4 {
-    margin-top: 0;
+    margin-top: 10px;
     margin-bottom: 5px;
     font-family: "Roboto Mono", monospace;
     font-weight: normal;
-    font-size: 0.8rem;
+    font-size: 0.775rem;
     color: #333;
 }
 
@@ -175,8 +175,11 @@ aside#filter-options label {
     margin-top: 10px;
     margin-bottom: 5px;
     font-family: "Roboto Mono", monospace;
-    font-size: 0.8rem;
+    font-size: 0.775rem;
     color: #333;
+}
+aside#filter-options label.checkbox-label {
+    margin-top: 5px;
 }
 
 aside#filter-options select {
@@ -187,40 +190,62 @@ aside#filter-options input[type="checkbox"] {
     vertical-align: top;
 }
 
+aside#filter-options input[type="text"],
 aside#filter-options input[type="number"] {
     box-sizing: border-box;
     width: 100%;
 
     padding: 6px 8px;
 
-    border: 1px solid #DDD;
+    border: 1px solid #DFDFDF;
+    border-bottom-color: #D3D3D3;
     border-radius: 4px;
     background-color: #FEFEFE;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 1px 3px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(0, 0, 0, 0.05);
 
     font-size: 0.8rem;
     font-family: "Roboto Mono", monospace;
 }
 
-aside#filter-options button#apply-filters {
+aside#filter-options button {
     vertical-align: top;
     box-sizing: border-box;
+    margin: 10px 0;
     height: 30px;
     width: 100%;
-    margin-top: 15px;
 
-    border: 1px solid #1E88E5;
+    border: 1px solid #DFDFDF;
+    border-bottom-color: #D3D3D3;
     border-radius: 4px;
-    background-color: #42A5F5;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    background-color: #FEFEFE;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 1px 0 white;
 
     font-family: "Roboto Mono", sans-serif;
-    font-weight: bold;
+    font-weight: normal;
     font-size: 0.8rem;
-    color: #E3F2FD;
+
+    cursor: pointer;
 
     transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
 }
+
+aside#filter-options button#apply-filters {
+    border: 1px solid #2196F3;
+    border-bottom-color: #1E88E5;
+    background-color: #42A5F5;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+
+    font-weight: bold;
+    color: #E3F2FD;
+}
+
+aside#filter-options hr {
+    margin: 10px 2px;
+    border: none;
+    border-top: 1px solid #DFDFDF;
+}
+
+
 
 table#entry-table {
     border-collapse: collapse;

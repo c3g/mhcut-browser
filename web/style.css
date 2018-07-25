@@ -11,10 +11,41 @@ section#table-display {
     overflow: auto;
 }
 
+section#table-display::after {
+    position: fixed;
+    top: 0; left: 0; right: 200px; bottom: 0;
+    z-index: 20;
+    opacity: 0;
+    background-color: #FEFEFE;
+    pointer-events: none;
+
+    font-family: "Roboto Mono", monospace;
+    text-align: center;
+    color: #999;
+    line-height: 100vh;
+
+    content: "Loading...";
+
+    transition: opacity 0.1s;
+    animation-duration: 1s;
+    animation-name: loading;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes loading {
+    from {
+        color: #999;
+    }
+
+    to {
+        color: #333;
+    }
+}
+
 section#table-display.loading::after {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(254, 254, 254, 0.7);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 section#table-pagination {

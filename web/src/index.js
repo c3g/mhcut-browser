@@ -33,6 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
             page = 1;
             reloadPage();
         });
+
+        d3.select("#table-display").classed("loading", false);
     });
 });
 
@@ -68,12 +70,24 @@ function updatePagination() {
 }
 
 function reloadPage() {
+    let transitionEnded = false;
+    if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
+        .on("transitionend", () => transitionEnded = true);
     return fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`))
         .then(r => r.json())
         .then(data => {
             loadedEntries = data;
-            populateEntryTable();
-            updatePagination();
+            if (!transitionEnded) {
+                d3.select("#table-display").on("transitionend", () => {
+                    populateEntryTable();
+                    updatePagination();
+                    d3.select("#table-display").classed("loading", false);
+                });
+            } else {
+                populateEntryTable();
+                updatePagination();
+                d3.select("#table-display").classed("loading", false);
+            }
         });
 }
 

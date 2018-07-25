@@ -58,6 +58,17 @@ function formatEntryCell(e, f) {
         return `<a href="https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${e["rs"]}"
                    target="_blank" rel="noopener">${e["rs"]}</a>`
     }
+    if (f["name"] === "gene_info" && e["gene_info"] !== "-") {
+        return e["gene_info"]
+            .split("|")
+            .map(og => `<a href="https://www.ncbi.nlm.nih.gov/gene/${og.split(":")[1]}/"
+                           target="_blank" rel="noopener">${og}</a>`)
+            .join("|");
+    }
+    if (f["name"] === "allele_id" && e["allele_id"] !== "NA") {
+        return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
+                   target="_blank" rel="noopener">${e["allele_id"]}</a>`
+    }
     return e[f["name"]] === null ? "NA" : e[f["name"]];
 }
 

@@ -7,7 +7,7 @@ CREATE TABLE variants (
                                    'chr20', 'chr21', 'chr22', 'chrX', 'chrY')),
   start INTEGER NOT NULL CHECK (start >= 0),
   end INTEGER NOT NULL CHECK (end >= 0),
-  rs INTEGER CHECK (rs >= 0), -- Reference SNP
+  rs INTEGER UNIQUE CHECK (rs >= 0), -- Reference SNP
   caf TEXT, -- TODO: WHAT IS THIS?
   topmed TEXT, -- TODO: WHAT IS THIS?
   gene_info TEXT, -- TODO: WHAT IS THIS?

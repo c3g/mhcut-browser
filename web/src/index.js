@@ -47,8 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 sortBy = f["name"];
             }
 
-            updateTableColumnHeaders();
-
             page = 1;
             reloadPage();
         });
@@ -125,11 +123,13 @@ function reloadPage() {
                 d3.select("#table-display").on("transitionend", () => {
                     populateEntryTable();
                     updatePagination();
+                    updateTableColumnHeaders();
                     d3.select("#table-display").classed("loading", false);
                 });
             } else {
                 populateEntryTable();
                 updatePagination();
+                updateTableColumnHeaders();
                 d3.select("#table-display").classed("loading", false);
             }
         });

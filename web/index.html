@@ -34,6 +34,23 @@
 </section>
 <aside id="filter-options">
     <h1>TSV Browser</h1>
+    <h2>FILTER OPTIONS</h2>
+    <h3>Position</h3>
+    <h4>Chromosome</h4>
+    <label for="chr1"><input type="checkbox" name="chr1" id="chr1"> chr1</label>
+    <label for="start">Start Position</label>
+    <input type="number" min="" max="" id="start" name="start">
+    <label for="start">End Position</label>
+    <input type="number" min="" max="" id="end" name="end">
+    <label for="position-filter-type">Position Filter Type</label>
+    <select name="position-filter-type" id="position-filter-type">
+        <option value="overlap" selected>Overlaps Range</option>
+        <option value="not-overlap">Does Not Overlap Range</option>
+        <option value="" disabled>&mdash;</option>
+        <option value="within">Contained in Range</option>
+        <option value="not-within">Is Not Contained in Range</option>
+    </select>
+    <button id="apply-filters">Filter</button>
 </aside>
 </body>
 </html>

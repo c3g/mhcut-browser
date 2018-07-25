@@ -39,14 +39,17 @@ def main():
                       "                     mh_seq_2, pam_mot, pam_uniq, guides_no_ot, guides_min_ot) "
                       "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                       "       ?, ?)",
-                      (variant["chr"], int(variant["start"]), int(variant["end"]), int_or_none_cast(variant["RS"]),
-                       variant["CAF"], variant["TOPMED"], variant["GENEINFO"], variant["PM"], variant["MC"],
-                       variant["AF_EXAC"], variant["AF_TGP"], variant["ALLELEID"], variant["CLNDN"], variant["CLNSIG"],
-                       variant["DBVARID"], variant["GENEINFO.ClinVar"], variant["MC.ClinVar"], variant["citation"],
-                       variant["geneloc"], int(variant["varL"]), int(variant["mhL"]), int(variant["mh1L"]),
-                       variant["hom"], int(variant["nbMM"]), int_or_none_cast(variant["mhDist"]), variant["MHseq1"],
-                       variant["MHseq2"], int_or_none_cast(variant["pamMot"]), int_or_none_cast(variant["pamUniq"]),
-                       int_or_none_cast(variant["guidesNoOT"]), int_or_none_cast(variant["guidesMinOT"])))
+                      (variant["chr"].strip(), int(variant["start"]), int(variant["end"]),
+                       int_or_none_cast(variant["RS"]), variant["CAF"].strip(), variant["TOPMED"].strip(),
+                       variant["GENEINFO"].strip(), variant["PM"].strip(), variant["MC"].strip(),
+                       variant["AF_EXAC"].strip(), variant["AF_TGP"].strip(), variant["ALLELEID"].strip(),
+                       variant["CLNDN"].strip(), variant["CLNSIG"].strip(), variant["DBVARID"].strip(),
+                       variant["GENEINFO.ClinVar"].strip(), variant["MC.ClinVar"].strip(), variant["citation"].strip(),
+                       variant["geneloc"].strip(), int(variant["varL"]), int(variant["mhL"]), int(variant["mh1L"]),
+                       variant["hom"].strip(), int(variant["nbMM"]), int_or_none_cast(variant["mhDist"]),
+                       variant["MHseq1"].strip(), variant["MHseq2"].strip(), int_or_none_cast(variant["pamMot"]),
+                       int_or_none_cast(variant["pamUniq"]), int_or_none_cast(variant["guidesNoOT"]),
+                       int_or_none_cast(variant["guidesMinOT"])))
             i += 1
 
     conn.commit()

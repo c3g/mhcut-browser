@@ -82,32 +82,16 @@ section#table-pagination div:last-of-type {
 }
 
 section#table-pagination button {
-    vertical-align: top;
-    box-sizing: border-box;
     height: 26px;
     padding: 0;
-    margin-top: 10px;
-    margin-left: 5px;
+    margin: 10px 0 0 5px;
 
-    border: 1px solid #DFDFDF;
-    border-bottom-color: #D3D3D3;
-    border-radius: 4px;
-    background-color: #FEFEFE;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
-
-    color: #777;
-
-    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
 }
 
 section#table-pagination button[disabled] {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-section#table-pagination button:hover {
-    border-color: #D0D0D0;
-    color: #555;
 }
 
 section#table-pagination button span.material-icons {
@@ -194,25 +178,16 @@ aside#filter-options input[type="number"] {
 }
 
 aside#filter-options button {
-    vertical-align: top;
-    box-sizing: border-box;
     margin: 10px 0;
     height: 30px;
     width: 100%;
 
-    border: 1px solid #DFDFDF;
-    border-bottom-color: #D3D3D3;
-    border-radius: 4px;
-    background-color: #FEFEFE;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 1px 0 white;
 
-    font-family: "Roboto Mono", monospace;
     font-weight: normal;
     font-size: 0.8rem;
 
     cursor: pointer;
-
-    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
 }
 
 aside#filter-options div#chromosome-checkboxes label {
@@ -413,24 +388,14 @@ div#advanced-search-modal-options div:last-of-type {
 }
 
 div#advanced-search-modal-options button {
-    vertical-align: top;
-    box-sizing: border-box;
     height: 28px;
     padding: 0 8px 0 6px;
     margin-top: 10px;
 
-    border: 1px solid #DFDFDF;
-    border-bottom-color: #D3D3D3;
-    border-radius: 4px;
-    background-color: #FEFEFE;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
 
-    font-family: "Roboto Mono", monospace;
     font-size: 0.75rem;
-    color: #777;
     line-height: 14px;
-
-    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
 }
 div#advanced-search-modal-options button span.material-icons {
     vertical-align: top;
@@ -542,6 +507,35 @@ select {
 
     font-family: "Roboto Mono", monospace;
     font-size: 0.75rem;
+}
+
+button {
+    vertical-align: top;
+    box-sizing: border-box;
+
+    border: 1px solid #DFDFDF;
+    border-bottom-color: #D3D3D3;
+    border-radius: 4px;
+    background-color: #FEFEFE;
+    outline: none;
+
+    font-family: "Roboto Mono", monospace;
+    color: #555;
+
+    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+button:hover {
+    border-color: #CFCFCF;
+    border-bottom-color: #C3C3C3;
+    color: #444;
+}
+button:focus {
+    border-color: #AFAFAF;
+    border-bottom-color: #A3A3A3;
+}
+
+button::-moz-focus-inner {
+    border: none;
 }
 
 

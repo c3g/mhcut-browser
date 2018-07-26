@@ -87,6 +87,7 @@ section#table-pagination button {
     height: 26px;
     padding: 0;
     margin-top: 10px;
+    margin-left: 5px;
 
     border: 1px solid #DFDFDF;
     border-bottom-color: #D3D3D3;

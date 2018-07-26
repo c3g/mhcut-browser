@@ -25,6 +25,17 @@ document.addEventListener("DOMContentLoaded", function () {
         updatePagination();
         updateTableColumnHeaders();
 
+        const chromosomeLabels = d3.select("#chromosome-checkboxes").selectAll("label").data(metadata["chr"])
+            .enter()
+            .append("label")
+            .attr("for", c => c);
+        chromosomeLabels.append("input")
+            .attr("type", "checkbox")
+            .attr("id", c => c)
+            .attr("name", c => c)
+            .attr("checked", "checked");
+        chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
+
         d3.select("#start").attr("min", metadata["min_pos"]);
         d3.select("#start").attr("max", metadata["max_pos"]);
         d3.select("#end").attr("min", metadata["min_pos"]);

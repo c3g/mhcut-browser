@@ -8,6 +8,12 @@ from flask import Flask, g, json, request
 from typing import Pattern
 
 
+# Domain lists for metadata endpoint
+CHR_VALUES = ("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
+              "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
+              "chr20", "chr21", "chr22", "chrX", "chrY")
+
+# Domains
 CHR_DOMAIN = re.compile("^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
 POS_INT_DOMAIN = re.compile("^[1-9]\d*")
 SORT_ORDER_DOMAIN = re.compile("^(ASC|DESC)$")
@@ -106,7 +112,10 @@ def fields():
 def metadata():
     c = get_db().cursor()
     c.execute("SELECT MIN(start) AS min_pos, MAX(end) AS max_pos FROM variants")
-    return json.jsonify(dict(c.fetchone()))
+    return json.jsonify({
+        **dict(c.fetchone()),
+        "chr": CHR_VALUES
+    })
 
 
 @app.teardown_appcontext

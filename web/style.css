@@ -215,6 +215,19 @@ aside#filter-options button {
     transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
 }
 
+aside#filter-options div#chromosome-checkboxes label {
+    display: inline-block;
+    width: 33.3%;
+    margin: 2px 0;
+    font-size: 0.7rem;
+    line-height: 19px;
+}
+
+aside#filter-options div#chromosome-checkboxes label input {
+    vertical-align: top;
+    margin-left: 0;
+}
+
 aside#filter-options button#apply-filters {
     margin-bottom: 15px;
 

@@ -489,6 +489,18 @@ input[type="number"] {
 
     font-size: 0.8rem;
     font-family: "Roboto Mono", monospace;
+
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+input[type="text"]:hover,
+input[type="number"]:hover {
+    border-color: #CFCFCF;
+    border-bottom-color: #C3C3C3;
+}
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border-color: #AFAFAF;
+    border-bottom-color: #A3A3A3;
 }
 
 select {

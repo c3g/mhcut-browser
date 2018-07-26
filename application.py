@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+import json as pyjson
 import re
 import sqlite3
+
 from flask import Flask, g, json, request
 from typing import Pattern
+
 
 CHR_DOMAIN = re.compile("^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
 POS_INT_DOMAIN = re.compile("^[1-9]\d*")
@@ -30,6 +33,28 @@ def verify_domain(value, domain: Pattern):
     raise DomainError
 
 
+def search_param(c):
+    return "search_{}".format(c["name"])
+
+
+def build_search_query_data(raw_query, c):
+    columns = get_columns(c)
+    search_query_data = {}
+
+    try:
+        query_obj = json.loads(raw_query)
+        for c in columns:
+            if c["name"] not in query_obj:
+                continue
+            search_query_data[search_param(c)] = "%{}%".format(query_obj[c["name"]])
+
+    except (pyjson.decoder.JSONDecodeError, AttributeError):
+        for c in columns:
+            search_query_data[search_param(c)] = "%{}%".format(raw_query.strip())
+
+    return search_query_data
+
+
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
@@ -47,15 +72,18 @@ def index():
     c.execute("PRAGMA table_info(variants)")
     columns = get_columns(c)
     column_names = [i["name"] for i in columns]
+    search_query_fragment = " OR ".join(["{} LIKE :{}".format(c["name"], search_param(c)) for c in columns])
+    search_query_data = build_search_query_data(request.args.get("search_query", ""), c)
     sort_by = verify_domain(request.args.get("sort_by", "id"), re.compile("^({})$".format("|".join(column_names))))
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
     c.execute(
-        "SELECT * FROM variants WHERE chr = :chr OR :chr = 'any' ORDER BY {} {} "
-        "LIMIT :items_per_page OFFSET :start".format(sort_by, sort_order),
+        "SELECT * FROM variants WHERE (chr = :chr OR :chr = 'any') AND ({}) ORDER BY {} {} "
+        "LIMIT :items_per_page OFFSET :start".format(search_query_fragment, sort_by, sort_order),
         {
             "start": (page - 1) * items_per_page,
             "chr": chromosome,
-            "items_per_page": items_per_page
+            "items_per_page": items_per_page,
+            **search_query_data
         }
     )
     return json.jsonify([dict(i) for i in c.fetchall()])

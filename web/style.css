@@ -430,6 +430,7 @@ ul#advanced-search-conditions {
 }
 
 ul#advanced-search-conditions li {
+    display: flex;
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
     color: #333;
@@ -446,6 +447,10 @@ ul#advanced-search-conditions li select {
 ul#advanced-search-conditions li select,
 ul#advanced-search-conditions li input {
     vertical-align: top;
+}
+
+ul#advanced-search-conditions li input[type="text"] {
+    flex: 1;
 }
 
 ul#advanced-search-conditions li div.boolean-type-placeholder {

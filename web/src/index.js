@@ -8,6 +8,7 @@ let fields = [];
 let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
+let transitioning = true;
 
 document.addEventListener("DOMContentLoaded", function () {
     Promise.all([
@@ -30,11 +31,13 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#end").attr("max", metadata["max_pos"]);
 
         d3.select("#prev-page").on("click", () => {
+            if (transitioning) return;
             page = Math.max(page - 1, 1);
             reloadPage();
         });
 
         d3.select("#next-page").on("click", () => {
+            if (transitioning) return;
             page = Math.min(page + 1, parseInt(getTotalPages(), 10));
             reloadPage();
         });
@@ -46,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         d3.select("#table-display").classed("loading", false);
+        transitioning = false;
 
         d3.selectAll("table#entry-table thead th").data(fields, f => f["name"]).on("click", f => {
             if (sortBy === f["name"]) {
@@ -112,9 +116,11 @@ function updatePagination() {
 }
 
 function reloadPage() {
-    let transitionEnded = false;
+    transitioning = true;
+
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
-        .on("transitionend", () => transitionEnded = true);
+        .on("transitionend", () => transitioning = false);
+
     let url = new URL("/api/", window.location.origin);
     let params = {
         page: page.toString(10),
@@ -123,22 +129,27 @@ function reloadPage() {
         sort_order: sortOrder
     };
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
     return fetch(new Request(url.toString()))
         .then(r => r.json())
         .then(data => {
             loadedEntries = data;
-            if (!transitionEnded) {
+            if (transitioning && itemsPerPage >= 100) {
                 d3.select("#table-display").on("transitionend", () => {
                     populateEntryTable();
                     updatePagination();
                     updateTableColumnHeaders();
                     d3.select("#table-display").classed("loading", false);
+                    transitioning = false;
                 });
+                // Fallback if the transitionend event is not triggered.
+                setTimeout(() => d3.select("#table-display").dispatch("transitionend"), 300);
             } else {
                 populateEntryTable();
                 updatePagination();
                 updateTableColumnHeaders();
                 d3.select("#table-display").classed("loading", false);
+                transitioning = false;
             }
         });
 }

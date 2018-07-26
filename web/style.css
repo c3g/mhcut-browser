@@ -24,7 +24,7 @@ section#table-display {
 
 section#table-display::after {
     position: fixed;
-    top: 16px; left: 16px; right: 201px; bottom: 16px;
+    top: 16px; left: 16px; right: 201px; bottom: 66px;
     z-index: 20;
     opacity: 0;
     background-color: #FEFEFE;

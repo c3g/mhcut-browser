@@ -30,6 +30,12 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#end").attr("min", metadata["min_pos"]);
         d3.select("#end").attr("max", metadata["max_pos"]);
 
+        const searchContainer = d3.select("#advanced-search-container");
+        d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
+        d3.select("#hide-advanced-search").on("click", () => searchContainer.classed("shown", false));
+        d3.select("#advanced-search-container").on("click", () => searchContainer.classed("shown", false));
+        d3.select("#advanced-search-modal").on("click", () => d3.event.stopPropagation());
+
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;
             page = Math.max(page - 1, 1);

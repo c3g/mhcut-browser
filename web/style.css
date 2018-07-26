@@ -217,7 +217,7 @@ aside#filter-options button {
 
 aside#filter-options div#chromosome-checkboxes label {
     display: inline-block;
-    width: 33.3%;
+    width: 25%;
     margin: 2px 0;
     font-size: 0.7rem;
     line-height: 19px;

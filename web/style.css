@@ -191,6 +191,9 @@ aside#filter-options div#chromosome-checkboxes label {
     margin: 2px 0;
     font-size: 0.7rem;
     line-height: 19px;
+
+    -moz-user-select: none;
+    user-select: none;
 }
 
 aside#filter-options div#chromosome-checkboxes label input {

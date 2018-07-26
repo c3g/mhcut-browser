@@ -19,6 +19,11 @@ class DomainError(Exception):
     pass
 
 
+def get_columns(c):
+    c.execute("PRAGMA table_info(variants)")
+    return tuple([dict(i) for i in c.fetchall()])
+
+
 def verify_domain(value, domain: Pattern):
     if re.match(domain, str(value)):
         return value
@@ -40,8 +45,9 @@ def index():
     chromosome = verify_domain(request.args.get("chr", "any"), CHR_DOMAIN)
     c = get_db().cursor()
     c.execute("PRAGMA table_info(variants)")
-    columns = [dict(i)["name"] for i in c.fetchall()]
-    sort_by = verify_domain(request.args.get("sort_by", "id"), re.compile("^({})$".format("|".join(columns))))
+    columns = get_columns(c)
+    column_names = [i["name"] for i in columns]
+    sort_by = verify_domain(request.args.get("sort_by", "id"), re.compile("^({})$".format("|".join(column_names))))
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
     c.execute(
         "SELECT * FROM variants WHERE chr = :chr OR :chr = 'any' ORDER BY {} {} "
@@ -65,9 +71,7 @@ def pages():
 
 @app.route("/fields", methods=["GET"])
 def fields():
-    c = get_db().cursor()
-    c.execute("PRAGMA table_info(variants)")
-    return json.jsonify([dict(i) for i in c.fetchall()])
+    return json.jsonify(get_columns(get_db().cursor()))
 
 
 @app.route("/metadata", methods=["GET"])

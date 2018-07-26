@@ -530,3 +530,19 @@ select {
     font-family: "Roboto Mono", monospace;
     font-size: 0.75rem;
 }
+
+
+
+@media screen and (max-width: 1400px) {
+    div#advanced-search-modal {
+        position: absolute;
+        top: 60px; left: 120px; right: 120px; bottom: 60px;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    div#advanced-search-modal {
+        position: absolute;
+        top: 40px; left: 80px; right: 80px; bottom: 40px;
+    }
+}

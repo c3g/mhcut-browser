@@ -285,6 +285,214 @@ table#entry-table tbody td a:hover {
 
 
 
+div#advanced-search-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 50;
+
+    background-color: rgba(236, 239, 241, 0.6);
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 0.3s ease-in-out;
+}
+div#advanced-search-container.shown {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 50;
+
+    background-color: rgba(236, 239, 241, 0.6);
+    opacity: 1;
+
+    pointer-events: auto;
+}
+
+div#advanced-search-modal {
+    position: absolute;
+    top: 60px; left: 260px; right: 260px; bottom: 60px;
+    z-index: 100;
+
+    overflow: hidden;
+
+    background-color: #FEFEFE;
+    border: 1px solid #D5D5D5;
+    border-bottom: 1px solid #C9C9C9;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.09);
+}
+
+div#advanced-search-modal h2 {
+    margin-top: 0;
+    font-family: "Roboto Mono", monospace;
+    font-weight: normal;
+    color: #555;
+}
+
+div#advanced-search-modal button#hide-advanced-search {
+    position: absolute;
+    top: 21px; right: 24px;
+    z-index: 150;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #AAA;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+}
+div#advanced-search-modal button#hide-advanced-search:hover {
+    color: #999;
+}
+div#advanced-search-modal button#hide-advanced-search span.material-icons {
+    font-size: 2rem;
+}
+
+div#advanced-search-modal div#advanced-search-modal-scroll-container {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 50px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 24px 30px;
+}
+div#advanced-search-modal div#advanced-search-modal-scroll-container::after {
+    display: block;
+    height: 24px;
+    content: "";
+}
+
+div#advanced-search-modal div.code-comparison {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #EFEFEF;
+}
+
+div#advanced-search-modal p {
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.8rem;
+    color: #333;
+}
+
+div#advanced-search-modal-options {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    box-sizing: border-box;
+    height: 50px;
+    display: flex;
+    border-top: 1px solid #F0F0F0;
+    background-color: #FCFCFC;
+}
+
+div#advanced-search-modal-options div {
+    flex: 1;
+    padding: 0 20px;
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 47px;
+    color: #666;
+}
+div#advanced-search-modal-options div:first-of-type {
+    text-align: left;
+}
+div#advanced-search-modal-options div:last-of-type {
+    text-align: right;
+}
+
+div#advanced-search-modal-options button {
+    vertical-align: top;
+    box-sizing: border-box;
+    height: 28px;
+    padding: 0 8px 0 6px;
+    margin-top: 10px;
+
+    border: 1px solid #DFDFDF;
+    border-bottom-color: #D3D3D3;
+    border-radius: 4px;
+    background-color: #FEFEFE;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.75rem;
+    color: #777;
+    line-height: 14px;
+
+    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+div#advanced-search-modal-options button span.material-icons {
+    vertical-align: top;
+    font-size: 1rem;
+}
+
+ul#advanced-search-conditions {
+    list-style: none;
+    margin: 0; padding: 0;
+}
+
+ul#advanced-search-conditions li {
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.8rem;
+    color: #333;
+}
+ul#advanced-search-conditions li:not(:first-child) {
+    margin-top: 10px;
+}
+
+ul#advanced-search-conditions li select {
+    margin-right: 5px;
+    vertical-align: top;
+}
+
+ul#advanced-search-conditions li select,
+ul#advanced-search-conditions li input {
+    vertical-align: top;
+}
+
+ul#advanced-search-conditions li div.boolean-type-placeholder {
+    display: inline-block;
+    width: 60px;
+}
+
+ul#advanced-search-conditions li button.remove-search-condition {
+    background: none;
+    border: none;
+}
+ul#advanced-search-conditions li button.remove-search-condition span.material-icons {
+    margin-top: 6px;
+    font-size: 1.1rem;
+    color: #AAA;
+    transition: color 0.15s ease-in-out;
+}
+ul#advanced-search-conditions li button.remove-search-condition:hover span.material-icons {
+    color: #999;
+}
+
+
+
+code {
+    background-color: #FCFCFC;
+    border: 1px solid #DFDFDF;
+    border-top-color: #D3D3D3;
+    border-radius: 4px;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.03);
+    color: #444;
+}
+
+div.code-comparison {
+    display: flex;
+    flex-direction: row;
+    margin: 10px 0;
+}
+div.code-comparison code {
+    flex: 1;
+    margin: 0 5px;
+    padding: 5px 7px;
+}
+div.code-comparison code:first-child { margin-left: 0; }
+div.code-comparison code:last-child { margin-right: 0; }
+
+
+
 input[type="text"],
 input[type="number"] {
     box-sizing: border-box;

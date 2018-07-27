@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
         fields = data[2];
         metadata = data[3];
         selectedChromosomes = [...metadata["chr"]];
+        selectedGeneLocations = [...metadata["geneloc"]];
+
         startPos = parseInt(metadata["min_pos"], 10);
         endPos = parseInt(metadata["max_pos"], 10);
 

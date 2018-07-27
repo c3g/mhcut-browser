@@ -9,10 +9,19 @@ let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
 let selectedChromosomes = [];
+let startPos = 0;
+let endPos = 12000000000000;
+let positionFilterOperator = "overlap";
 let selectedGeneLocations = [];
 let currentFilterID = 0;
 let advancedSearchFilters = [];
 let transitioning = true;
+
+const POSITION_FILTER_OPERATORS = {
+    "overlap": "Overlaps",
+    "not_overlap": "Does Not Overlap",
+    "within": "Contained Within"
+};
 
 const CONDITION_OPERATORS = {
     BOTH: ["equals"],
@@ -36,6 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
         fields = data[2];
         metadata = data[3];
         selectedChromosomes = [...metadata["chr"]];
+        startPos = parseInt(metadata["min_pos"], 10);
+        endPos = parseInt(metadata["max_pos"], 10);
 
         populateEntryTable();
         updatePagination();
@@ -63,10 +74,32 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
 
-        d3.select("#start").attr("min", metadata["min_pos"]);
-        d3.select("#start").attr("max", metadata["max_pos"]);
-        d3.select("#end").attr("min", metadata["min_pos"]);
-        d3.select("#end").attr("max", metadata["max_pos"]);
+        d3.select("#start")
+            .attr("min", metadata["min_pos"])
+            .attr("max", metadata["max_pos"])
+            .property("value", metadata["min_pos"])
+            .on("change", function () {
+                startPos = parseInt(this.value, 10);
+                if (isNaN(startPos)) startPos = parseInt(metadata["min_pos"], 10);
+            });
+        d3.select("#end")
+            .attr("min", metadata["min_pos"])
+            .attr("max", metadata["max_pos"])
+            .property("value", metadata["max_pos"])
+            .on("change", function () {
+                endPos = parseInt(this.value, 10);
+                if (isNaN(endPos)) endPos = parseInt(metadata["max_pos"], 10);
+            });
+
+        d3.select("#position-filter-operator")
+            .on("change", function () { positionFilterOperator = this.value; })
+            .selectAll("option")
+            .data(Object.keys(POSITION_FILTER_OPERATORS))
+            .enter()
+            .append("option")
+            .attr("value", o => o)
+            .property("selected", o => o === positionFilterOperator)
+            .text(o => POSITION_FILTER_OPERATORS[o]);
 
         const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["geneloc"])
             .enter()
@@ -208,6 +241,9 @@ function reloadPage() {
         sort_order: sortOrder,
 
         chr: selectedChromosomes,
+        start: startPos,
+        end: endPos,
+        position_filter_operator: positionFilterOperator,
         geneloc: selectedGeneLocations,
 
         search_query: d3.select("#search-query").property("value")

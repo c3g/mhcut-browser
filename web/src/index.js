@@ -26,7 +26,8 @@ const POSITION_FILTER_OPERATORS = {
 const CONDITION_OPERATORS = {
     BOTH: ["equals"],
     TEXT: ["contains", "starts_with", "ends_with"],
-    INTEGER: ["<", "<=", ">", ">="]
+    INTEGER: ["<", "<=", ">", ">="],
+    NULLABLE: ["is_null"]
 };
 
 const DEFAULT_CONDITION_BOOLEAN = "AND";
@@ -330,12 +331,18 @@ function updateSearchFilterDOM() {
     const filters = d3.select("ul#advanced-search-conditions")
         .selectAll("li.advanced-search-filter")
         .data(advancedSearchFilters, c => c.id);
-    const filterEntry = filters.enter().append("li").attr("class", "advanced-search-filter");
+    const filterEntry = filters.enter()
+        .append("li")
+        .attr("class", "advanced-search-filter")
+        .attr("id", c => `advanced-search-filter-${c.id}`);
     filterEntry.append("div").attr("class", "boolean-type-placeholder");
     filterEntry.filter((f, i) => i > 0)
         .append("select")
         .attr("class", "select-boolean-type")
-        .on("change", function (f) { f.boolean = this.value; updateSearchFilterDOM(); })
+        .on("change", function (f) {
+            f.boolean = this.value;
+            updateSearchFilterDOM();
+        })
         .selectAll("option")
         .data(["AND", "OR"])
         .enter()
@@ -345,7 +352,10 @@ function updateSearchFilterDOM() {
         .text(b => b);
     filterEntry.append("select")
         .attr("class", "select-condition-field")
-        .on("change", function (f) { f.field = this.value; updateSearchFilterDOM(); })
+        .on("change", function (f) {
+            f.field = this.value;
+            updateSearchFilterDOM();
+        })
         .selectAll("option")
         .data(["", ...fields], f => f["name"])
         .enter()
@@ -354,10 +364,17 @@ function updateSearchFilterDOM() {
         .text(f => f["name"]);
     filterEntry.append("select")
         .attr("class", "select-operator")
-        .on("change", function (f) { f.operator = this.value; });
+        .on("change", function (f) {
+            f.operator = this.value;
+            d3.select(`li#advanced-search-filter-${f.id}`).select(".search-filter-value")
+                .attr("disabled", f.operator === "is_null" ? "disabled" : null);
+        });
     filterEntry.append("input")
         .attr("type", "text")
-        .on("change", function (f) { f.value = this.value; });
+        .attr("class", "search-filter-value")
+        .on("change", function (f) {
+            f.value = this.value;
+        });
     filterEntry.append("button")
         .attr("class", "remove-search-condition")
         .on("click", c => {
@@ -376,7 +393,10 @@ function updateSearchFilterDOM() {
         .selectAll("option")
         .data(f => [
             ...CONDITION_OPERATORS["BOTH"],
-            ...(f.field === "" ? [] : CONDITION_OPERATORS[fields.find(f2 => f2["name"] === f.field)["type"]])
+            ...(f.field === "" ? [] : CONDITION_OPERATORS[fields.find(f2 => f2["name"] === f.field)["type"]]),
+            ...(f.field !== ""
+                ? (fields.find(f2 => f2["name"] === f.field)["notnull"] === 0 ? CONDITION_OPERATORS["NULLABLE"] : [])
+                : [])
         ], o => o);
     filterOperators.enter().append("option").attr("value", o => o).text(o => o);
     filterOperators.exit().remove();

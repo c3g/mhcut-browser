@@ -504,6 +504,11 @@ input[type="number"]:focus {
     border-color: #AFAFAF;
     border-bottom-color: #A3A3A3;
 }
+input[type="text"][disabled],
+input[type="number"][disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
 select {
     -webkit-appearance: none;

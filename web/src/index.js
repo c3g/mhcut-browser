@@ -101,7 +101,10 @@ document.addEventListener("DOMContentLoaded", function () {
             searchContainer.classed("shown", false);
         });
 
-        d3.select("#apply-filters").on("click", () => reloadPage());
+        d3.select("#apply-filters").on("click", () => {
+            page = 1;
+            reloadPage();
+        });
 
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;

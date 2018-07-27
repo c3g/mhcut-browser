@@ -8,7 +8,17 @@ let fields = [];
 let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
+let currentFilterID = 0;
+let advancedSearchFilters = [];
 let transitioning = true;
+
+const CONDITION_OPERATORS = {
+    BOTH: ["equals"],
+    TEXT: ["contains", "starts_with", "ends_with"],
+    INTEGER: ["<", "<=", ">", ">="]
+};
+
+const DEFAULT_CONDITION_BOOLEAN = "AND";
 
 document.addEventListener("DOMContentLoaded", function () {
     Promise.all([
@@ -174,4 +184,77 @@ function reloadPage() {
 
 function getTotalPages() {
     return Math.ceil(totalCount / itemsPerPage).toFixed(0);
+}
+
+function addAdvancedSearchCondition() {
+    advancedSearchFilters.push({
+        id: getFilterID(),
+        boolean: DEFAULT_CONDITION_BOOLEAN,
+        field: "",
+        operator: "equals",
+        value: ""
+    });
+
+    updateSearchFilterDOM();
+}
+
+function updateSearchFilterDOM() {
+    const filters = d3.select("ul#advanced-search-conditions")
+        .selectAll("li.advanced-search-filter")
+        .data(advancedSearchFilters, c => c.id);
+    const filterEntry = filters.enter().append("li").attr("class", "advanced-search-filter");
+    filterEntry.append("div").attr("class", "boolean-type-placeholder");
+    filterEntry.filter((f, i) => i > 0)
+        .append("select")
+        .attr("class", "select-boolean-type")
+        .on("change", function (f) { f.boolean = this.value; updateSearchFilterDOM(); })
+        .selectAll("option")
+        .data(["AND", "OR"])
+        .enter()
+        .append("option")
+        .attr("value", b => b)
+        .attr("selected", b => b === DEFAULT_CONDITION_BOOLEAN ? "selected" : null)
+        .text(b => b);
+    filterEntry.append("select")
+        .attr("class", "select-condition-field")
+        .on("change", function (f) { f.field = this.value; updateSearchFilterDOM(); })
+        .selectAll("option")
+        .data(["", ...fields], f => f["name"])
+        .enter()
+        .append("option")
+        .attr("value", f => f["name"])
+        .text(f => f["name"]);
+    filterEntry.append("select")
+        .attr("class", "select-operator")
+        .on("change", function (f) { f.operator = this.value; });
+    filterEntry.append("input")
+        .attr("type", "text")
+        .on("change", function (f) { f.value = this.value; });
+    filterEntry.append("button")
+        .attr("class", "remove-search-condition")
+        .on("click", c => {
+            advancedSearchFilters = advancedSearchFilters.filter(c2 => c2.id !== c.id);
+            updateSearchFilterDOM();
+        })
+        .append("span")
+        .attr("class", "material-icons")
+        .text("close");
+    filters.exit().remove();
+
+    const allFilters = filterEntry.merge(filters);
+    allFilters.select("div.boolean-type-placeholder").style("display", (f, i) => i === 0 ? "inline-block" : "none");
+    allFilters.select("select.select-boolean-type").style("display", (f, i) => i > 0 ? "inline-block" : "none");
+    const filterOperators = allFilters.select("select.select-operator")
+        .selectAll("option")
+        .data(f => [
+            ...CONDITION_OPERATORS["BOTH"],
+            ...(f.field === "" ? [] : CONDITION_OPERATORS[fields.find(f2 => f2["name"] === f.field)["type"]])
+        ], o => o);
+    filterOperators.enter().append("option").attr("value", o => o).text(o => o);
+    filterOperators.exit().remove();
+}
+
+function getFilterID() {
+    currentFilterID++;
+    return currentFilterID - 1;
 }

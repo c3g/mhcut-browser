@@ -223,6 +223,7 @@ function updatePagination() {
     const totalPages = getTotalPages();
     d3.select("#current-page").text(page.toFixed(0));
     d3.select("#total-pages").text(totalPages);
+    d3.select("#total-entries").text(totalCount);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#next-page").attr("disabled", page.toString(10) === totalPages ? "disabled" : null);
 }

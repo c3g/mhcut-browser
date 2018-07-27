@@ -95,6 +95,12 @@ section#table-pagination button span.material-icons {
     line-height: 25px;
 }
 
+section#table-pagination span#total-entries-text {
+    color: #999;
+}
+
+
+
 aside#filter-options {
     position: fixed;
     z-index: 15;

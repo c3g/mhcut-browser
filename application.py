@@ -126,8 +126,17 @@ def index():
 
 @app.route("/entries", methods=["GET"])
 def pages():
+    chromosome = verify_domain(request.args.get("chr", "any"), CHR_DOMAIN)
+
     c = get_db().cursor()
-    c.execute("SELECT COUNT(*) FROM variants")
+    search_query_fragment, search_query_data = build_search_query(request.args.get("search_query", ""), c)
+    c.execute(
+        "SELECT COUNT(*) FROM variants WHERE (chr = :chr OR :chr = 'any') AND ({})".format(search_query_fragment),
+        {
+            "chr": chromosome,
+            **search_query_data
+        }
+    )
     count = c.fetchone()[0]
     return json.jsonify(count)
 

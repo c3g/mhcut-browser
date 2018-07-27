@@ -170,7 +170,8 @@ function reloadPage() {
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
         .on("transitionend", () => transitioning = false);
 
-    let url = new URL("/api/", window.location.origin);
+    let fetchURL = new URL("/api/", window.location.origin);
+    let countURL = new URL("/api/entries", window.location.origin);
     let params = {
         page: page.toString(10),
         items_per_page: itemsPerPage,
@@ -178,12 +179,16 @@ function reloadPage() {
         sort_order: sortOrder,
         search_query: d3.select("#search-query").property("value")
     };
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    Object.keys(params).forEach(key => {
+        fetchURL.searchParams.append(key, params[key]);
+        countURL.searchParams.append(key, params[key]);
+    });
 
-    return fetch(new Request(url.toString()))
-        .then(r => r.json())
+    return Promise.all([fetch(new Request(fetchURL.toString())), fetch(new Request(countURL.toString()))])
+        .then(rs => Promise.all(rs.map(r => r.json())))
         .then(data => {
-            loadedEntries = data;
+            loadedEntries = data[0];
+            totalCount = data[1];
             if (transitioning && itemsPerPage >= 100) {
                 d3.select("#table-display").on("transitionend", () => {
                     populateEntryTable();

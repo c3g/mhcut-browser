@@ -23,6 +23,7 @@ const CONDITION_OPERATORS = {
 const DEFAULT_CONDITION_BOOLEAN = "AND";
 
 document.addEventListener("DOMContentLoaded", function () {
+    // noinspection JSCheckFunctionSignatures
     Promise.all([
         fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
         fetch(new Request("/api/entries")),
@@ -216,6 +217,7 @@ function reloadPage() {
         countURL.searchParams.append(key, params[key]);
     });
 
+    // noinspection JSCheckFunctionSignatures
     return Promise.all([fetch(new Request(fetchURL.toString())), fetch(new Request(countURL.toString()))])
         .then(rs => Promise.all(rs.map(r => r.json())))
         .then(data => {

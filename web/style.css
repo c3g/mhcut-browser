@@ -195,7 +195,7 @@ aside#filter-options div#gene-location-checkboxes label {
 }
 
 aside#filter-options button#apply-filters {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 
     border: 1px solid #2196F3;
     border-bottom-color: #1E88E5;
@@ -204,6 +204,11 @@ aside#filter-options button#apply-filters {
 
     font-weight: bold;
     color: #E3F2FD;
+}
+
+aside#filter-options button#clear-filters {
+    margin-top: 5px;
+    margin-bottom: 15px;
 }
 
 aside#filter-options hr {

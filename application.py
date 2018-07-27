@@ -102,7 +102,6 @@ def index():
     chromosome = verify_domain(request.args.get("chr", "any"), CHR_DOMAIN)
 
     c = get_db().cursor()
-    c.execute("PRAGMA table_info(variants)")
     columns = get_columns(c)
     column_names = [i["name"] for i in columns]
 

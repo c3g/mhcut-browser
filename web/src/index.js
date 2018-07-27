@@ -77,6 +77,8 @@ document.addEventListener("DOMContentLoaded", function () {
             searchContainer.classed("shown", false);
         });
 
+        d3.select("#apply-filters").on("click", () => reloadPage());
+
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;
             page = Math.max(page - 1, 1);
@@ -173,7 +175,8 @@ function reloadPage() {
         page: page.toString(10),
         items_per_page: itemsPerPage,
         sort_by: sortBy,
-        sort_order: sortOrder
+        sort_order: sortOrder,
+        search_query: d3.select("#search-query").property("value")
     };
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 

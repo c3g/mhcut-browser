@@ -57,6 +57,12 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#hide-advanced-search").on("click", () => searchContainer.classed("shown", false));
         d3.select("#advanced-search-container").on("click", () => searchContainer.classed("shown", false));
         d3.select("#advanced-search-modal").on("click", () => d3.event.stopPropagation());
+        d3.select("#add-search-condition").on("click", () => addAdvancedSearchCondition());
+        d3.select("#save-search-query").on("click", () => {
+            if (advancedSearchFilters.length > 0)
+                d3.select("#search-query").property("value", JSON.stringify(advancedSearchFilters));
+            searchContainer.classed("shown", false);
+        });
 
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;

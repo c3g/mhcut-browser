@@ -319,6 +319,7 @@ function addAdvancedSearchCondition() {
     advancedSearchFilters.push({
         id: getFilterID(),
         boolean: DEFAULT_CONDITION_BOOLEAN,
+        negated: false,
         field: "",
         operator: "equals",
         value: ""
@@ -350,6 +351,17 @@ function updateSearchFilterDOM() {
         .attr("value", b => b)
         .attr("selected", b => b === DEFAULT_CONDITION_BOOLEAN ? "selected" : null)
         .text(b => b);
+    filterEntry.append("select")
+        .attr("class", "select-condition-negation")
+        .on("change", function (f) {
+            f.negated = this.value !== "";
+        })
+        .selectAll("option")
+        .data(["", "NOT"])
+        .enter()
+        .append("option")
+        .attr("value", n => n)
+        .text(n => n);
     filterEntry.append("select")
         .attr("class", "select-condition-field")
         .on("change", function (f) {

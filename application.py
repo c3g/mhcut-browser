@@ -91,13 +91,13 @@ def build_search_query(raw_query, c):
             if search_query_fragment != "":
                 search_query_fragment += " {} ".format(c["boolean"])
 
-            search_query_fragment += "({} {}".format(c["field"], op_data[0])
+            search_query_fragment += "({}({} {}".format("NOT " if c["negated"] else "", c["field"], op_data[0])
 
             if op_data[1] != "":
                 search_query_fragment += " :{}".format(search_param(c["id"]))
                 search_query_data[search_param(c["id"])] = op_data[1].format(c["value"])
 
-            search_query_fragment += ")"
+            search_query_fragment += "))"
 
     except (pyjson.decoder.JSONDecodeError, TypeError, AttributeError):
         search_query_fragment = " OR ".join(["(CAST({} AS TEXT) LIKE :{})".format(c["name"], search_param(c["name"]))

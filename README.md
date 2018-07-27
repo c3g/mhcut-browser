@@ -30,3 +30,19 @@ generating script. See the `requirements.txt` file for required packages.
 
 NPM version 6 or later is required to install front-end dependencies for the
 web application.
+
+
+
+## Usage
+
+### Step 0: Initial Setup
+
+All the sub-steps outlined here are contained in a single script, `setup.bash`,
+which can be run with the following command in the root of the project
+directory:
+
+```bash
+bash ./setup.bash
+```
+
+TODO

@@ -9,6 +9,7 @@ let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
 let selectedChromosomes = [];
+let selectedGeneLocations = [];
 let currentFilterID = 0;
 let advancedSearchFilters = [];
 let transitioning = true;
@@ -64,6 +65,28 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#start").attr("max", metadata["max_pos"]);
         d3.select("#end").attr("min", metadata["min_pos"]);
         d3.select("#end").attr("max", metadata["max_pos"]);
+
+        const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["geneloc"])
+            .enter()
+            .append("label")
+            .attr("for", l => l);
+        geneLocationLabels.append("input")
+            .attr("type", "checkbox")
+            .attr("id", l => l)
+            .attr("class", "geneloc-checkbox")
+            .attr("name", l => l)
+            .attr("checked", "checked")
+            .on("change", function () {
+                selectedGeneLocations = [];
+                d3.selectAll(".geneloc-checkbox")
+                    .filter(function () { return d3.select(this).property("checked"); })
+                    .each(function () { selectedGeneLocations.push(d3.select(this).attr("id")); });
+
+                if (selectedGeneLocations.length === 0) {
+                    this.checked = true;
+                }
+            });
+        geneLocationLabels.append("span").text(l => " " + l);
 
         const searchContainer = d3.select("#advanced-search-container");
         d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
@@ -180,7 +203,9 @@ function reloadPage() {
         sort_order: sortOrder,
 
         chr: selectedChromosomes,
-        search_query: d3.select("#search-query").property("value"),
+        geneloc: selectedGeneLocations,
+
+        search_query: d3.select("#search-query").property("value")
     };
     Object.keys(params).forEach(key => {
         fetchURL.searchParams.append(key, params[key]);

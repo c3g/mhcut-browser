@@ -28,6 +28,7 @@ SEARCH_OPERATORS = {
 CHR_VALUES = ("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
               "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
               "chr20", "chr21", "chr22", "chrX", "chrY")
+GENELOC_VALUES = ("intronic", "exonic", "intergenic")
 
 # Domains
 CHR_DOMAIN = re.compile("^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
@@ -104,6 +105,11 @@ def index():
         chromosomes = list(CHR_VALUES)
     chr_fragment = "(" + ",".join(["'{}'".format(c) for c in chromosomes]) + ")"
 
+    gene_locations = [l.strip() for l in request.args.get("geneloc", "").split(",") if l.strip() in GENELOC_VALUES]
+    if len(gene_locations) == 0:
+        gene_locations = list(GENELOC_VALUES)
+    geneloc_fragment = "(" + ",".join(["'{}'".format(l) for l in gene_locations]) + ")"
+
     c = get_db().cursor()
     columns = get_columns(c)
     column_names = [i["name"] for i in columns]
@@ -114,8 +120,14 @@ def index():
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
     c.execute(
-        "SELECT * FROM variants WHERE (chr IN {}) AND ({}) ORDER BY {} {} "
-        "LIMIT :items_per_page OFFSET :start".format(chr_fragment, search_query_fragment, sort_by, sort_order),
+        "SELECT * FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND ({}) ORDER BY {} {} "
+        "LIMIT :items_per_page OFFSET :start".format(
+            chr_fragment,
+            geneloc_fragment,
+            search_query_fragment,
+            sort_by,
+            sort_order
+        ),
         {
             "start": (page - 1) * items_per_page,
             "items_per_page": items_per_page,
@@ -132,10 +144,19 @@ def pages():
         chromosomes = list(CHR_VALUES)
     chr_fragment = "(" + ",".join(["'{}'".format(c) for c in chromosomes]) + ")"
 
+    gene_locations = [l.strip() for l in request.args.get("geneloc", "").split(",") if l.strip() in GENELOC_VALUES]
+    if len(gene_locations) == 0:
+        gene_locations = list(GENELOC_VALUES)
+    geneloc_fragment = "(" + ",".join(["'{}'".format(l) for l in gene_locations]) + ")"
+
     c = get_db().cursor()
     search_query_fragment, search_query_data = build_search_query(request.args.get("search_query", ""), c)
     c.execute(
-        "SELECT COUNT(*) FROM variants WHERE (chr IN {}) AND ({})".format(chr_fragment, search_query_fragment),
+        "SELECT COUNT(*) FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND ({})".format(
+            chr_fragment,
+            geneloc_fragment,
+            search_query_fragment
+        ),
         search_query_data
     )
     count = c.fetchone()[0]
@@ -153,7 +174,8 @@ def metadata():
     c.execute("SELECT MIN(start) AS min_pos, MAX(end) AS max_pos FROM variants")
     return json.jsonify({
         **dict(c.fetchone()),
-        "chr": CHR_VALUES
+        "chr": CHR_VALUES,
+        "geneloc": GENELOC_VALUES
     })
 
 

@@ -147,9 +147,6 @@ aside#filter-options label {
     font-size: 0.775rem;
     color: #333;
 }
-aside#filter-options label.checkbox-label {
-    margin-top: 5px;
-}
 
 aside#filter-options select {
     width: 100%;
@@ -191,6 +188,10 @@ aside#filter-options div#chromosome-checkboxes label {
 aside#filter-options div#chromosome-checkboxes label input {
     vertical-align: top;
     margin-left: 0;
+}
+
+aside#filter-options div#gene-location-checkboxes label {
+    margin: 2px 0;
 }
 
 aside#filter-options button#apply-filters {

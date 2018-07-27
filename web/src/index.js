@@ -175,9 +175,12 @@ function reloadPage() {
     let params = {
         page: page.toString(10),
         items_per_page: itemsPerPage,
+
         sort_by: sortBy,
         sort_order: sortOrder,
-        search_query: d3.select("#search-query").property("value")
+
+        chr: selectedChromosomes,
+        search_query: d3.select("#search-query").property("value"),
     };
     Object.keys(params).forEach(key => {
         fetchURL.searchParams.append(key, params[key]);

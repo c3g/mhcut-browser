@@ -99,7 +99,10 @@ def index():
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
     items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
 
-    chromosome = verify_domain(request.args.get("chr", "any"), CHR_DOMAIN)
+    chromosomes = [c for c in request.args.get("chr", "").split(",") if re.match(CHR_DOMAIN, c)]
+    if len(chromosomes) == 0:
+        chromosomes = list(CHR_VALUES)
+    chr_fragment = "(" + ",".join(["'{}'".format(c) for c in chromosomes]) + ")"
 
     c = get_db().cursor()
     columns = get_columns(c)
@@ -111,11 +114,10 @@ def index():
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
     c.execute(
-        "SELECT * FROM variants WHERE (chr = :chr OR :chr = 'any') AND ({}) ORDER BY {} {} "
-        "LIMIT :items_per_page OFFSET :start".format(search_query_fragment, sort_by, sort_order),
+        "SELECT * FROM variants WHERE (chr IN {}) AND ({}) ORDER BY {} {} "
+        "LIMIT :items_per_page OFFSET :start".format(chr_fragment, search_query_fragment, sort_by, sort_order),
         {
             "start": (page - 1) * items_per_page,
-            "chr": chromosome,
             "items_per_page": items_per_page,
             **search_query_data
         }
@@ -125,16 +127,16 @@ def index():
 
 @app.route("/entries", methods=["GET"])
 def pages():
-    chromosome = verify_domain(request.args.get("chr", "any"), CHR_DOMAIN)
+    chromosomes = [c for c in request.args.get("chr", "").split(",") if re.match(CHR_DOMAIN, c)]
+    if len(chromosomes) == 0:
+        chromosomes = list(CHR_VALUES)
+    chr_fragment = "(" + ",".join(["'{}'".format(c) for c in chromosomes]) + ")"
 
     c = get_db().cursor()
     search_query_fragment, search_query_data = build_search_query(request.args.get("search_query", ""), c)
     c.execute(
-        "SELECT COUNT(*) FROM variants WHERE (chr = :chr OR :chr = 'any') AND ({})".format(search_query_fragment),
-        {
-            "chr": chromosome,
-            **search_query_data
-        }
+        "SELECT COUNT(*) FROM variants WHERE (chr IN {}) AND ({})".format(chr_fragment, search_query_fragment),
+        search_query_data
     )
     count = c.fetchone()[0]
     return json.jsonify(count)

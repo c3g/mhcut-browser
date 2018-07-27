@@ -369,7 +369,7 @@ function updateSearchFilterDOM() {
             updateSearchFilterDOM();
         })
         .selectAll("option")
-        .data(["", ...fields], f => f["name"])
+        .data([{name: ""}, ...fields], f => f["name"])
         .enter()
         .append("option")
         .attr("value", f => f["name"])

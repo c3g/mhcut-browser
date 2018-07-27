@@ -76,11 +76,11 @@ def build_search_query(raw_query, c):
             op_data = SEARCH_OPERATORS[c["operator"]]
             if search_query_fragment != "":
                 search_query_fragment += " {} ".format(c["boolean"])
-            search_query_fragment += "{} {} :{}".format(c["field"], op_data[0], search_param(c["id"]))
+            search_query_fragment += "({} {} :{})".format(c["field"], op_data[0], search_param(c["id"]))
             search_query_data[search_param(c["id"])] = op_data[1].format(c["value"])
 
     except (pyjson.decoder.JSONDecodeError, AttributeError):
-        search_query_fragment = " OR ".join(["CAST({} AS TEXT) LIKE :{}".format(c["name"], search_param(c["name"]))
+        search_query_fragment = " OR ".join(["(CAST({} AS TEXT) LIKE :{})".format(c["name"], search_param(c["name"]))
                                              for c in columns])
         search_query_data = {search_param(c["name"]): "%{}%".format(raw_query.strip()) for c in columns}
 

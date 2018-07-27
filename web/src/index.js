@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         chromosomeLabels.append("input")
             .attr("type", "checkbox")
             .attr("id", c => c)
+            .attr("class", "chr-checkbox")
             .attr("name", c => c)
             .attr("checked", "checked");
         chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);

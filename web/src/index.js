@@ -141,6 +141,24 @@ document.addEventListener("DOMContentLoaded", function () {
             page = 1;
             reloadPage();
         });
+        d3.select("#clear-filters").on("click", () => {
+            selectedChromosomes = [...metadata["chr"]];
+
+            startPos = parseInt(metadata["min_pos"], 10);
+            endPos = parseInt(metadata["max_pos"], 10);
+            positionFilterOperator = "overlap";
+
+            selectedGeneLocations = [...metadata["geneloc"]];
+
+            d3.selectAll(".chr-checkbox").property("checked", true);
+            d3.selectAll(".geneloc-checkbox").property("checked", true);
+
+            d3.select("#search-query").property("value", "");
+            advancedSearchFilters = [];
+
+            updateFilterDOM();
+            reloadPage();
+        });
 
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;
@@ -284,6 +302,16 @@ function reloadPage() {
 
 function getTotalPages() {
     return Math.ceil(totalCount / itemsPerPage).toFixed(0);
+}
+
+function updateFilterDOM() {
+    d3.select("#start").property("value", startPos);
+    d3.select("#end").property("value", endPos);
+
+    d3.select("#position-filter-operator")
+        .selectAll("option")
+        .data(Object.keys(POSITION_FILTER_OPERATORS))
+        .property("selected", o => o === positionFilterOperator);
 }
 
 function addAdvancedSearchCondition() {

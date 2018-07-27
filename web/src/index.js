@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(new Request("/api/fields")),
         fetch(new Request("/api/metadata"))
     ]).then(rs => Promise.all(rs.map(r => r.json()))).then(data => {
+        itemsPerPage = parseInt(d3.select("#items-per-page").property("value"), 10);
         loadedEntries = data[0];
         totalCount = parseInt(data[1], 10);
         fields = data[2];

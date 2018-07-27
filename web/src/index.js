@@ -8,6 +8,7 @@ let fields = [];
 let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
+let selectedChromosomes = [];
 let currentFilterID = 0;
 let advancedSearchFilters = [];
 let transitioning = true;
@@ -31,6 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
         totalCount = parseInt(data[1], 10);
         fields = data[2];
         metadata = data[3];
+        selectedChromosomes = [...metadata["chr"]];
+
         populateEntryTable();
         updatePagination();
         updateTableColumnHeaders();
@@ -44,7 +47,17 @@ document.addEventListener("DOMContentLoaded", function () {
             .attr("id", c => c)
             .attr("class", "chr-checkbox")
             .attr("name", c => c)
-            .attr("checked", "checked");
+            .attr("checked", "checked")
+            .on("change", function () {
+                selectedChromosomes = [];
+                d3.selectAll(".chr-checkbox")
+                    .filter(function () { return d3.select(this).property("checked"); })
+                    .each(function () { selectedChromosomes.push(d3.select(this).attr("id")); });
+
+                if (selectedChromosomes.length === 0) {
+                    this.checked = true;
+                }
+            });
         chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
 
         d3.select("#start").attr("min", metadata["min_pos"]);

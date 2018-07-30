@@ -161,6 +161,12 @@ document.addEventListener("DOMContentLoaded", function () {
             reloadPage();
         });
 
+        d3.select("#first-page").on("click", () => {
+            if (transitioning) return;
+            page = 1;
+            reloadPage();
+        });
+
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;
             page = Math.max(page - 1, 1);
@@ -170,6 +176,12 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#next-page").on("click", () => {
             if (transitioning) return;
             page = Math.min(page + 1, parseInt(getTotalPages(), 10));
+            reloadPage();
+        });
+
+        d3.select("#last-page").on("click", () => {
+            if (transitioning) return;
+            page = parseInt(getTotalPages(), 10);
             reloadPage();
         });
 
@@ -240,11 +252,15 @@ function updateTableColumnHeaders() {
 
 function updatePagination() {
     const totalPages = getTotalPages();
+
     d3.select("#current-page").text(page.toFixed(0));
     d3.select("#total-pages").text(totalPages);
     d3.select("#total-entries").text(totalCount);
+
+    d3.select("#first-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#next-page").attr("disabled", page.toString(10) === totalPages ? "disabled" : null);
+    d3.select("#last-page").attr("disabled", page.toString(10) === totalPages ? "disabled" : null);
 }
 
 function reloadPage() {

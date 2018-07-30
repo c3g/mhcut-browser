@@ -65,7 +65,7 @@ section#table-pagination {
     background-color: #FCFCFC;
 }
 
-section#table-pagination div {
+section#table-pagination > div {
     flex: 1;
     padding: 0 20px;
     font-family: "Roboto Mono", monospace;
@@ -74,10 +74,10 @@ section#table-pagination div {
     line-height: 47px;
     color: #666;
 }
-section#table-pagination div:first-of-type {
+section#table-pagination > div:first-of-type {
     text-align: left;
 }
-section#table-pagination div:last-of-type {
+section#table-pagination > div:last-of-type {
     text-align: right;
 }
 
@@ -93,6 +93,14 @@ section#table-pagination button span.material-icons {
     min-width: 30px;
     font-size: 1.2rem;
     line-height: 25px;
+}
+
+section#table-pagination div.button-row {
+    display: inline-block;
+}
+
+section#table-pagination div.button-row button:not(:first-child) {
+    margin-left: 2px;
 }
 
 section#table-pagination span#total-entries-text {

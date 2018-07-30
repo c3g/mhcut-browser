@@ -17,7 +17,10 @@ if ! [ -x "$(command -v virtualenv)" ]; then
     sudo -H pip3 install virtualenv
 fi
 
-# NGINX?
+if ! [ -x "$(command -v nginx)" ]; then
+  echo "Attempting to install NGINX via apt..."
+  sudo apt-get install -y nginx
+fi
 
 if ! [ -x "$(command -v npm)" ]; then
   echo "Attempting to install NPM from nodesource via apt..."

@@ -17,9 +17,21 @@ if ! [ -x "$(command -v virtualenv)" ]; then
     sudo -H pip3 install virtualenv
 fi
 
-if ! [ -x "$(command -v nginx)" ]; then
-  echo "Attempting to install NGINX via apt..."
-  sudo apt-get install -y nginx
+read -p "Server software to install (apache2 or [nginx]): " server
+
+if [ "$server" == "apache2" ]; then
+  if ! [ -x "$(command -v apache2)" ]; then
+    echo "Attempting to install Apache via apt..."
+    sudo apt-get install -y apache2 libapache2-mod-wsgi-py3
+    echo "Enabling required Apache modules..."
+    sudo a2enmod wsgi proxy proxy_http rewrite
+    sudo systemctl restart apache2
+  fi
+else
+    if ! [ -x "$(command -v nginx)" ]; then
+      echo "Attempting to install NGINX via apt..."
+      sudo apt-get install -y nginx
+    fi
 fi
 
 if ! [ -x "$(command -v npm)" ]; then

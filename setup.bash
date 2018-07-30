@@ -19,7 +19,7 @@ fi
 
 read -p "Server software to install (apache2 or [nginx]): " server
 
-if [ "$server" == "apache2" ]; then
+if [ "$server" == "apache2" ] || [ "$server" == "apache" ]; then
   if ! [ -x "$(command -v apache2)" ]; then
     echo "Attempting to install Apache via apt..."
     sudo apt-get install -y apache2 libapache2-mod-wsgi-py3

@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 
 import json as pyjson
+import os.path
 import re
 import sqlite3
 
 from flask import Flask, g, json, request
 from typing import Pattern
+
+
+# Database Setup
+
+BASE_DIR = os.path.dirname(__file__)
+DATABASE_PATH = os.path.join(BASE_DIR, "db.sqlite")
 
 
 # Search Operator / Condition Domains
@@ -108,7 +115,7 @@ def build_search_query(raw_query, c):
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = sqlite3.connect("db.sqlite")
+        db = g._database = sqlite3.connect(DATABASE_PATH)
         db.row_factory = sqlite3.Row
     return db
 

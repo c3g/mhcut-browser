@@ -48,7 +48,7 @@ sudo npm install -g npm
 
 echo "Setting up Python 3 virtual environment in project root..."
 virtualenv -p python3 ./env
-source env/bin/activate
+PS1="" source env/bin/activate
 pip install -r requirements.txt
 
 echo "Installing web dependencies via NPM..."

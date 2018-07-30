@@ -11,17 +11,15 @@ from typing import Pattern
 # Search Operator / Condition Domains
 SEARCH_OPERATORS = {
     "equals": ("=", "{}"),
+    "<": ("<", "{}"),
+    "<=": ("<=", "{}"),
+    ">": (">", "{}"),
+    ">=": (">=", "{}"),
 
     # TEXT
     "contains": ("LIKE", "%{}%"),
     "starts_with": ("LIKE", "{}%"),
     "ends_with": ("LIKE", "%{}"),
-
-    # INTEGER
-    "<": ("<", "{}"),
-    "<=": ("<=", "{}"),
-    ">": (">", "{}"),
-    ">=": (">=", "{}"),
 
     # NULLABLE
     "is_null": ("IS NULL", "")

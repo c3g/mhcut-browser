@@ -24,9 +24,8 @@ const POSITION_FILTER_OPERATORS = {
 };
 
 const CONDITION_OPERATORS = {
-    BOTH: ["equals"],
+    BOTH: ["equals", "<", "<=", ">", ">="],
     TEXT: ["contains", "starts_with", "ends_with"],
-    INTEGER: ["<", "<=", ">", ">="],
     NULLABLE: ["is_null"]
 };
 

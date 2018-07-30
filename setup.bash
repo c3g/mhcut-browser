@@ -24,7 +24,10 @@ if [ "$server" == "apache2" ]; then
     echo "Attempting to install Apache via apt..."
     sudo apt-get install -y apache2 libapache2-mod-wsgi-py3
     echo "Enabling required Apache modules..."
-    sudo a2enmod wsgi proxy proxy_http rewrite
+    sudo a2enmod wsgi
+    sudo a2enmod proxy
+    sudo a2enmod proxy_http
+    sudo a2enmod rewrite
     sudo systemctl restart apache2
   fi
 else

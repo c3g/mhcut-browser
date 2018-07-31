@@ -127,7 +127,7 @@ aside#filter-options h1 {
     margin-top: 15px;
     margin-bottom: 10px;
     font-family: "Roboto Mono", monospace;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: normal;
     text-align: center;
     color: #555;
@@ -138,7 +138,7 @@ aside#filter-options h2 {
     margin-bottom: 10px;
     font-family: "Roboto Mono", monospace;
     font-weight: normal;
-    font-size: 0.75rem;
+    font-size: 0.725rem;
     color: #777;
     text-align: center;
     letter-spacing: 2px;

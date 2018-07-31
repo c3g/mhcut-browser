@@ -126,3 +126,292 @@ cd web
 npm install
 cd ..
 ```
+
+
+### Step 1: Build the Database
+
+To build the database, run the `tsv_to_sqlite.py` script as follows to
+generate the `db.sqlite` relational database file, passing in the desired TSV
+file to convert as an argument:
+
+```bash
+python ./tsv_to_sqlite.py variants.tsv
+```
+
+
+### Step 2: Running the Web Application
+
+#### In Development
+
+##### A. Activate the Virtual Environment
+
+If not already in the virtual environment, activate it by running the following
+command from within the root project directory:
+
+```bash
+source env/bin/activate
+```
+
+##### B. *Option 1:* Configure NGINX
+
+Either alter the default configuration file (for `localhost`) or create a new
+virtual host specifically for the application and register a local domain name
+in the `/etc/hosts` file on the development machine.
+
+Example configuration file, located in `/etc/nginx/sites-available/`:
+```nginx
+server {
+	listen 80;
+
+	root /path/to/crispr/browser/web;
+	index index.html index.htm;
+
+	server_name your-domain-name.local;
+
+	location /api/ {
+		proxy_pass http://localhost:5000/;
+	}
+
+	location / {
+		try_files $uri $uri/ /index.html;
+	}
+}
+```
+
+If a new virtual host configuration file has been created, enable the virtual
+host by running the following commands, replacing `conf-name` with the name of
+the newly-created configuration file, and restarting NGINX:
+
+```bash
+ln -s /etc/nginx/sites-available/conf-name /etc/nginx/sites-enabled/conf-name
+nginx -t  # Optional, tests the configuration and informs the user if it's OK
+sudo systemctl restart nginx
+```
+
+##### B. *Option 2:* Configure Apache
+
+Either alter the default configuration file (for `localhost`) or create a new
+virtual host specifically for the application and register a local domain name
+in the `/etc/hosts` file on the development machine.
+
+Example configuration file, located in `/etc/apache2/sites-available/`:
+```
+<VirtualHost *:80>
+    ServerName your-domain-name.local
+
+    ServerAdmin webmaster@localhost
+    DocumentRoot /path/to/crispr/browser/web
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /path/to/crispr/browser/web>
+        Require all granted
+
+        RewriteEngine on
+        # Don't rewrite files or directories
+        RewriteCond %{REQUEST_FILENAME} -f [OR]
+        RewriteCond %{REQUEST_FILENAME} -d
+        RewriteRule ^ - [L]
+        # Rewrite everything else to index.html to allow html5 state links
+        RewriteRule ^ index.html [L]
+    </Directory>
+
+    ProxyPass /api/ http://127.0.0.1:5000/
+    ProxyPassReverse /api/ http://127.0.0.1:5000/
+</VirtualHost>
+```
+
+If a new virtual host configuration file (for example `mcgill-network.conf`)
+has been created, enable the virtual host by running the following commands,
+replacing `mcgill-network` with the name of the newly-created configuration
+file, and restarting Apache:
+
+```bash
+sudo a2ensite mcgill-network
+sudo systemctl restart apache2
+```
+
+
+##### C. Build the JavaScript Bundle
+
+In this case, the development-environment bundle is built, to aid in debugging.
+This should be ran from the main project directory.
+
+```bash
+cd web
+npm run build-dev
+cd ..
+```
+
+If continuous development is being done on the JavaScript parts of the web
+application, the webpack watcher (which continuously compiles the code as it is
+changed) can be started with the following command, within the `web`
+directory:
+
+```bash
+npm run watch
+```
+
+This will run continuously, waiting for changes in the `web/src` directory,
+until it is killed with `Ctrl-c` or similar.
+
+##### D. Run the Development API Server
+
+Run the following commands from the root project directory to start the
+development server:
+
+```bash
+export FLASK_APP=application.py
+export FLASK_ENV=development
+
+flask run
+```
+
+To check if the server is running, visit
+[localhost:5000](http://localhost:5000/). The URL should give a JSON response
+with some of the entries from the database.
+
+If it is not running, check the terminal in which the server is running for
+any possible error messages.
+
+#### In Production
+
+In production, the McGill Network web application is designed to be deployed
+with uWSGI and NGINX as a systemd service.
+
+##### A. Perform Initial Setup and Configuration
+
+See Step 0 for details.
+
+##### B. *Option 1:* Configure NGINX
+
+In production, it is recommended to create a new virtual host specifically for
+the application.
+
+Example configuration, located in `/etc/nginx/sites-available/`:
+```nginx
+server {
+	listen 80;
+
+	root /path/to/crispr/browser/web;
+	index index.html index.htm;
+
+	server_name your-domain-name.com;
+
+	location /api/ {
+		include uwsgi_params;
+		uwsgi_pass unix:/path/to/crispr/browser/ccb.sock;
+		uwsgi_param SCRIPT_NAME /api/;
+	}
+
+	location / {
+		try_files $uri $uri/ /index.html;
+	}
+}
+```
+
+If a new virtual host configuration file has been created, enable the virtual
+host by running the following command, replacing `conf-name` with the name of
+the newly-created configuration file, and restarting NGINX:
+
+```bash
+ln -s /etc/nginx/sites-available/conf-name /etc/nginx/sites-enabled/conf-name
+nginx -t # Optional, tests the configuration and informs the user if it's OK
+sudo systemctl restart nginx
+```
+
+##### B. *Option 2:* Configure Apache
+
+In production, it is recommended to create a new virtual host specifically for
+the application.
+
+Example configuration, located in `/etc/apache2/sites-available/`:
+```
+<VirtualHost *:80>
+    ServerName your-domain-name.com
+
+    ServerAdmin webmaster@localhost
+    DocumentRoot /path/to/crispr/browser/web
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory /path/to/crispr/browser/web>
+        Require all granted
+
+        RewriteEngine on
+        # Don't rewrite files or directories
+        RewriteCond %{REQUEST_FILENAME} -f [OR]
+        RewriteCond %{REQUEST_FILENAME} -d
+        RewriteRule ^ - [L]
+        # Rewrite everything else to index.html to allow html5 state links
+        RewriteRule ^ index.html [L]
+    </Directory>
+
+    <Directory /path/to/crispr/browser>
+        <Files wsgi.py>
+            Require all granted
+        </Files>
+    </Directory>
+
+    WSGIDaemonProcess ccb python-home=/path/to/crispr/browser/env python-path=/path/to/crispr/browser
+    WSGIProcessGroup ccb
+    WSGIScriptAlias /api /path/to/crispr/browser/wsgi.py
+</VirtualHost>
+```
+
+If a new virtual host configuration file (for example `mcgill-network.conf`)
+has been created, enable the virtual host by running the following commands,
+replacing `mcgill-network` with the name of the newly-created configuration
+file, and restarting Apache:
+
+```bash
+sudo a2ensite mcgill-network
+sudo systemctl restart apache2
+```
+
+##### C. Build the JavaScript Bundle
+
+In this case, the production-environment bundle is built. This must be run from
+the product directory.
+
+```bash
+cd static
+npm install
+npm run build
+cd ..
+```
+
+##### D. *(for NGINX only)* Configure Project `systemd` Service
+
+First, edit the example `ccb.example.service` file to match the paths the
+application is being served out of.
+
+Then, copy the example `ccb.example.service` file to the `systemd` services
+folder as follows:
+
+```bash
+cp ./ccb.example.service /etc/systemd/system/ccb.service
+```
+
+Finally, start the service and enable it to start at boot time:
+
+```bash
+sudo systemctl start ccb
+sudo systemctl enable ccb
+```
+
+To check if the software is running, visit
+[localhost:5000](http://localhost:5000/). The URL should give a JSON response
+with some of the entries from the database.
+
+If it is not running, make sure the service started correctly with the
+following command:
+
+```bash
+sudo systemctl status ccb
+```
+
+If a `502` HTTP error appears, check if the socket path is correct in the NGINX
+configuration and the service user is correct in the systemd service file.

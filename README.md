@@ -52,7 +52,6 @@ If some of the dependencies are already installed on the host machine, or if
 different install paths or installation methods are required, it is suggested
 that the installation steps are completed manually (see directly below).
 
-
 #### Install Various Dependencies
 
 ##### Python
@@ -105,7 +104,6 @@ sudo npm install -g npm  # Update NPM to the latest version
 npm -v  # The version should be at least 6.x.x
 ```
 
-
 #### Set Up Python Virtual Environment
 
 Create a Python 3 virtual environment in the main project directory with the
@@ -117,7 +115,6 @@ virtualenv -p python3 ./env
 source env/bin/activate
 pip install -r requirements.txt
 ```
-
 
 #### Install Web Dependencies
 

@@ -1,6 +1,6 @@
 {
-  "name": "tsv-browser-web",
-  "version": "0.1.0",
+  "name": "crispr-cut-browser-web",
+  "version": "0.2.0",
   "description": "A TSV browser for SNP data.",
   "main": "src/index.js",
   "scripts": {

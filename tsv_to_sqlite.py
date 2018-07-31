@@ -2,6 +2,7 @@
 
 import csv
 import sqlite3
+import sys
 
 from tqdm import tqdm
 
@@ -23,13 +24,17 @@ def main():
     Main method, runs when the script is ran directly.
     """
 
+    if len(sys.argv) != 2:
+        print("Usage: ./tsv_to_sqlite.py file_to_convert.tsv")
+        exit(1)
+
     conn = sqlite3.connect("./db.sqlite")
     c = conn.cursor()
 
     with open("./schema.sql", "r") as s:
         c.executescript(s.read())
 
-    with open("./variants-subset.tsv", "r") as vs_file:
+    with open(sys.argv[1], "r") as vs_file:
         reader = csv.DictReader(vs_file, delimiter="\t")
         i = 0
         for variant in tqdm(reader):  # TODO: Find total with wc -l

@@ -236,6 +236,22 @@ function formatEntryCell(e, f) {
                            target="_blank" rel="noopener">${og}</a>`)
             .join("|");
     }
+    if (f["name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== "NA") {
+        return e["gene_info_clinvar"]
+            .split("|")
+            .map(og => `<a href="https://www.ncbi.nlm.nih.gov/gene/${og.split(":")[1]}/"
+                           target="_blank" rel="noopener">${og}</a>`)
+            .join("|");
+    }
+    if (f["name"] === "citation" && e["citation"] !== "NA" && e["citation"] !== "-") {
+        return e["citation"]
+            .split(";")
+            .map(id => id.substring(0, 2) === "NB"
+                ? `<a href="https://www.ncbi.nlm.nih.gov/books/${id}/" target="_blank" rel="noopener">${id}</a>`
+                : `<a href="https://www.ncbi.nlm.nih.gov/pubmed/${id.replace("PM", "")}/"
+                      target="_blank" rel="noopener">${id}</a>`)
+            .join(";");
+    }
     if (f["name"] === "allele_id" && e["allele_id"] !== "NA") {
         return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
                    target="_blank" rel="noopener">${e["allele_id"]}</a>`

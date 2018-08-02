@@ -7,7 +7,7 @@ body {
 main {
     position: fixed;
     z-index: 10;
-    top: 15px; left: 15px; right: 225px; bottom: 15px;
+    top: 15px; left: 15px; right: 220px; bottom: 15px;
     overflow: hidden;
     background-color: #FEFEFE;
     border: 1px solid #DCDCDC;
@@ -24,7 +24,7 @@ section#table-display {
 
 section#table-display::after {
     position: fixed;
-    top: 16px; left: 16px; right: 226px; bottom: 66px;
+    top: 16px; left: 16px; right: 221px; bottom: 66px;
     z-index: 20;
     opacity: 0;
     background-color: #FEFEFE;
@@ -115,7 +115,7 @@ aside#filter-options {
     top: 0; right: 0; bottom: 0;
 
     box-sizing: border-box;
-    width: 225px;
+    width: 220px;
     padding: 0 15px;
 
     background-color: #ECEFF1;

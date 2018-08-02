@@ -191,6 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
             d3.selectAll(".chr-checkbox").property("checked", true);
             d3.selectAll(".geneloc-checkbox").property("checked", true);
 
+            minMHL = 0;
+
             d3.select("#search-query").property("value", "");
             advancedSearchFilters = [];
 
@@ -381,6 +383,8 @@ function getTotalPages() {
 function updateFilterDOM() {
     d3.select("#start").property("value", startPos);
     d3.select("#end").property("value", endPos);
+
+    d3.select("#min-mh-l").property("value", minMHL);
 
     // d3.select("#position-filter-operator")
     //     .selectAll("option")

@@ -82,6 +82,14 @@ section#table-pagination > div:last-of-type {
     text-align: right;
 }
 
+section#table-pagination > div .vr {
+    display: inline-block;
+    width: 1px;
+    height: 50px;
+    margin: 0 20px;
+    background-color: #F0F0F0;
+}
+
 section#table-pagination button {
     height: 26px;
     margin: 10px 0 0 5px;
@@ -93,6 +101,9 @@ section#table-pagination button {
 section#table-pagination button.icon-button {
     padding: 0;
 }
+
+section#table-pagination button#first-page {
+    margin-left: 0;
 }
 
 section#table-pagination button span.material-icons {
@@ -103,6 +114,7 @@ section#table-pagination button span.material-icons {
 
 section#table-pagination div.button-row {
     display: inline-block;
+    vertical-align: top;
 }
 
 section#table-pagination div.button-row button:not(:first-child) {

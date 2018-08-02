@@ -154,6 +154,11 @@ aside#filter-options h2 {
     letter-spacing: 2px;
 }
 
+aside#filter-options h2 label {
+    margin: 0;
+    color: #777;
+}
+
 aside#filter-options h3 {
     margin-top: 10px;
     margin-bottom: 5px;

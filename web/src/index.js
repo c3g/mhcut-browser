@@ -4,17 +4,24 @@ let page = 1;
 let itemsPerPage = 100;
 let loadedEntries = [];
 let totalCount = 0;
+
 let fields = [];
 let metadata = {};
+
 let sortBy = "id";
 let sortOrder = "ASC";
+
 let selectedChromosomes = [];
+
 let startPos = 0;
 let endPos = 12000000000000;
 let positionFilterOperator = "overlap";
+
 let selectedGeneLocations = [];
+
 let currentFilterID = 0;
 let advancedSearchFilters = [];
+
 let transitioning = true;
 
 const POSITION_FILTER_OPERATORS = {

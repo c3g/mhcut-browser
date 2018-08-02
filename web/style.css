@@ -580,6 +580,17 @@ button::-moz-focus-inner {
 
 
 
+div.row {
+    display: flex;
+    flex-direction: row;
+}
+div.row .col {
+    flex: 1;
+    vertical-align: top;
+}
+
+
+
 @media screen and (max-width: 1400px) {
     div#advanced-search-modal {
         position: absolute;

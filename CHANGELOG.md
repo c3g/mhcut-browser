@@ -14,6 +14,7 @@
 
   * `NA` now treated internally as `NULL` for the `gene_info_clinvar` database
     column.
+  * Add application version to metadata endpoint.
 
 ### Miscellaneous
 

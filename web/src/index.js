@@ -193,6 +193,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             minMHL = 0;
 
+            mustHaveDBSNP = false;
+            mustHaveClinVar = false;
+
             d3.select("#search-query").property("value", "");
             advancedSearchFilters = [];
 
@@ -385,6 +388,9 @@ function updateFilterDOM() {
     d3.select("#end").property("value", endPos);
 
     d3.select("#min-mh-l").property("value", minMHL);
+
+    d3.select("#dbsnp").property("checked", mustHaveDBSNP);
+    d3.select("#clinvar").property("checked", mustHaveClinVar);
 
     // d3.select("#position-filter-operator")
     //     .selectAll("option")

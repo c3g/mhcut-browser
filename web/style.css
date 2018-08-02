@@ -181,6 +181,7 @@ aside#filter-options label.checkbox-label {
     margin: 2px 0;
     line-height: 18px;
     font-size: 0.725rem;
+    white-space: nowrap;
 }
 
 aside#filter-options select {

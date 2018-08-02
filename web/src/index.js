@@ -341,7 +341,7 @@ function reloadPage() {
 }
 
 function getTotalPages() {
-    return Math.ceil(totalCount / itemsPerPage).toFixed(0);
+    return Math.max(Math.ceil(totalCount / itemsPerPage), 1).toFixed(0);
 }
 
 function updateFilterDOM() {

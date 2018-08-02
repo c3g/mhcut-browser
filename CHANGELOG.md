@@ -7,6 +7,8 @@
   * Logo added to sidebar.
   * Sidebar width increased and layout changed for increased vertical space.
   * Fix status text showing 0 total pages if no results were found.
+  * Remove "Position Filter Type" quick filter option (by request).
+  * Add "Minimum mhL" and "Database Sources" quick filter options (by request).
 
 ### Server and API
 

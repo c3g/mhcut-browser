@@ -172,6 +172,12 @@ aside#filter-options label {
     color: #333;
 }
 
+aside#filter-options label.checkbox-label {
+    margin: 2px 0;
+    line-height: 18px;
+    font-size: 0.725rem;
+}
+
 aside#filter-options select {
     width: 100%;
 }

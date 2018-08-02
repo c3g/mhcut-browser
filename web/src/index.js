@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["geneloc"])
             .enter()
             .append("label")
+            .attr("class", "checkbox-label")
             .attr("for", l => l);
         geneLocationLabels.append("input")
             .attr("type", "checkbox")

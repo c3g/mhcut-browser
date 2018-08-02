@@ -1,6 +1,12 @@
 # Changelog
 
-## Version 0.3.0 (UNRELEASED)
+## Version 0.3.1 (2018-08-02)
+
+### Server and API
+
+  * Fix issue with loading version number in production.
+
+## Version 0.3.0 (2018-08-02)
 
 ### Front End
 

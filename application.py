@@ -9,12 +9,13 @@ from flask import Flask, g, json, request
 from typing import Pattern
 
 
-__version__ = json.load(open("web/package.json", "r"))["version"]
+BASE_DIR = os.path.dirname(__file__)
+
+# Version for Metadata Endpoint
+__version__ = json.load(open(os.path.join(BASE_DIR, "web/package.json"), "r"))["version"]
 
 
 # Database Setup
-
-BASE_DIR = os.path.dirname(__file__)
 DATABASE_PATH = os.path.join(BASE_DIR, "db.sqlite")
 
 

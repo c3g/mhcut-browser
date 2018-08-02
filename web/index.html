@@ -74,38 +74,41 @@
         <img src="/logo.png" alt="CRISPR Cut Browser Logo" id="app-logo">
     </div>
     <h1>CRISPR Cut Browser</h1>
-    <h2>QUICK FILTERS</h2>
-    <h3>Chromosome</h3>
-    <div id="chromosome-checkboxes"></div>
-    <label for="start">Start Position</label>
-    <input type="number" min="" max="" id="start" name="start">
-    <label for="end">End Position</label>
-    <input type="number" min="" max="" id="end" name="end">
-    <!--<label for="position-filter-operator">Position Filter Type</label>-->
-    <!--<select name="position-filter-operator" id="position-filter-operator"></select>-->
-    <h3>Gene Location</h3>
-    <div id="gene-location-checkboxes"></div>
-    <hr>
-    <label for="min-mh-l-value">Minimum mhL Value</label>
-    <input type="number" min="0" value="0" id="min-mh-l-value" name="min-mh-l-value" >
-    <hr>
-    <h3>Database Sources</h3>
-    <label for="dbsnp" class="checkbox-label">
-        <input type="checkbox" id="dbsnp" name="dbsnp" checked> Must be in dbSNP
-    </label>
-    <label for="clinvar" class="checkbox-label">
-        <input type="checkbox" id="clinvar" name="clinvar" checked> Must be in ClinVar
-    </label>
-    <hr>
-    <h2><label for="search-query">SEARCH</label></h2>
-    <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
-    <div class="row">
-        <h3 style="margin: 0; padding-right: 0.6em; line-height: 39px;">OR</h3>
-        <button id="show-advanced-search" class="col" style="margin-top: 5px;">Advanced Search</button>
-    </div>
-    <hr>
-    <button id="apply-filters">Apply Filters</button>
-    <button id="clear-filters">Clear Filters</button>
+    <form id="filter-search-form">
+        <h2>QUICK FILTERS</h2>
+        <h3>Chromosome</h3>
+        <div id="chromosome-checkboxes"></div>
+        <label for="start">Start Position</label>
+        <input type="number" min="" max="" id="start" name="start">
+        <label for="end">End Position</label>
+        <input type="number" min="" max="" id="end" name="end">
+        <!--<label for="position-filter-operator">Position Filter Type</label>-->
+        <!--<select name="position-filter-operator" id="position-filter-operator"></select>-->
+        <h3>Gene Location</h3>
+        <div id="gene-location-checkboxes"></div>
+        <hr>
+        <label for="min-mh-l">Minimum mhL Value</label>
+        <input type="number" min="0" value="0" id="min-mh-l" name="min-mh-l" >
+        <hr>
+        <h3>Database Sources</h3>
+        <label for="dbsnp" class="checkbox-label">
+            <input type="checkbox" id="dbsnp" name="dbsnp" checked> Must be in dbSNP
+        </label>
+        <label for="clinvar" class="checkbox-label">
+            <input type="checkbox" id="clinvar" name="clinvar" checked> Must be in ClinVar
+        </label>
+        <hr>
+        <h2><label for="search-query">SEARCH</label></h2>
+        <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
+        <div class="row">
+            <h3 style="margin: 0; padding-right: 0.6em; line-height: 39px;">OR</h3>
+            <button id="show-advanced-search" type="button" class="col"
+                    style="margin-top: 5px;">Advanced Search</button>
+        </div>
+        <hr>
+        <button id="apply-filters" type="submit">Apply Filters</button>
+        <button id="clear-filters" type="button">Clear Filters</button>
+    </form>
 </aside>
 </body>
 </html>

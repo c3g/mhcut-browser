@@ -46,6 +46,12 @@ const DEFAULT_CONDITION_BOOLEAN = "AND";
 
 
 document.addEventListener("DOMContentLoaded", function () {
+    const searchContainer = d3.select("#advanced-search-container");
+
+    document.addEventListener("keyup", e => {
+        if (e.keyCode === 27 && searchContainer.classed("shown")) searchContainer.classed("shown", false);
+    });
+
     // noinspection JSCheckFunctionSignatures
     Promise.all([
         fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
@@ -140,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         geneLocationLabels.append("span").text(l => " " + l);
 
-        d3.select("#min-mh-l-value")
+        d3.select("#min-mh-l")
             .attr("min", 0)
             .attr("max", metadata["max_mh_l"])
             .property("value", minMHL)
@@ -156,7 +162,6 @@ document.addEventListener("DOMContentLoaded", function () {
             mustHaveClinVar = d3.select(this).property("checked");
         });
 
-        const searchContainer = d3.select("#advanced-search-container");
         d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
         d3.select("#hide-advanced-search").on("click", () => searchContainer.classed("shown", false));
         d3.select("#advanced-search-container").on("click", () => searchContainer.classed("shown", false));
@@ -168,10 +173,12 @@ document.addEventListener("DOMContentLoaded", function () {
             searchContainer.classed("shown", false);
         });
 
-        d3.select("#apply-filters").on("click", () => {
+        d3.select("#filter-search-form").on("submit", () => {
+            d3.event.preventDefault();
             page = 1;
             reloadPage();
         });
+
         d3.select("#clear-filters").on("click", () => {
             selectedChromosomes = [...metadata["chr"]];
 

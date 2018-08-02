@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 0.4.0 (UNRELEASED)
+
+### Front End
+
+  * Reset "Minimum mhL" and "Database Sources" properly when filters are
+    cleared.
+  * Allow keyboard submission of filtering and searching form.
+  * Allow the user to escape the advanced search modal with the escape key.
+
+
 ## Version 0.3.1 (2018-08-02)
 
 ### Server and API

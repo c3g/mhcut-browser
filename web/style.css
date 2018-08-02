@@ -201,7 +201,7 @@ aside#filter-options button {
 aside#filter-options div#chromosome-checkboxes label {
     display: inline-block;
     width: 25%;
-    margin: 2px 0;
+    margin: 1px 0;
     font-size: 0.7rem;
     line-height: 19px;
 
@@ -215,7 +215,7 @@ aside#filter-options div#chromosome-checkboxes label input {
 }
 
 aside#filter-options div#gene-location-checkboxes label {
-    margin: 2px 0;
+    margin: 1px 0;
 }
 
 aside#filter-options button#apply-filters {

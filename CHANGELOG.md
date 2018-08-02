@@ -6,6 +6,7 @@
 
   * Fix issue with loading version number in production.
 
+
 ## Version 0.3.0 (2018-08-02)
 
 ### Front End
@@ -21,6 +22,8 @@
   * `NA` now treated internally as `NULL` for the `gene_info_clinvar` database
     column.
   * Add application version to metadata endpoint.
+  * Add `min_mh_l` (minimum mhL value), `dbsnp` (must an entry be in dbSNP?),
+    and `clinvar` (must an entry be in ClinVar?) search parameters.
 
 ### Miscellaneous
 

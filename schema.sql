@@ -19,7 +19,7 @@ CREATE TABLE variants (
   clndn TEXT,
   clnsig TEXT,
   dbvarid TEXT,
-  gene_info_clinvar TEXT,
+  gene_info_clinvar TEXT, -- NA is represented as NULL, '-' is left as-is
   mc_clinvar TEXT,
   citation TEXT,
   geneloc TEXT NOT NULL CHECK (geneloc IN ('intronic', 'exonic', 'intergenic')),

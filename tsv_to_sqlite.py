@@ -38,6 +38,10 @@ def main():
         reader = csv.DictReader(vs_file, delimiter="\t")
         i = 0
         for variant in tqdm(reader):  # TODO: Find total with wc -l
+            gene_info_clinvar = variant["GENEINFO.ClinVar"].strip()
+            if gene_info_clinvar == "NA":
+                # Treat NA, but not -, as null
+                gene_info_clinvar = None
             c.execute("INSERT INTO variants(chr, start, end, rs, caf, topmed, gene_info, pm, mc, af_exac, af_tgp, "
                       "                     allele_id, clndn, clnsig, dbvarid, gene_info_clinvar, mc_clinvar, "
                       "                     citation, geneloc, var_l, mh_l, mh_1l, hom, nbmm, mh_dist, mh_seq_1, "
@@ -49,7 +53,7 @@ def main():
                        variant["GENEINFO"].strip(), variant["PM"].strip(), variant["MC"].strip(),
                        variant["AF_EXAC"].strip(), variant["AF_TGP"].strip(), variant["ALLELEID"].strip(),
                        variant["CLNDN"].strip(), variant["CLNSIG"].strip(), variant["DBVARID"].strip(),
-                       variant["GENEINFO.ClinVar"].strip(), variant["MC.ClinVar"].strip(), variant["citation"].strip(),
+                       gene_info_clinvar, variant["MC.ClinVar"].strip(), variant["citation"].strip(),
                        variant["geneloc"].strip(), int(variant["varL"]), int(variant["mhL"]), int(variant["mh1L"]),
                        variant["hom"].strip(), int(variant["nbMM"]), int_or_none_cast(variant["mhDist"]),
                        variant["MHseq1"].strip(), variant["MHseq2"].strip(), int_or_none_cast(variant["pamMot"]),

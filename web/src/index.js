@@ -19,6 +19,11 @@ let endPos = 12000000000000;
 
 let selectedGeneLocations = [];
 
+let minMHL = 0;
+
+let mustHaveDBSNP = false;
+let mustHaveClinVar = false;
+
 let currentFilterID = 0;
 let advancedSearchFilters = [];
 
@@ -134,6 +139,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
         geneLocationLabels.append("span").text(l => " " + l);
+
+        d3.select("#min-mh-l-value")
+            .attr("min", 0)
+            .attr("max", metadata["max_mh_l"])
+            .property("value", minMHL)
+            .on("change", function () {
+                minMHL = parseInt(this.value, 10);
+                if (isNaN(minMHL)) minMHL = 0;
+            });
+
+        d3.select("#dbsnp").property("checked", mustHaveDBSNP).on("change", function () {
+            mustHaveDBSNP = d3.select(this).property("checked");
+        });
+        d3.select("#clinvar").property("checked", mustHaveClinVar).on("change", function () {
+            mustHaveClinVar = d3.select(this).property("checked");
+        });
 
         const searchContainer = d3.select("#advanced-search-container");
         d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
@@ -308,6 +329,10 @@ function reloadPage() {
         end: endPos,
         // position_filter_operator: positionFilterOperator,
         geneloc: selectedGeneLocations,
+        min_mh_l: minMHL,
+
+        dbsnp: mustHaveDBSNP,
+        clinvar: mustHaveClinVar,
 
         search_query: d3.select("#search-query").property("value")
     };

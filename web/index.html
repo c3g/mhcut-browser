@@ -86,6 +86,17 @@
     <h3>Gene Location</h3>
     <div id="gene-location-checkboxes"></div>
     <hr>
+    <label for="min-mh-l-value">Minimum mhL Value</label>
+    <input type="number" min="0" value="0" id="min-mh-l-value" name="min-mh-l-value" >
+    <hr>
+    <h3>Database Sources</h3>
+    <label for="dbsnp" class="checkbox-label">
+        <input type="checkbox" id="dbsnp" name="dbsnp" checked> Must be in dbSNP
+    </label>
+    <label for="clinvar" class="checkbox-label">
+        <input type="checkbox" id="clinvar" name="clinvar" checked> Must be in ClinVar
+    </label>
+    <hr>
     <h2><label for="search-query">SEARCH</label></h2>
     <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
     <div class="row">

@@ -244,7 +244,7 @@ function formatEntryCell(e, f) {
                            target="_blank" rel="noopener">${og}</a>`)
             .join("|");
     }
-    if (f["name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== "NA") {
+    if (f["name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== null) {
         return e["gene_info_clinvar"]
             .split("|")
             .map(og => `<a href="https://www.ncbi.nlm.nih.gov/gene/${og.split(":")[1]}/"

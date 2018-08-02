@@ -71,6 +71,7 @@ section#table-pagination > div {
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
     text-align: center;
+    white-space: nowrap;
     line-height: 47px;
     color: #666;
 }

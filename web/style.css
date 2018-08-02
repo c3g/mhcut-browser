@@ -7,7 +7,7 @@ body {
 main {
     position: fixed;
     z-index: 10;
-    top: 15px; left: 15px; right: 200px; bottom: 15px;
+    top: 15px; left: 15px; right: 225px; bottom: 15px;
     overflow: hidden;
     background-color: #FEFEFE;
     border: 1px solid #DCDCDC;
@@ -24,7 +24,7 @@ section#table-display {
 
 section#table-display::after {
     position: fixed;
-    top: 16px; left: 16px; right: 201px; bottom: 66px;
+    top: 16px; left: 16px; right: 226px; bottom: 66px;
     z-index: 20;
     opacity: 0;
     background-color: #FEFEFE;
@@ -115,7 +115,7 @@ aside#filter-options {
     top: 0; right: 0; bottom: 0;
 
     box-sizing: border-box;
-    width: 200px;
+    width: 225px;
     padding: 0 15px;
 
     background-color: #ECEFF1;
@@ -125,7 +125,7 @@ aside#filter-options {
 
 aside#filter-options div#app-logo-container {
     margin: 20px auto 0 auto;
-    width: 60%;
+    width: 100px;
 }
 
 aside#filter-options img#app-logo {
@@ -137,7 +137,7 @@ aside#filter-options h1 {
     margin-top: 10px;
     margin-bottom: 10px;
     font-family: "Roboto Mono", monospace;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: normal;
     text-align: center;
     color: #555;
@@ -200,9 +200,9 @@ aside#filter-options button {
 
 aside#filter-options div#chromosome-checkboxes label {
     display: inline-block;
-    width: 25%;
-    margin: 1px 0;
-    font-size: 0.7rem;
+    width: 20%;
+    margin: 0;
+    font-size: 0.66rem;
     line-height: 19px;
 
     -moz-user-select: none;

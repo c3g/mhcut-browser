@@ -8,6 +8,13 @@
     cleared.
   * Allow keyboard submission of filtering and searching form.
   * Allow the user to escape the advanced search modal with the escape key.
+  * Add instructions on using the advanced search feature.
+  * Add an export modal window for exporting search results as a TSV file.
+  * Fix some quick filters not resetting properly.
+
+### Server and API
+
+  * Add endpoint for exporting TSV-formatted search results.
 
 
 ## Version 0.3.1 (2018-08-02)

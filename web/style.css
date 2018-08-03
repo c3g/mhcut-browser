@@ -415,6 +415,18 @@ div.modal-options button span.material-icons {
     font-size: 1rem;
 }
 
+div.modal-scroll-container {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 50px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 24px 30px;
+}
+div.modal-scroll-container::after {
+    display: block;
+    height: 24px;
+    content: "";
+}
 
 div.modal button.close-modal {
     position: absolute;

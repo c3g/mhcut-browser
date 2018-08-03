@@ -31,12 +31,14 @@
                 <p>
                     To begin, add at least one condition with the "Add Condition" button in the bottom left of the modal
                     window. This adds a set of fields which can be used to create a <strong>single rule</strong>
-                    applying to a <strong>specific column</strong> in the database. The fields are broken down as
-                    follows: 1) An optional negation field that takes the rest of the condition and inverts it. For
-                    example, if the current condition is "gene_info contains 'LOC'", then this would turn the condition
-                    into "gene_info <strong>does not</strong> contain 'LOC'". 2) A field drop-down which specifies which
-                    field the condition should apply to. 3) An operator for the condition. This relates the selected
-                    field with the value entered into the text box on the right (4).
+                    applying to a <strong>specific column</strong> in the database. The options for the new rule are
+                    broken down as follows: 1) A joining <em>boolean</em> operator (not present on the first operator).
+                    2) An optional negation field that takes the rest of the condition and inverts it. For example, if
+                    the current condition is "gene_info contains 'LOC'", then this would turn the condition into
+                    "gene_info <strong>does not</strong> contain 'LOC'". 3) A field drop-down which specifies which
+                    field the condition should apply to. 4) An operator for the condition; the available operators
+                    depend on the type of data stored in the column. This relates the selected column with the value
+                    entered into the text box on the right (5).
                 </p>
                 <p>
                     For example, take the <strong>gene_info</strong> field. This field allows 9 different operators:
@@ -46,6 +48,23 @@
                     matches with, for example, "<em>LOC</em>105378947:105378947" or
                     "KAZN:23254|<em>LOC</em>107985467:107985467". If the <strong>starts_with</strong> operator was used,
                     only the first example would match.
+                </p>
+                <p>
+                    The <strong>equals</strong> operator is available for all data types and only yields direct matches,
+                    meaning that the contents of the column entries must match exactly (with no room for any characters,
+                    including whitespace, on either side of a value). The inequality operators use the same order as
+                    when sorting the columns, so <strong>2</strong> < <strong>3</strong>, <strong>0.2</strong> <
+                    <strong>0.3</strong>, and <strong>abc</strong> < <strong>abe</strong> < <strong>bce</strong>.
+                </p>
+                <p>
+                    The joining boolean operators available are <strong>AND</strong> and <strong>OR</strong>. They
+                    behave as follows, using "True" and "False" as results of the actual comparison operators described
+                    above (so, for example, 1 = 1 is True and "hello" contains "a" is False). Note that the OR used in
+                    this case is <strong>inclusive</strong> as opposed to exclusive.
+                </p>
+                <p>
+                    True AND True is True; True AND False is False; <strong>True OR True is True</strong>;
+                    True OR False is True; False AND/OR False is False.
                 </p>
                 <p>
                     In this way, multiple rules can be strung together into a query. When the query is built, an

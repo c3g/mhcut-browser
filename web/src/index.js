@@ -175,8 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
         d3.select("#hide-advanced-search").on("click", () => searchContainer.classed("shown", false));
-        d3.select("#advanced-search-container").on("click", () => searchContainer.classed("shown", false));
-        d3.select("#advanced-search-modal").on("click", () => d3.event.stopPropagation());
         d3.select("#toggle-advanced-search-help").on("click", () => d3.select("#advanced-search-help").classed("shown",
             !d3.select("#advanced-search-help").classed("shown")));
         d3.select("#add-search-condition").on("click", () => addAdvancedSearchCondition());
@@ -185,6 +183,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 d3.select("#search-query").property("value", JSON.stringify(advancedSearchFilters));
             searchContainer.classed("shown", false);
         });
+
+        d3.selectAll(".modal-container").on("click", function () { d3.select(this).classed("shown", false); });
+        d3.selectAll(".modal").on("click", () => d3.event.stopPropagation());
 
         d3.select("#filter-search-form").on("submit", () => {
             d3.event.preventDefault();

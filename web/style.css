@@ -450,6 +450,22 @@ div.modal button.close-modal span.material-icons {
     font-size: 2rem;
 }
 
+div.modal button.toggle-modal-help {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #CCC;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+}
+
+div.modal button.toggle-modal-help:hover {
+    color: #BBB;
+}
+div.modal button.toggle-modal-help span.material-icons {
+    font-size: 2rem;
+}
+
 
 
 div#advanced-search-modal div#advanced-search-modal-scroll-container {
@@ -463,6 +479,29 @@ div#advanced-search-modal div#advanced-search-modal-scroll-container::after {
     display: block;
     height: 24px;
     content: "";
+}
+
+div#advanced-search-help {
+    overflow: hidden;
+    max-height: 0;
+    padding: 0 15px;
+    margin-bottom: 0;
+
+    background: #FCFCFC;
+    border: 1px solid #DFDFDF;
+    border-top-color: #D3D3D3;
+    border-radius: 4px;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.03);
+
+    opacity: 0;
+
+    transition: all 0.3s ease-in-out;
+}
+div#advanced-search-help.shown {
+    max-height: 600px;
+    padding: 1px 15px;
+    margin-bottom: 15px;
+    opacity: 1;
 }
 
 div#advanced-search-modal div.code-comparison {
@@ -517,6 +556,14 @@ ul#advanced-search-conditions li button.remove-search-condition span.material-ic
 }
 ul#advanced-search-conditions li button.remove-search-condition:hover span.material-icons {
     color: #999;
+}
+
+
+
+div#export-options-modal label {
+    margin-right: 0.4em;
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.8rem;
 }
 
 

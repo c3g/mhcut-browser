@@ -16,8 +16,45 @@
     <div id="advanced-search-modal" class="modal">
         <button id="hide-advanced-search" class="close-modal"><span class="material-icons">close</span></button>
         <div id="advanced-search-modal-scroll-container" class="modal-scroll-container">
-            <h2>Advanced Search</h2>
-            <p>
+            <h2>
+                Advanced Search
+                <button id="toggle-advanced-search-help" class="toggle-modal-help">
+                    <span class="material-icons">help</span>
+                </button>
+            </h2>
+            <div id="advanced-search-help">
+                <p>
+                    The advanced search mechanism allows for complex filtering of variants in the database by allowing
+                    the user to create a <strong>set of rules</strong> that determine if a variant entry is or is not
+                    allowed the result set.
+                </p>
+                <p>
+                    To begin, add at least one condition with the "Add Condition" button in the bottom left of the modal
+                    window. This adds a set of fields which can be used to create a <strong>single rule</strong>
+                    applying to a <strong>specific column</strong> in the database. The fields are broken down as
+                    follows: 1) An optional negation field that takes the rest of the condition and inverts it. For
+                    example, if the current condition is "gene_info contains 'LOC'", then this would turn the condition
+                    into "gene_info <strong>does not</strong> contain 'LOC'". 2) A field drop-down which specifies which
+                    field the condition should apply to. 3) An operator for the condition. This relates the selected
+                    field with the value entered into the text box on the right (4).
+                </p>
+                <p>
+                    For example, take the <strong>gene_info</strong> field. This field allows 9 different operators:
+                    equals, 4 inequality operators, starts/ends with, and contains. In this case, the
+                    <strong>contains</strong> operator is helpful. If the string "LOC" is being searched in the
+                    <strong>gene_info</strong> field, the <strong>contains</strong> operator would yield positive
+                    matches with, for example, "<em>LOC</em>105378947:105378947" or
+                    "KAZN:23254|<em>LOC</em>107985467:107985467". If the <strong>starts_with</strong> operator was used,
+                    only the first example would match.
+                </p>
+                <p>
+                    In this way, multiple rules can be strung together into a query. When the query is built, an
+                    encoded version can be saved by pressing the "Save" button, which will clear and re-populate the
+                    search field with a machine-readable version of the query. The query can then be optionally combined
+                    with "quick filters" in the sidebar before being used to filter the variants.
+                </p>
+            </div>
+            <p style="margin-top: 0;">
                 <strong>Order of Boolean Operations:</strong>
                 In chains of <strong>AND</strong> and <strong>OR</strong>, <strong>AND</strong> takes precedence. For
                 example, the following are equivalent:
@@ -57,6 +94,12 @@
             <p>
                 <strong>Total Matching Variants:</strong> <span id="matching-variants-export">0</span>
             </p>
+            <form>
+                <label for="export-format">Export Format:</label>
+                <select name="export-format" id="export-format">
+                    <option value="tsv">TSV</option>
+                </select>
+            </form>
         </div>
         <div class="modal-options">
             <div></div>

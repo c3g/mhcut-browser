@@ -47,6 +47,7 @@ const DEFAULT_CONDITION_BOOLEAN = "AND";
 
 document.addEventListener("DOMContentLoaded", function () {
     const searchContainer = d3.select("#advanced-search-container");
+    const exportContainer = d3.select("#export-options-container");
 
     document.addEventListener("keyup", e => {
         if (e.keyCode === 27 && searchContainer.classed("shown")) searchContainer.classed("shown", false);
@@ -73,6 +74,16 @@ document.addEventListener("DOMContentLoaded", function () {
         populateEntryTable();
         updatePagination();
         updateTableColumnHeaders();
+
+        d3.select("#show-export").on("click", () => exportContainer.classed("shown", true));
+        d3.select("#hide-export").on("click", () => exportContainer.classed("shown", false));
+
+        d3.select("#export-variants").on("click", () => {
+            let downloadURL = new URL("/api/tsv", window.location.origin);
+            let params = getSearchParams();
+            Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+            window.location.href = downloadURL.toString();
+        });
 
         const chromosomeLabels = d3.select("#chromosome-checkboxes").selectAll("label").data(metadata["chr"])
             .enter()
@@ -314,6 +325,8 @@ function updatePagination() {
     d3.select("#current-page").text(page.toFixed(0));
     d3.select("#total-pages").text(totalPages);
     d3.select("#total-entries").text(totalCount);
+
+    d3.select("#matching-variants-export").text(totalCount);
 
     d3.select("#first-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);

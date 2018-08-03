@@ -332,21 +332,7 @@ function reloadPage() {
     let params = {
         page: page.toString(10),
         items_per_page: itemsPerPage,
-
-        sort_by: sortBy,
-        sort_order: sortOrder,
-
-        chr: selectedChromosomes,
-        start: startPos,
-        end: endPos,
-        // position_filter_operator: positionFilterOperator,
-        geneloc: selectedGeneLocations,
-        min_mh_l: minMHL,
-
-        dbsnp: mustHaveDBSNP,
-        clinvar: mustHaveClinVar,
-
-        search_query: d3.select("#search-query").property("value")
+        ...getSearchParams()
     };
     Object.keys(params).forEach(key => {
         fetchURL.searchParams.append(key, params[key]);
@@ -500,4 +486,23 @@ function updateSearchFilterDOM() {
 function getFilterID() {
     currentFilterID++;
     return currentFilterID - 1;
+}
+
+function getSearchParams() {
+    return {
+        sort_by: sortBy,
+        sort_order: sortOrder,
+
+        chr: selectedChromosomes,
+        start: startPos,
+        end: endPos,
+        // position_filter_operator: positionFilterOperator,
+        geneloc: selectedGeneLocations,
+        min_mh_l: minMHL,
+
+        dbsnp: mustHaveDBSNP,
+        clinvar: mustHaveClinVar,
+
+        search_query: d3.select("#search-query").property("value")
+    };
 }

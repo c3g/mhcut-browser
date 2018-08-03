@@ -416,8 +416,7 @@ div.modal-options button span.material-icons {
 }
 
 
-
-div#advanced-search-modal button#hide-advanced-search {
+div.modal button.close-modal {
     position: absolute;
     top: 21px; right: 24px;
     z-index: 150;
@@ -428,12 +427,15 @@ div#advanced-search-modal button#hide-advanced-search {
     cursor: pointer;
     transition: color 0.15s ease-in-out;
 }
-div#advanced-search-modal button#hide-advanced-search:hover {
+
+div.modal button.close-modal:hover {
     color: #999;
 }
-div#advanced-search-modal button#hide-advanced-search span.material-icons {
+div.modal button.close-modal span.material-icons {
     font-size: 2rem;
 }
+
+
 
 div#advanced-search-modal div#advanced-search-modal-scroll-container {
     position: absolute;

@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS variants;
+DROP TABLE IF EXISTS guides;
 
 CREATE TABLE variants (
   id INTEGER PRIMARY KEY,
@@ -35,4 +36,24 @@ CREATE TABLE variants (
   pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
   guides_no_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
   guides_min_ot INTEGER CHECK (guides_min_ot >= 0) -- NULL means NA
+);
+
+CREATE TABLE guides (
+  id INTEGER PRIMARY KEY,
+  variant INTEGER NOT NULL REFERENCES variants,
+  protospacer TEXT,
+  mm0 INTEGER, -- NULL means NA
+  mm1 INTEGER, -- NULL means NA
+  mm2 INTEGER, -- NULL means NA
+  m1_dist_1 INTEGER NOT NULL,
+  m1_dist_2 INTEGER NOT NULL,
+  mh_dist_1 INTEGER NOT NULL,
+  mh_dist_2 INTEGER NOT NULL,
+  nb_off_tgt INTEGER NOT NULL,
+  largest_off_tgt INTEGER NOT NULL,
+  bot_score TEXT NOT NULL,
+  bot_size TEXT,
+  bot_var_l INTEGER, -- NULL means NA
+  bot_gc INTEGER, -- NULL means NA
+  bot_seq TEXT -- NULL means NA
 );

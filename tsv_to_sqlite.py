@@ -24,8 +24,8 @@ def main():
     Main method, runs when the script is ran directly.
     """
 
-    if len(sys.argv) != 2:
-        print("Usage: ./tsv_to_sqlite.py file_to_convert.tsv")
+    if len(sys.argv) != 3:
+        print("Usage: ./tsv_to_sqlite.py variants_file.tsv guides_file.tsv")
         exit(1)
 
     conn = sqlite3.connect("./db.sqlite")
@@ -34,10 +34,24 @@ def main():
     with open("./schema.sql", "r") as s:
         c.executescript(s.read())
 
+    # Get number of lines for progress bars.
+    n_variants = 0
+    n_guides = 0
+    with open(sys.argv[1], "r") as vs_file, open(sys.argv[2], "r") as gs_file:
+        # Skip headers:
+        next(vs_file)
+        next(gs_file)
+
+        for _ in vs_file:
+            n_variants += 1
+
+        for _ in gs_file:
+            n_guides += 1
+
     with open(sys.argv[1], "r") as vs_file:
         reader = csv.DictReader(vs_file, delimiter="\t")
         i = 0
-        for variant in tqdm(reader):  # TODO: Find total with wc -l
+        for variant in tqdm(reader, total=n_variants, desc="variants"):  # TODO: Find total with wc -l
             gene_info_clinvar = variant["GENEINFO.ClinVar"].strip()
             if gene_info_clinvar == "NA":
                 # Treat NA, but not -, as null
@@ -60,6 +74,26 @@ def main():
                        int_or_none_cast(variant["pamUniq"]), int_or_none_cast(variant["guidesNoOT"]),
                        int_or_none_cast(variant["guidesMinOT"])))
             i += 1
+
+    conn.commit()
+
+    with open(sys.argv[2], "r") as gs_file:
+        reader = csv.DictReader(gs_file, delimiter="\t")
+        for guide in tqdm(reader, total=n_guides, desc="guides"):
+            c.execute("SELECT id FROM variants WHERE chr = :chr AND start = :start AND end = :end", {
+                "chr": guide["chr"],
+                "start": int(guide["start"]),
+                "end": int(guide["end"])
+            })
+            variant_id = c.fetchone()[0]
+            c.execute("INSERT INTO guides(variant, protospacer, mm0, mm1, mm2, m1_dist_1, m1_dist_2, mh_dist_1, "
+                      "mh_dist_2, nb_off_tgt, largest_off_tgt, bot_score, bot_size, bot_var_l, bot_gc, bot_seq)"
+                      "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                      (variant_id, guide["protospacer"].strip(), int_or_none_cast(guide["mm0"]),
+                       int_or_none_cast(guide["mm1"]), int_or_none_cast(guide["mm2"]), int(guide["m1Dist1"]),
+                       int(guide["m1Dist2"]), int(guide["mhDist1"]), int(guide["mhDist2"]), int(guide["nbOffTgt"]),
+                       int(guide["largestOffTgt"]), guide["botScore"].strip(), int_or_none_cast(guide["botSize"]),
+                       int_or_none_cast(guide["botVarL"]), int_or_none_cast(guide["botGC"]), guide["botSeq"].strip()))
 
     conn.commit()
     conn.close()

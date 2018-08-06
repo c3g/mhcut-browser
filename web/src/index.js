@@ -260,12 +260,12 @@ function populateEntryTable() {
 
     variantFields.forEach(f => rowEntry.append("td")
         .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
-        .html(e => formatEntryCell(e, f)));
+        .html(e => formatTableCell(e, f)));
 
     tableRows.exit().remove();
 }
 
-function formatEntryCell(e, f) {
+function formatTableCell(e, f) {
     if (f["name"] === "rs") {
         if (e["rs"] === null) return "-";
         return `<a href="https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${e["rs"]}"

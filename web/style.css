@@ -4,6 +4,45 @@ body {
     background-color: #ECEFF1;
 }
 
+
+
+nav#table-view-nav {
+    position: absolute;
+    z-index: 10;
+    top: 0; left: 0; right: 0;
+    box-sizing: border-box;
+    height: 35px;
+    padding: 5px 15px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+nav#table-view-nav ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+nav#table-view-nav ul li {
+    box-sizing: border-box;
+    margin-right: 1.1rem;
+    display: inline-block;
+    font-family: "Roboto Mono", monospace;
+    line-height: 23px;
+    color: rgba(38, 50, 56, 0.4);
+}
+
+nav#table-view-nav ul li.active {
+    color: rgba(38, 50, 56, 0.9);
+}
+
+nav#table-view-nav ul li a {
+    cursor: pointer;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+
+
 main {
     position: fixed;
     z-index: 10;
@@ -20,7 +59,7 @@ main {
 
 section#table-display {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 50px;
+    top: 36px; left: 0; right: 0; bottom: 50px;
     overflow: auto;
 }
 
@@ -313,6 +352,15 @@ table#entry-table tbody td {
     font-size: 0.8rem;
     font-family: "Roboto Mono", monospace;
     color: #333;
+}
+
+table#entry-table thead th:first-child,
+table#entry-table tbody td:first-child {
+    padding-left: 15px;
+}
+table#entry-table thead th:last-child,
+table#entry-table tbody td:last-child {
+    padding-right: 15px;
 }
 
 table#entry-table tbody td.lighter {

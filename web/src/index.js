@@ -15,7 +15,6 @@ let selectedChromosomes = [];
 
 let startPos = 0;
 let endPos = 12000000000000;
-// let positionFilterOperator = "overlap";
 
 let selectedGeneLocations = [];
 
@@ -28,12 +27,6 @@ let currentFilterID = 0;
 let advancedSearchFilters = [];
 
 let transitioning = true;
-
-// const POSITION_FILTER_OPERATORS = {
-//     "overlap": "Overlaps",
-//     "not_overlap": "Does Not Overlap",
-//     "within": "Contained Within"
-// };
 
 
 const CONDITION_OPERATORS = {
@@ -123,16 +116,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 endPos = parseInt(this.value, 10);
                 if (isNaN(endPos)) endPos = parseInt(metadata["max_pos"], 10);
             });
-
-        // d3.select("#position-filter-operator")
-        //     .on("change", function () { positionFilterOperator = this.value; })
-        //     .selectAll("option")
-        //     .data(Object.keys(POSITION_FILTER_OPERATORS))
-        //     .enter()
-        //     .append("option")
-        //     .attr("value", o => o)
-        //     .property("selected", o => o === positionFilterOperator)
-        //     .text(o => POSITION_FILTER_OPERATORS[o]);
 
         const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["geneloc"])
             .enter()
@@ -393,11 +376,6 @@ function updateFilterDOM() {
 
     d3.select("#dbsnp").property("checked", mustHaveDBSNP);
     d3.select("#clinvar").property("checked", mustHaveClinVar);
-
-    // d3.select("#position-filter-operator")
-    //     .selectAll("option")
-    //     .data(Object.keys(POSITION_FILTER_OPERATORS))
-    //     .property("selected", o => o === positionFilterOperator);
 }
 
 function addAdvancedSearchCondition() {
@@ -512,7 +490,6 @@ function getSearchParams() {
         chr: selectedChromosomes,
         start: startPos,
         end: endPos,
-        // position_filter_operator: positionFilterOperator,
         geneloc: selectedGeneLocations,
         min_mh_l: minMHL,
 

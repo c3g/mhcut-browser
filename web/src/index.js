@@ -5,7 +5,8 @@ let itemsPerPage = 100;
 let loadedEntries = [];
 let totalCount = 0;
 
-let fields = [];
+let variantFields = [];
+let guideFields = [];
 let metadata = {};
 
 let sortBy = "id";
@@ -56,7 +57,8 @@ document.addEventListener("DOMContentLoaded", function () {
         itemsPerPage = parseInt(d3.select("#items-per-page").property("value"), 10);
         loadedEntries = data[0];
         totalCount = parseInt(data[1], 10);
-        fields = data[2];
+        variantFields = data[2]["variants"];
+        guideFields = data[2]["guides"];
         metadata = data[3];
         selectedChromosomes = [...metadata["chr"]];
         selectedGeneLocations = [...metadata["geneloc"]];
@@ -233,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#table-display").classed("loading", false);
         transitioning = false;
 
-        d3.selectAll("table#entry-table thead th").data(fields, f => f["name"]).on("click", f => {
+        d3.selectAll("table#entry-table thead th").data(variantFields, f => f["name"]).on("click", f => {
             if (sortBy === f["name"]) {
                 sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");
             } else {
@@ -248,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function populateEntryTable() {
-    const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(fields, f => f["name"]);
+    const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(variantFields, f => f["name"]);
     // TODO: Use original column name for display
     tableColumns.enter().append("th").text(f => f["name"]).append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
@@ -256,7 +258,7 @@ function populateEntryTable() {
     const tableRows = d3.select("table#entry-table tbody").selectAll("tr").data(loadedEntries, e => e["id"]);
     const rowEntry = tableRows.enter().append("tr");
 
-    fields.forEach(f => rowEntry.append("td")
+    variantFields.forEach(f => rowEntry.append("td")
         .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
         .html(e => formatEntryCell(e, f)));
 
@@ -300,7 +302,7 @@ function formatEntryCell(e, f) {
 }
 
 function updateTableColumnHeaders() {
-    d3.selectAll("table#entry-table thead th").data(fields, f => f["name"])
+    d3.selectAll("table#entry-table thead th").data(variantFields, f => f["name"])
         .select("span.material-icons")
         .text(f => (sortBy === f["name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
 }
@@ -432,7 +434,7 @@ function updateSearchFilterDOM() {
             updateSearchFilterDOM();
         })
         .selectAll("option")
-        .data([{name: ""}, ...fields], f => f["name"])
+        .data([{name: ""}, ...variantFields], f => f["name"])
         .enter()
         .append("option")
         .attr("value", f => f["name"])
@@ -468,9 +470,11 @@ function updateSearchFilterDOM() {
         .selectAll("option")
         .data(f => [
             ...CONDITION_OPERATORS["BOTH"],
-            ...(f.field === "" ? [] : CONDITION_OPERATORS[fields.find(f2 => f2["name"] === f.field)["type"]]),
+            ...(f.field === "" ? [] : CONDITION_OPERATORS[variantFields.find(f2 => f2["name"] === f.field)["type"]]),
             ...(f.field !== ""
-                ? (fields.find(f2 => f2["name"] === f.field)["notnull"] === 0 ? CONDITION_OPERATORS["NULLABLE"] : [])
+                ? (variantFields.find(f2 => f2["name"] === f.field)["notnull"] === 0
+                    ? CONDITION_OPERATORS["NULLABLE"]
+                    : [])
                 : [])
         ], o => o);
     filterOperators.enter().append("option").attr("value", o => o).text(o => o);

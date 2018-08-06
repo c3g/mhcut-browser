@@ -84,13 +84,18 @@ def get_db():
     return db
 
 
-def get_columns(c):
+def get_variants_columns(c):
     c.execute("PRAGMA table_info(variants)")
     return tuple([dict(i) for i in c.fetchall()])
 
 
+def get_guides_columns(c):
+    c.execute("PRAGMA table_info(guides)")
+    return tuple([dict(i) for i in c.fetchall()])
+
+
 def build_search_query(raw_query, c):
-    columns = get_columns(c)
+    columns = get_variants_columns(c)
     column_names = [c["name"] for c in columns]
     search_query_fragment = ""
     search_query_data = {}
@@ -179,7 +184,7 @@ def index():
 
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join([i["name"] for i in get_columns(c)])))
+        re.compile("^({})$".format("|".join([i["name"] for i in get_variants_columns(c)])))
     )
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
@@ -214,7 +219,7 @@ def variants_tsv():
 
     search_params = get_search_params_from_request(c)
 
-    column_names = [i["name"] for i in get_columns(c)]
+    column_names = [i["name"] for i in get_variants_columns(c)]
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
         re.compile("^({})$".format("|".join(column_names)))
@@ -282,7 +287,11 @@ def entries():
 
 @app.route("/fields", methods=["GET"])
 def fields():
-    return json.jsonify(get_columns(get_db().cursor()))
+    c = get_db().cursor()
+    return json.jsonify({
+        "variants": get_variants_columns(c),
+        "guides": get_guides_columns(c)
+    })
 
 
 @app.route("/metadata", methods=["GET"])

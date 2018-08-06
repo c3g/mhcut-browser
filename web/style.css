@@ -369,6 +369,8 @@ table#entry-table tbody td.lighter {
 
 table#entry-table tbody td a {
     color: #1E88E5;
+    text-decoration: underline;
+    cursor: pointer;
     transition: color 0.15s ease-in-out;
 }
 table#entry-table tbody td a:hover {

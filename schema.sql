@@ -29,7 +29,7 @@ CREATE TABLE variants (
   mh_1l INTEGER NOT NULL CHECK (mh_1l >= 0), -- Number of First Consecutive Matches
   hom TEXT, -- Decimal field with precision 1 or 2
   nbmm INTEGER NOT NULL CHECK (nbmm >= 0),
-  mh_dist INTEGER CHECK (mh_dist >= 0),
+  mh_dist INTEGER,
   mh_seq_1 TEXT,
   mh_seq_2 TEXT,
   pam_mot INTEGER CHECK (pam_mot >= 0), -- NULL means NA

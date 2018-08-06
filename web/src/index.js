@@ -296,7 +296,7 @@ function formatEntryCell(e, f) {
     }
     if (f["name"] === "allele_id" && e["allele_id"] !== "NA") {
         return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
-                   target="_blank" rel="noopener">${e["allele_id"]}</a>`
+                   target="_blank" rel="noopener">${e["allele_id"]}</a>`;
     }
     return e[f["name"]] === null ? "NA" : e[f["name"]]; // TODO: Maybe shouldn't always be NA
 }

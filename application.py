@@ -261,6 +261,48 @@ def variants_tsv():
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"export.tsv\""})
 
 
+@app.route("/guides", methods=["GET"])
+def guides():
+    page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
+    items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
+
+    c = get_db().cursor()
+
+    search_params = get_search_params_from_request(c)
+
+    sort_by = verify_domain(
+        request.args.get("sort_by", "id"),
+        re.compile("^({})$".format("|".join([i["name"] for i in get_guides_columns(c)])))
+    )
+    sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
+
+    c.execute(
+        "SELECT * FROM guides WHERE variant_id IN ("
+        "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
+        "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
+        "  LIMIT :items_per_page OFFSET :start"
+        ") ORDER BY {} {}".format(
+            search_params["chr_fragment"],
+            search_params["geneloc_fragment"],
+            search_params["position_filter_fragment"],
+            search_params["search_query_fragment"],
+            sort_by,
+            sort_order
+        ),
+        {
+            "start": (page - 1) * items_per_page,
+            "items_per_page": items_per_page,
+            "start_pos": search_params["start_pos"],
+            "end_pos": search_params["end_pos"],
+            "min_mh_l": search_params["min_mh_l"],
+            "dbsnp": search_params["dbsnp"],
+            "clinvar": search_params["clinvar"],
+            **search_params["search_query_data"]
+        }
+    )
+    return json.jsonify([dict(i) for i in c.fetchall()])
+
+
 @app.route("/entries", methods=["GET"])
 def entries():
     c = get_db().cursor()

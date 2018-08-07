@@ -29,16 +29,16 @@ nav#table-view-nav ul li {
     font-family: "Roboto Mono", monospace;
     line-height: 23px;
     color: rgba(38, 50, 56, 0.4);
+
+    cursor: pointer;
+    -moz-user-select: none;
+    user-select: none;
+
+    transition: color 0.15s ease-in-out;
 }
 
 nav#table-view-nav ul li.active {
     color: rgba(38, 50, 56, 0.9);
-}
-
-nav#table-view-nav ul li a {
-    cursor: pointer;
-    -moz-user-select: none;
-    user-select: none;
 }
 
 

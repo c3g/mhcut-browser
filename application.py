@@ -324,7 +324,29 @@ def entries():
             **search_params["search_query_data"]
         }
     )
-    return json.jsonify(c.fetchone()[0])
+    variant_count = c.fetchone()[0]
+    c.execute(
+        "SELECT COUNT(*) FROM guides WHERE variant_id IN ("
+        "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
+        "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}))".format(
+            search_params["chr_fragment"],
+            search_params["geneloc_fragment"],
+            search_params["position_filter_fragment"],
+            search_params["search_query_fragment"]
+        ),
+        {
+            "start_pos": search_params["start_pos"],
+            "end_pos": search_params["end_pos"],
+            "min_mh_l": search_params["min_mh_l"],
+            "dbsnp": search_params["dbsnp"],
+            "clinvar": search_params["clinvar"],
+            **search_params["search_query_data"]
+        }
+    )
+    return json.jsonify({
+        "variants": variant_count,
+        "guides": c.fetchone()[0]
+    })
 
 
 @app.route("/fields", methods=["GET"])

@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = downloadURL.toString();
         });
 
+
         const chromosomeLabels = d3.select("#chromosome-checkboxes").selectAll("label").data(metadata["chr"])
             .enter()
             .append("label")
@@ -102,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
 
+
         d3.select("#start")
             .attr("min", metadata["min_pos"])
             .attr("max", metadata["max_pos"])
@@ -118,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 endPos = parseInt(this.value, 10);
                 if (isNaN(endPos)) endPos = parseInt(metadata["max_pos"], 10);
             });
+
 
         const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["geneloc"])
             .enter()
@@ -142,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         geneLocationLabels.append("span").text(l => " " + l);
 
+
         d3.select("#min-mh-l")
             .attr("min", 0)
             .attr("max", metadata["max_mh_l"])
@@ -151,12 +155,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (isNaN(minMHL)) minMHL = 0;
             });
 
+
         d3.select("#dbsnp").property("checked", mustHaveDBSNP).on("change", function () {
             mustHaveDBSNP = d3.select(this).property("checked");
         });
         d3.select("#clinvar").property("checked", mustHaveClinVar).on("change", function () {
             mustHaveClinVar = d3.select(this).property("checked");
         });
+
 
         d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
         d3.select("#hide-advanced-search").on("click", () => searchContainer.classed("shown", false));

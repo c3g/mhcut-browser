@@ -40,7 +40,7 @@ CREATE TABLE variants (
 
 CREATE TABLE guides (
   id INTEGER PRIMARY KEY,
-  variant INTEGER NOT NULL REFERENCES variants,
+  variant_id INTEGER NOT NULL REFERENCES variants,
   protospacer TEXT,
   mm0 INTEGER, -- NULL means NA
   mm1 INTEGER, -- NULL means NA

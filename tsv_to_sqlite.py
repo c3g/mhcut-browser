@@ -86,7 +86,7 @@ def main():
                 "end": int(guide["end"])
             })
             variant_id = c.fetchone()[0]
-            c.execute("INSERT INTO guides(variant, protospacer, mm0, mm1, mm2, m1_dist_1, m1_dist_2, mh_dist_1, "
+            c.execute("INSERT INTO guides(variant_id, protospacer, mm0, mm1, mm2, m1_dist_1, m1_dist_2, mh_dist_1, "
                       "mh_dist_2, nb_off_tgt, largest_off_tgt, bot_score, bot_size, bot_var_l, bot_gc, bot_seq)"
                       "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                       (variant_id, guide["protospacer"].strip(), int_or_none_cast(guide["mm0"]),

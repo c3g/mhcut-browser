@@ -189,7 +189,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             startPos = parseInt(metadata["min_pos"], 10);
             endPos = parseInt(metadata["max_pos"], 10);
-            // positionFilterOperator = "overlap";
 
             selectedGeneLocations = [...metadata["geneloc"]];
 

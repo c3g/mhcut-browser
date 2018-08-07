@@ -315,6 +315,7 @@ aside#filter-options hr {
 
 table#entry-table {
     border-collapse: collapse;
+    min-width: 100%;
 }
 
 table#entry-table thead th {

@@ -1,9 +1,13 @@
 import * as d3 from "d3";
 
+let dataDisplay = "variants";
+
 let page = 1;
 let itemsPerPage = 100;
-let loadedEntries = [];
+let loadedVariants = [];
+let loadedGuides = [];
 let totalCount = 0;
+let totalGuidesCount = 0;
 
 let variantFields = [];
 let guideFields = [];
@@ -50,16 +54,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // noinspection JSCheckFunctionSignatures
     Promise.all([
         fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
+        fetch(new Request(`/api/guides?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
         fetch(new Request("/api/entries")),
         fetch(new Request("/api/fields")),
         fetch(new Request("/api/metadata"))
     ]).then(rs => Promise.all(rs.map(r => r.json()))).then(data => {
         itemsPerPage = parseInt(d3.select("#items-per-page").property("value"), 10);
-        loadedEntries = data[0];
-        totalCount = parseInt(data[1], 10);
-        variantFields = data[2]["variants"];
-        guideFields = data[2]["guides"];
-        metadata = data[3];
+        loadedVariants = data[0];
+        loadedGuides = data[1];
+        totalCount = data[2]["variants"];
+        totalGuidesCount = data[2]["guides"];
+        variantFields = data[3]["variants"];
+        guideFields = data[3]["guides"];
+        metadata = data[4];
         selectedChromosomes = [...metadata["chr"]];
         selectedGeneLocations = [...metadata["geneloc"]];
 
@@ -69,6 +76,12 @@ document.addEventListener("DOMContentLoaded", function () {
         populateEntryTable();
         updatePagination();
         updateTableColumnHeaders();
+
+        d3.select("#view-variants").on("click", () => selectTablePage("variants"));
+        d3.select("#view-guides").on("click", () => selectTablePage("guides"));
+
+        if (window.location.hash === "#variants") selectTablePage("variants");
+        if (window.location.hash === "#guides") selectTablePage("guides");
 
         d3.select("#show-export").on("click", () => exportContainer.classed("shown", true));
         d3.select("#hide-export").on("click", () => exportContainer.classed("shown", false));
@@ -254,16 +267,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+function selectTablePage(p) {
+    dataDisplay = p;
+    window.location.hash = p;
+
+    d3.select("#view-variants").classed("active", dataDisplay === "variants");
+    d3.select("#view-guides").classed("active", dataDisplay === "guides");
+
+    populateEntryTable();
+    updatePagination();
+    updateTableColumnHeaders();
+}
+
 function populateEntryTable() {
-    const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(variantFields, f => f["name"]);
+    const fields = (dataDisplay === "variants" ? variantFields : guideFields);
+    const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
+    const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(fields, f => f["name"]);
     // TODO: Use original column name for display
     tableColumns.enter().append("th").text(f => f["name"]).append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
 
-    const tableRows = d3.select("table#entry-table tbody").selectAll("tr").data(loadedEntries, e => e["id"]);
+    const tableRows = d3.select("table#entry-table tbody").selectAll("tr")
+        .data(entries, () => Math.random().toString()); // TODO: Fix IDs
     const rowEntry = tableRows.enter().append("tr");
 
-    variantFields.forEach(f => rowEntry.append("td")
+    fields.forEach(f => rowEntry.append("td")
         .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
         .html(e => formatTableCell(e, f)));
 
@@ -298,13 +326,16 @@ function formatTableCell(e, f) {
     } else if (f["name"] === "allele_id" && e["allele_id"] !== "NA") {
         return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
                    target="_blank" rel="noopener">${e["allele_id"]}</a>`;
+    } else if (f["name"] === "pam_uniq" && e["pam_uniq"] !== null) {
+        return `<a class="show-guides-modal">${e["pam_uniq"]}</a>`;
     }
 
     return e[f["name"]] === null ? "NA" : e[f["name"]]; // TODO: Maybe shouldn't always be NA
 }
 
 function updateTableColumnHeaders() {
-    d3.selectAll("table#entry-table thead th").data(variantFields, f => f["name"])
+    const fields = (dataDisplay === "variants" ? variantFields : guideFields);
+    d3.selectAll("table#entry-table thead th").data(fields, f => f["name"])
         .select("span.material-icons")
         .text(f => (sortBy === f["name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
 }
@@ -314,7 +345,8 @@ function updatePagination() {
 
     d3.select("#current-page").text(page.toFixed(0));
     d3.select("#total-pages").text(totalPages);
-    d3.select("#total-entries").text(totalCount);
+    d3.select("#total-variants").text(totalCount);
+    d3.select("#total-guides").text(totalGuidesCount);
 
     d3.select("#matching-variants-export").text(totalCount);
 
@@ -330,7 +362,8 @@ function reloadPage() {
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
         .on("transitionend", () => transitioning = false);
 
-    let fetchURL = new URL("/api/", window.location.origin);
+    let variantsURL = new URL("/api/", window.location.origin);
+    let guidesURL = new URL("/api/guides", window.location.origin);
     let countURL = new URL("/api/entries", window.location.origin);
     let params = {
         page: page.toString(10),
@@ -338,16 +371,23 @@ function reloadPage() {
         ...getSearchParams()
     };
     Object.keys(params).forEach(key => {
-        fetchURL.searchParams.append(key, params[key]);
+        variantsURL.searchParams.append(key, params[key]);
+        guidesURL.searchParams.append(key, params[key]);
         countURL.searchParams.append(key, params[key]);
     });
 
     // noinspection JSCheckFunctionSignatures
-    return Promise.all([fetch(new Request(fetchURL.toString())), fetch(new Request(countURL.toString()))])
+    return Promise.all([
+            fetch(new Request(variantsURL.toString())),
+            fetch(new Request(guidesURL.toString())),
+            fetch(new Request(countURL.toString()))
+        ])
         .then(rs => Promise.all(rs.map(r => r.json())))
         .then(data => {
-            loadedEntries = data[0];
-            totalCount = data[1];
+            loadedVariants = data[0];
+            loadedGuides = data[1];
+            totalCount = data[2]["variants"];
+            totalGuidesCount = data[2]["guides"];
             if (transitioning && itemsPerPage >= 100) {
                 d3.select("#table-display").on("transitionend", () => {
                     populateEntryTable();

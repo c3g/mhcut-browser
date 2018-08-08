@@ -11,10 +11,20 @@
   * Add instructions on using the advanced search feature.
   * Add an export modal window for exporting search results as a TSV file.
   * Fix some quick filters not resetting properly.
+  * Add tab for viewing guides that relate to the currently-loaded set of
+    variants.
+  * Add modal table for viewing a specific variant's guides.
 
 ### Server and API
 
   * Add endpoint for exporting TSV-formatted search results.
+  * Add endpoints for viewing guides.
+  
+### Database
+
+  * Schema now includes tables for guides and key-value metadata.
+  * `tsv_to_sqlite.py` now takes in an additional argument for a guides TSV
+    file.
 
 
 ## Version 0.3.1 (2018-08-02)

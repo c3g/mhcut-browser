@@ -258,7 +258,7 @@ def variants_tsv():
                 row = c2.fetchone()
 
     return Response(generate(), mimetype="text/tab-separated-values",
-                    headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"export.tsv\""})
+                    headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"variants.tsv\""})
 
 
 @app.route("/variants/<int:variant_id>/guides", methods=["GET"])
@@ -310,6 +310,46 @@ def guides():
         }
     )
     return json.jsonify([dict(i) for i in c.fetchall()])
+
+
+@app.route("/guides/tsv", methods=["GET"])
+def guides_tsv():
+    c = get_db().cursor()
+    search_params = get_search_params_from_request(c)
+    column_names = [i["name"] for i in get_guides_columns(c)]
+
+    def generate():
+        with app.app_context():
+            c2 = get_db().cursor()
+
+            c2.execute(
+                "SELECT * FROM guides WHERE variant_id IN ("
+                "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
+                "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({})"
+                ")".format(
+                    search_params["chr_fragment"],
+                    search_params["geneloc_fragment"],
+                    search_params["position_filter_fragment"],
+                    search_params["search_query_fragment"]
+                ),
+                {
+                    "start_pos": search_params["start_pos"],
+                    "end_pos": search_params["end_pos"],
+                    "min_mh_l": search_params["min_mh_l"],
+                    "dbsnp": search_params["dbsnp"],
+                    "clinvar": search_params["clinvar"],
+                    **search_params["search_query_data"]
+                }
+            )
+
+            yield "\t".join(column_names) + "\n"
+            row = c2.fetchone()
+            while row is not None:
+                yield "\t".join([str(col) if col is not None else "NA" for col in tuple(row)]) + "\n"
+                row = c2.fetchone()
+
+    return Response(generate(), mimetype="text/tab-separated-values",
+                    headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"guides.tsv\""})
 
 
 @app.route("/entries", methods=["GET"])

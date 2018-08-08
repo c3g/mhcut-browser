@@ -253,18 +253,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         d3.select("#table-display").classed("loading", false);
         transitioning = false;
-
-        d3.selectAll("table#entry-table thead th").data(variantFields, f => f["name"]).on("click", f => {
-            if (sortBy === f["name"]) {
-                sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");
-            } else {
-                sortOrder = "ASC";
-                sortBy = f["name"];
-            }
-
-            page = 1;
-            reloadPage();
-        });
     });
 });
 
@@ -285,7 +273,23 @@ function populateEntryTable() {
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
     const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(fields, f => f["name"]);
     // TODO: Use original column name for display
-    tableColumns.enter().append("th").text(f => f["name"]).append("span").attr("class", "material-icons");
+    tableColumns.enter()
+        .append("th")
+        .text(f => f["name"])
+        .on("click", f => {
+            if (dataDisplay === "guides") return;
+
+            if (sortBy === f["name"]) {
+                sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");
+            } else {
+                sortOrder = "ASC";
+                sortBy = f["name"];
+            }
+
+            page = 1;
+            reloadPage();
+        })
+        .append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
 
     const tableRows = d3.select("table#entry-table tbody").selectAll("tr")

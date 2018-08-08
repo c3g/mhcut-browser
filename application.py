@@ -373,6 +373,67 @@ def guides_tsv():
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"guides.tsv\""})
 
 
+@app.route("/combined/tsv", methods=["GET"])
+def combined_tsv():
+    c = get_db().cursor()
+    search_params = get_search_params_from_request(c)
+    variants_column_names = [i["name"] for i in get_variants_columns(c)]
+    guides_column_names = [i["name"] for i in get_guides_columns(c)]
+
+    sort_by = verify_domain(
+        request.args.get("sort_by", "id"),
+        re.compile("^({})$".format("|".join(variants_column_names)))
+    )
+    sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
+
+    def generate():
+        with app.app_context():
+            c2 = get_db().cursor()
+
+            c2.execute(
+                "SELECT * FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
+                "AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
+                "ORDER BY {} {}".format(
+                    search_params["chr_fragment"],
+                    search_params["geneloc_fragment"],
+                    search_params["position_filter_fragment"],
+                    search_params["search_query_fragment"],
+                    sort_by,
+                    sort_order
+                ),
+                {
+                    "start_pos": search_params["start_pos"],
+                    "end_pos": search_params["end_pos"],
+                    "min_mh_l": search_params["min_mh_l"],
+                    "dbsnp": search_params["dbsnp"],
+                    "clinvar": search_params["clinvar"],
+                    **search_params["search_query_data"]
+                }
+            )
+
+            yield "\t".join(variants_column_names + [col if col != "id" else "guide_id"
+                                                     for col in guides_column_names]) + "\n"
+            c3 = get_db().cursor()
+            row = c2.fetchone()
+            while row is not None:
+                row_to_return = [str(col) if col is not None else "NA" for col in tuple(row)]
+
+                yield "\t".join(row_to_return) + "\n"
+
+                c3.execute("SELECT * FROM guides WHERE variant_id = ?", (row_to_return[0],))
+                guide_row = c3.fetchone()
+                while guide_row is not None:
+                    yield "\t".join(([""] * len(variants_column_names)) \
+                                    + [str(col) if col is not None else "NA" for col in tuple(guide_row)]) + "\n"
+                    guide_row = c3.fetchone()
+
+                row = c2.fetchone()
+
+    return Response(generate(), mimetype="text/tab-separated-values",
+                    headers={"Content-Disposition": "Content-Disposition: attachment; "
+                                                    "filename=\"variants_with_guides.tsv\""})
+
+
 @app.route("/entries", methods=["GET"])
 def entries():
     c = get_db().cursor()

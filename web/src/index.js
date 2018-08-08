@@ -116,6 +116,13 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = downloadURL.toString();
         });
 
+        d3.select("#export-combined").on("click", () => {
+            let downloadURL = new URL("/api/combined/tsv", window.location.origin);
+            let params = getSearchParams();
+            Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+            window.location.href = downloadURL.toString();
+        });
+
 
         const chromosomeLabels = d3.select("#chromosome-checkboxes").selectAll("label").data(metadata["chr"])
             .enter()

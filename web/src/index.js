@@ -335,6 +335,10 @@ function populateEntryTable() {
                 .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
                 .html(e => formatTableCell(e, f)));
             variantGuides.exit().remove();
+            d3.select("#export-variant-guides").on("click", () => {
+                let downloadURL = new URL(`/api/variants/${e["id"]}/guides/tsv`, window.location.origin);
+                window.location.href = downloadURL.toString();
+            });
         });
     });
 

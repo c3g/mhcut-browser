@@ -273,7 +273,7 @@ function selectTablePage(p) {
 function populateEntryTable() {
     const fields = (dataDisplay === "variants" ? variantFields : guideFields);
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
-    const tableColumns = d3.select("table#entry-table thead").selectAll("th").data(fields, f => f["name"]);
+    const tableColumns = d3.select("table#entry-table thead tr").selectAll("th").data(fields, f => f["name"]);
     // TODO: Use original column name for display
     tableColumns.enter()
         .append("th")

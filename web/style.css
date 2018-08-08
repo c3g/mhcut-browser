@@ -65,7 +65,7 @@ section#table-display {
 
 section#table-display::after {
     position: fixed;
-    top: 16px; left: 16px; right: 221px; bottom: 66px;
+    top: 51px; left: 16px; right: 221px; bottom: 66px;
     z-index: 20;
     opacity: 0;
     background-color: #FEFEFE;

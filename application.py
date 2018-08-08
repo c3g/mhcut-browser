@@ -261,6 +261,13 @@ def variants_tsv():
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"export.tsv\""})
 
 
+@app.route("/variants/<int:variant_id>/guides", methods=["GET"])
+def variant_guides(variant_id):
+    c = get_db().cursor()
+    c.execute("SELECT * FROM guides WHERE variant_id = ?", (variant_id,))
+    return json.jsonify([dict(i) for i in c.fetchall()])
+
+
 @app.route("/guides", methods=["GET"])
 def guides():
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))

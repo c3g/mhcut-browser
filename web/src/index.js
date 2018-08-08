@@ -6,7 +6,7 @@ let page = 1;
 let itemsPerPage = 100;
 let loadedVariants = [];
 let loadedGuides = [];
-let totalCount = 0;
+let totalVariantsCount = 0;
 let totalGuidesCount = 0;
 
 let variantFields = [];
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
         itemsPerPage = parseInt(d3.select("#items-per-page").property("value"), 10);
         loadedVariants = data[0];
         loadedGuides = data[1];
-        totalCount = data[2]["variants"];
+        totalVariantsCount = data[2]["variants"];
         totalGuidesCount = data[2]["guides"];
         variantFields = data[3]["variants"];
         guideFields = data[3]["guides"];
@@ -345,10 +345,11 @@ function updatePagination() {
 
     d3.select("#current-page").text(page.toFixed(0));
     d3.select("#total-pages").text(totalPages);
-    d3.select("#total-variants").text(totalCount);
+    d3.select("#total-variants").text(totalVariantsCount);
     d3.select("#total-guides").text(totalGuidesCount);
 
-    d3.select("#matching-variants-export").text(totalCount);
+    d3.select("#matching-variants-export").text(totalVariantsCount);
+    d3.select("#matching-guides-export").text(totalGuidesCount);
 
     d3.select("#first-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);
@@ -386,7 +387,7 @@ function reloadPage() {
         .then(data => {
             loadedVariants = data[0];
             loadedGuides = data[1];
-            totalCount = data[2]["variants"];
+            totalVariantsCount = data[2]["variants"];
             totalGuidesCount = data[2]["guides"];
             if (transitioning && itemsPerPage >= 100) {
                 d3.select("#table-display").on("transitionend", () => {
@@ -409,7 +410,7 @@ function reloadPage() {
 }
 
 function getTotalPages() {
-    return Math.max(Math.ceil(totalCount / itemsPerPage), 1).toFixed(0);
+    return Math.max(Math.ceil(totalVariantsCount / itemsPerPage), 1).toFixed(0);
 }
 
 function updateFilterDOM() {

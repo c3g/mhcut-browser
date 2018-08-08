@@ -645,6 +645,17 @@ div#export-options-modal label {
 
 
 
+div#variant-guides-modal div.modal-scroll-container {
+    padding: 24px 0;
+}
+
+div#variant-guides-modal h2 {
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+
+
 code {
     background-color: #FCFCFC;
     border: 1px solid #DFDFDF;

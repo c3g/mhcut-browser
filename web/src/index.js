@@ -33,6 +33,10 @@ let advancedSearchFilters = [];
 
 let transitioning = true;
 
+let searchContainer = null;
+let exportContainer = null;
+let variantGuidesContainer = null;
+
 
 const CONDITION_OPERATORS = {
     BOTH: ["equals", "<", "<=", ">", ">="],
@@ -44,12 +48,15 @@ const DEFAULT_CONDITION_BOOLEAN = "AND";
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    const searchContainer = d3.select("#advanced-search-container");
-    const exportContainer = d3.select("#export-options-container");
+    searchContainer = d3.select("#advanced-search-container");
+    exportContainer = d3.select("#export-options-container");
+    variantGuidesContainer = d3.select("#variant-guides-container");
 
     document.addEventListener("keyup", e => {
         if (e.keyCode === 27 && searchContainer.classed("shown")) searchContainer.classed("shown", false);
         else if (e.keyCode === 27 && exportContainer.classed("shown")) exportContainer.classed("shown", false);
+        else if (e.keyCode === 27 && variantGuidesContainer.classed("shown"))
+            variantGuidesContainer.classed("shown", false);
     });
 
     // noinspection JSCheckFunctionSignatures
@@ -86,6 +93,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         d3.select("#show-export").on("click", () => exportContainer.classed("shown", true));
         d3.select("#hide-export").on("click", () => exportContainer.classed("shown", false));
+
+        d3.select("#hide-variant-guides").on("click", () => variantGuidesContainer.classed("shown", false));
+        const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
+            .selectAll("th").data(guideFields, f => f["name"]);
+
+        variantGuideTableColumns.enter().append("th").text(f => f["name"])
+            .append("span").attr("class", "material-icons");
+        variantGuideTableColumns.exit().remove();
 
         d3.select("#export-variants").on("click", () => {
             let downloadURL = new URL("/api/tsv", window.location.origin);
@@ -308,6 +323,20 @@ function populateEntryTable() {
     fields.forEach(f => rowEntry.append("td")
         .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
         .html(e => formatTableCell(e, f)));
+
+    rowEntry.select(".show-guides-modal").on("mousedown", e => {
+        variantGuidesContainer.classed("shown", true);
+        d3.select("#variant-for-guides").text(e["id"]);
+        fetch(new Request(`/api/variants/${e["id"]}/guides`)).then(r => r.json()).then(guides => {
+            // noinspection JSUnresolvedFunction
+            const variantGuides = d3.select("#variant-guides-table tbody").selectAll("tr").data(guides, g => g["id"]);
+            const variantGuideEntry = variantGuides.enter().append("tr");
+            guideFields.forEach(f => variantGuideEntry.append("td")
+                .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
+                .html(e => formatTableCell(e, f)));
+            variantGuides.exit().remove();
+        });
+    });
 
     tableRows.exit().remove();
 }

@@ -49,8 +49,8 @@ CREATE TABLE guides (
   m1_dist_2 INTEGER NOT NULL,
   mh_dist_1 INTEGER NOT NULL,
   mh_dist_2 INTEGER NOT NULL,
-  nb_off_tgt INTEGER NOT NULL,
-  largest_off_tgt INTEGER NOT NULL,
+  nb_off_tgt INTEGER, -- NULL means NA
+  largest_off_tgt INTEGER, -- NULL means NA
   bot_score TEXT NOT NULL,
   bot_size TEXT,
   bot_var_l INTEGER, -- NULL means NA

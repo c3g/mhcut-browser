@@ -268,6 +268,27 @@ def variant_guides(variant_id):
     return json.jsonify([dict(i) for i in c.fetchall()])
 
 
+@app.route("/variants/<int:variant_id>/guides/tsv", methods=["GET"])
+def variant_guides_tsv(variant_id):
+    c = get_db().cursor()
+    column_names = [i["name"] for i in get_guides_columns(c)]
+
+    def generate():
+        with app.app_context():
+            c2 = get_db().cursor()
+            c2.execute("SELECT * FROM guides WHERE variant_id = ?", (variant_id,))
+
+            yield "\t".join(column_names) + "\n"
+            row = c2.fetchone()
+            while row is not None:
+                yield "\t".join([str(col) if col is not None else "NA" for col in tuple(row)]) + "\n"
+                row = c2.fetchone()
+
+    return Response(generate(), mimetype="text/tab-separated-values",
+                    headers={"Content-Disposition": "Content-Disposition: attachment; "
+                                                    "filename=\"variant_{}_guides.tsv\"".format(variant_id)})
+
+
 @app.route("/guides", methods=["GET"])
 def guides():
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))

@@ -347,6 +347,14 @@ table#entry-table thead th span.material-icons {
     color: #999;
 }
 
+table#entry-table.guides thead th {
+    cursor: auto;
+}
+
+table#entry-table.guides thead th span.material-icons {
+    display: none;
+}
+
 table#entry-table tbody tr:nth-child(even) td,
 table#variant-guides-table tbody tr:nth-child(even) td {
     background-color: #F8F8F8;

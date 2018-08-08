@@ -260,6 +260,8 @@ function selectTablePage(p) {
     dataDisplay = p;
     window.location.hash = p;
 
+    d3.select("table#entry-table").attr("class", dataDisplay);
+
     d3.select("#view-variants").classed("active", dataDisplay === "variants");
     d3.select("#view-guides").classed("active", dataDisplay === "guides");
 

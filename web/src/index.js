@@ -333,8 +333,8 @@ function formatTableCell(e, f) {
     } else if (f["name"] === "allele_id" && e["allele_id"] !== "NA") {
         return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
                    target="_blank" rel="noopener">${e["allele_id"]}</a>`;
-    } else if (f["name"] === "pam_uniq" && e["pam_uniq"] !== null) {
-        return `<a class="show-guides-modal">${e["pam_uniq"]}</a>`;
+    } else if (f["name"] === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
+        return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
     }
 
     return e[f["name"]] === null ? "NA" : e[f["name"]]; // TODO: Maybe shouldn't always be NA

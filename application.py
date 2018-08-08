@@ -272,16 +272,18 @@ def guides():
 
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join([i["name"] for i in get_guides_columns(c)])))
+        re.compile("^({})$".format("|".join([i["name"] for i in get_variants_columns(c)])))
     )
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
+
+    # TODO: SORT GUIDES AS WELL
 
     c.execute(
         "SELECT * FROM guides WHERE variant_id IN ("
         "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
         "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
-        "  LIMIT :items_per_page OFFSET :start"
-        ") ORDER BY {} {}".format(
+        "  ORDER BY {} {} LIMIT :items_per_page OFFSET :start"
+        ")".format(
             search_params["chr_fragment"],
             search_params["geneloc_fragment"],
             search_params["position_filter_fragment"],

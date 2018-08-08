@@ -313,15 +313,14 @@ aside#filter-options hr {
 
 
 
-table#entry-table {
+table#entry-table,
+table#variant-guides-table {
     border-collapse: collapse;
     min-width: 100%;
 }
 
-table#entry-table thead th {
-    position: sticky;
-    top: 0;
-
+table#entry-table thead th,
+table#variant-guides-table thead th {
     vertical-align: top;
     padding: 4px 10px 6px 10px;
 
@@ -332,6 +331,11 @@ table#entry-table thead th {
     font-size: 0.7rem;
     font-family: "Roboto Mono", monospace;
     white-space: nowrap;
+}
+
+table#entry-table thead th {
+    position: sticky;
+    top: 0;
 
     cursor: pointer;
 }
@@ -343,11 +347,13 @@ table#entry-table thead th span.material-icons {
     color: #999;
 }
 
-table#entry-table tbody tr:nth-child(even) td {
+table#entry-table tbody tr:nth-child(even) td,
+table#variant-guides-table tbody tr:nth-child(even) td {
     background-color: #F8F8F8;
 }
 
-table#entry-table tbody td {
+table#entry-table tbody td,
+table#variant-guides-table tbody td {
     padding: 4px 10px;
     border-bottom: 1px solid #F0F0F0;
     font-size: 0.8rem;
@@ -356,15 +362,20 @@ table#entry-table tbody td {
 }
 
 table#entry-table thead th:first-child,
-table#entry-table tbody td:first-child {
+table#entry-table tbody td:first-child,
+table#variant-guides-table thead th:first-child,
+table#variant-guides-table tbody td:first-child {
     padding-left: 15px;
 }
 table#entry-table thead th:last-child,
-table#entry-table tbody td:last-child {
+table#entry-table tbody td:last-child,
+table#variant-guides-table thead th:last-child,
+table#variant-guides-table tbody td:last-child {
     padding-right: 15px;
 }
 
-table#entry-table tbody td.lighter {
+table#entry-table tbody td.lighter,
+table#variant-guides-table tbody td.lighter {
     color: #B0B0B0;
 }
 

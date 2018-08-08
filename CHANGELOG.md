@@ -9,7 +9,8 @@
   * Allow keyboard submission of filtering and searching form.
   * Allow the user to escape the advanced search modal with the escape key.
   * Add instructions on using the advanced search feature.
-  * Add an export modal window for exporting search results as a TSV file.
+  * Add an export modal window for exporting variant, guide, and combined
+    search results as TSV files.
   * Fix some quick filters not resetting properly.
   * Add tab for viewing guides that relate to the currently-loaded set of
     variants.
@@ -17,14 +18,15 @@
 
 ### Server and API
 
-  * Add endpoint for exporting TSV-formatted search results.
+  * Add endpoint for exporting TSV-formatted variant, guide, and combined
+    search results.
   * Add endpoints for viewing guides.
   
 ### Database
 
   * Schema now includes tables for guides and key-value metadata.
   * `tsv_to_sqlite.py` now takes in an additional argument for a guides TSV
-    file.
+    file in order to populate the database.
 
 
 ## Version 0.3.1 (2018-08-02)

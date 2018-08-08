@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("keyup", e => {
         if (e.keyCode === 27 && searchContainer.classed("shown")) searchContainer.classed("shown", false);
+        else if (e.keyCode === 27 && exportContainer.classed("shown")) exportContainer.classed("shown", false);
     });
 
     // noinspection JSCheckFunctionSignatures

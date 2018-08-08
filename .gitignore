@@ -4,3 +4,4 @@ env
 db.sqlite
 web/node_modules
 web/dist
+mhcut-dbsnp-*

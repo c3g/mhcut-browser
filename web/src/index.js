@@ -7,7 +7,6 @@ let itemsPerPage = 100;
 let loadedVariants = [];
 let loadedGuides = [];
 let totalVariantsCount = 0;
-let totalGuidesCount = 0;
 
 let variantFields = [];
 let guideFields = [];
@@ -59,22 +58,27 @@ document.addEventListener("DOMContentLoaded", function () {
             variantGuidesContainer.classed("shown", false);
     });
 
+    fetch(new Request("/api/entries")).then(r => r.json()).then(data => {
+        totalVariantsCount = data["variants"];
+        updatePagination();
+    });
+
     // noinspection JSCheckFunctionSignatures
     Promise.all([
         fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
         fetch(new Request(`/api/guides?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
-        fetch(new Request("/api/entries")),
         fetch(new Request("/api/fields")),
         fetch(new Request("/api/metadata"))
     ]).then(rs => Promise.all(rs.map(r => r.json()))).then(data => {
         itemsPerPage = parseInt(d3.select("#items-per-page").property("value"), 10);
         loadedVariants = data[0];
         loadedGuides = data[1];
-        totalVariantsCount = data[2]["variants"];
-        totalGuidesCount = data[2]["guides"];
-        variantFields = data[3]["variants"];
-        guideFields = data[3]["guides"];
-        metadata = data[4];
+
+        variantFields = data[2]["variants"];
+        guideFields = data[2]["guides"];
+
+        metadata = data[3];
+
         selectedChromosomes = [...metadata["chr"]];
         selectedGeneLocations = [...metadata["geneloc"]];
 
@@ -82,7 +86,6 @@ document.addEventListener("DOMContentLoaded", function () {
         endPos = parseInt(metadata["max_pos"], 10);
 
         populateEntryTable();
-        updatePagination();
         updateTableColumnHeaders();
 
         d3.select("#view-variants").on("click", () => selectTablePage("variants"));
@@ -224,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#filter-search-form").on("submit", () => {
             d3.event.preventDefault();
             page = 1;
-            reloadPage();
+            reloadPage(true);
         });
 
         d3.select("#clear-filters").on("click", () => {
@@ -247,37 +250,37 @@ document.addEventListener("DOMContentLoaded", function () {
             advancedSearchFilters = [];
 
             updateFilterDOM();
-            reloadPage();
+            reloadPage(true);
         });
 
         d3.select("#first-page").on("click", () => {
             if (transitioning) return;
             page = 1;
-            reloadPage();
+            reloadPage(false);
         });
 
         d3.select("#prev-page").on("click", () => {
             if (transitioning) return;
             page = Math.max(page - 1, 1);
-            reloadPage();
+            reloadPage(false);
         });
 
         d3.select("#next-page").on("click", () => {
             if (transitioning) return;
             page = Math.min(page + 1, parseInt(getTotalPages(), 10));
-            reloadPage();
+            reloadPage(false);
         });
 
         d3.select("#last-page").on("click", () => {
             if (transitioning) return;
             page = parseInt(getTotalPages(), 10);
-            reloadPage();
+            reloadPage(false);
         });
 
         d3.select("#items-per-page").on("change", () => {
             itemsPerPage = parseInt(d3.event.target.value, 10);
             page = 1;
-            reloadPage();
+            reloadPage(false);
         });
 
         d3.select("#table-display").classed("loading", false);
@@ -400,10 +403,8 @@ function updatePagination() {
     d3.select("#current-page").text(page.toFixed(0));
     d3.select("#total-pages").text(totalPages);
     d3.select("#total-variants").text(totalVariantsCount);
-    d3.select("#total-guides").text(totalGuidesCount);
 
     d3.select("#matching-variants-export").text(totalVariantsCount);
-    d3.select("#matching-guides-export").text(totalGuidesCount);
 
     d3.select("#first-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);
@@ -411,7 +412,7 @@ function updatePagination() {
     d3.select("#last-page").attr("disabled", page.toString(10) === totalPages ? "disabled" : null);
 }
 
-function reloadPage() {
+function reloadPage(reloadCounts) {
     transitioning = true;
 
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
@@ -428,21 +429,24 @@ function reloadPage() {
     Object.keys(params).forEach(key => {
         variantsURL.searchParams.append(key, params[key]);
         guidesURL.searchParams.append(key, params[key]);
-        countURL.searchParams.append(key, params[key]);
+        if (reloadCounts) countURL.searchParams.append(key, params[key]);
     });
 
     // noinspection JSCheckFunctionSignatures
     return Promise.all([
             fetch(new Request(variantsURL.toString())),
             fetch(new Request(guidesURL.toString())),
-            fetch(new Request(countURL.toString()))
+            ...(reloadCounts ? [fetch(new Request(countURL.toString()))] : [])
         ])
         .then(rs => Promise.all(rs.map(r => r.json())))
         .then(data => {
             loadedVariants = data[0];
             loadedGuides = data[1];
-            totalVariantsCount = data[2]["variants"];
-            totalGuidesCount = data[2]["guides"];
+
+            if (reloadCounts) {
+                totalVariantsCount = data[2]["variants"];
+            }
+
             if (transitioning && itemsPerPage >= 100) {
                 d3.select("#table-display").on("transitionend", () => {
                     populateEntryTable();

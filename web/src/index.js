@@ -52,9 +52,9 @@ document.addEventListener("DOMContentLoaded", function () {
     variantGuidesContainer = d3.select("#variant-guides-container");
 
     document.addEventListener("keyup", e => {
-        if (e.keyCode === 27 && searchContainer.classed("shown")) searchContainer.classed("shown", false);
-        else if (e.keyCode === 27 && exportContainer.classed("shown")) exportContainer.classed("shown", false);
-        else if (e.keyCode === 27 && variantGuidesContainer.classed("shown"))
+        if (e.key === "Escape" && searchContainer.classed("shown")) searchContainer.classed("shown", false);
+        else if (e.key === "Escape" && exportContainer.classed("shown")) exportContainer.classed("shown", false);
+        else if (e.key === "Escape" && variantGuidesContainer.classed("shown"))
             variantGuidesContainer.classed("shown", false);
     });
 

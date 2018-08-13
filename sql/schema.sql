@@ -1,14 +1,40 @@
-DROP TABLE IF EXISTS variants;
-DROP TABLE IF EXISTS guides;
+DROP TABLE IF EXISTS variants CASCADE;
+DROP TABLE IF EXISTS guides CASCADE;
+DROP TABLE IF EXISTS summary_statistics CASCADE;
+
+DROP INDEX IF EXISTS variants_chr_idx;
+DROP INDEX IF EXISTS variants_start_idx;
+DROP INDEX IF EXISTS variants_end_idx;
+DROP INDEX IF EXISTS variants_chr_start_end_idx;
+DROP INDEX IF EXISTS variants_mh_l_start_end_idx;
+DROP INDEX IF EXISTS variants_rs_idx;
+DROP INDEX IF EXISTS variants_caf_idx;
+DROP INDEX IF EXISTS variants_topmed_idx;
+DROP INDEX IF EXISTS variants_gene_info_idx;
+DROP INDEX IF EXISTS variants_pm_idx;
+DROP INDEX IF EXISTS variants_mc_idx;
+DROP INDEX IF EXISTS variants_af_exac_idx;
+DROP INDEX IF EXISTS variants_af_tgp_idx;
+DROP INDEX IF EXISTS variants_allele_id_idx;
+DROP INDEX IF EXISTS variants_clndn_idx;
+DROP INDEX IF EXISTS variants_clnsig_idx;
+-- DROP INDEX IF EXISTS variants_gene_info_clinvar_idx;
+DROP INDEX IF EXISTS variants_geneloc_idx;
+DROP INDEX IF EXISTS variants_mh_l_idx;
+DROP INDEX IF EXISTS variants_pam_uniq_idx;
+DROP INDEX IF EXISTS variants_guides_no_ot_idx;
+DROP INDEX IF EXISTS variants_guides_min_ot_idx;
+
+DROP INDEX IF EXISTS guides_variant_id_idx;
 
 CREATE TABLE variants (
   id INTEGER PRIMARY KEY,
   chr TEXT NOT NULL CHECK (chr IN ('chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10',
                                    'chr11', 'chr12', 'chr13', 'chr14', 'chr15', 'chr16', 'chr17', 'chr18', 'chr19',
                                    'chr20', 'chr21', 'chr22', 'chrX', 'chrY')),
-  start INTEGER NOT NULL CHECK (start >= 0),
-  end INTEGER NOT NULL CHECK (end >= 0),
-  rs INTEGER CHECK (rs >= 0), -- Reference SNP
+  pos_start INTEGER NOT NULL CHECK (pos_start >= 0),
+  pos_end INTEGER NOT NULL CHECK (pos_end >= 0),
+  rs TEXT,
   caf TEXT, -- TODO: WHAT IS THIS?
   topmed TEXT, -- TODO: WHAT IS THIS?
   gene_info TEXT, -- TODO: WHAT IS THIS?
@@ -56,4 +82,11 @@ CREATE TABLE guides (
   bot_var_l INTEGER, -- NULL means NA
   bot_gc INTEGER, -- NULL means NA
   bot_seq TEXT -- NULL means NA
+);
+
+CREATE INDEX guides_variant_id_idx ON guides(variant_id);
+
+CREATE TABLE summary_statistics (
+  s_key TEXT PRIMARY KEY,
+  s_value NUMERIC NOT NULL
 );

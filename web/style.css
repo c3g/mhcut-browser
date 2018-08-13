@@ -123,7 +123,7 @@ section#table-display::after {
     font-family: "Roboto Mono", monospace;
     text-align: center;
     color: #999;
-    line-height: 100vh;
+    line-height: 80vh;
 
     content: "Loading...";
 

@@ -143,9 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     .filter(function () { return d3.select(this).property("checked"); })
                     .each(function () { selectedChromosomes.push(d3.select(this).attr("id")); });
 
-                if (selectedChromosomes.length === 0) {
-                    this.checked = true;
-                }
+                if (selectedChromosomes.length === 0) this.checked = true;
             });
         chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
 
@@ -185,9 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     .filter(function () { return d3.select(this).property("checked"); })
                     .each(function () { selectedGeneLocations.push(d3.select(this).attr("id")); });
 
-                if (selectedGeneLocations.length === 0) {
-                    this.checked = true;
-                }
+                if (selectedGeneLocations.length === 0) this.checked = true;
             });
         geneLocationLabels.append("span").text(l => " " + l);
 

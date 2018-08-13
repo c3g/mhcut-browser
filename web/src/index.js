@@ -227,24 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         d3.select("#clear-filters").on("click", () => {
-            selectedChromosomes = [...metadata["chr"]];
-
-            startPos = parseInt(metadata["min_pos"], 10);
-            endPos = parseInt(metadata["max_pos"], 10);
-
-            selectedGeneLocations = [...metadata["geneloc"]];
-
-            d3.selectAll(".chr-checkbox").property("checked", true);
-            d3.selectAll(".geneloc-checkbox").property("checked", true);
-
-            minMHL = 0;
-
-            mustHaveDBSNP = false;
-            mustHaveClinVar = false;
-
-            d3.select("#search-query").property("value", "");
-            advancedSearchFilters = [];
-
+            resetFilters();
             updateFilterDOM();
             reloadPage(true);
         });
@@ -465,6 +448,26 @@ function reloadPage(reloadCounts) {
 
 function getTotalPages() {
     return Math.max(Math.ceil(totalVariantsCount / itemsPerPage), 1).toFixed(0);
+}
+
+function resetFilters() {
+    selectedChromosomes = [...metadata["chr"]];
+
+    startPos = parseInt(metadata["min_pos"], 10);
+    endPos = parseInt(metadata["max_pos"], 10);
+
+    selectedGeneLocations = [...metadata["geneloc"]];
+
+    d3.selectAll(".chr-checkbox").property("checked", true);
+    d3.selectAll(".geneloc-checkbox").property("checked", true);
+
+    minMHL = 0;
+
+    mustHaveDBSNP = false;
+    mustHaveClinVar = false;
+
+    d3.select("#search-query").property("value", "");
+    advancedSearchFilters = [];
 }
 
 function updateFilterDOM() {

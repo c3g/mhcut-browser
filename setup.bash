@@ -37,6 +37,11 @@ else
     fi
 fi
 
+if ! [ -x "$(command -v psql)" ]; then
+  echo "Attempting to install Postgres via apt..."
+  sudo apt-get install -y postgresql postgresql-contrib
+fi
+
 if ! [ -x "$(command -v npm)" ]; then
   echo "Attempting to install NPM from nodesource via apt..."
   curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -

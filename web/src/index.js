@@ -438,7 +438,7 @@ function reloadPage(reloadCounts) {
                 d3.select("#table-display").classed("loading", false);
                 transitioning = false;
             }
-        });
+        }).catch(err => console.error(err));
 }
 
 function getTotalPages() {

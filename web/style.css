@@ -302,6 +302,12 @@ aside#filter-options label.checkbox-label {
     white-space: nowrap;
 }
 
+aside#filter-options span.input-help-text {
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.7rem;
+    color: #777;
+}
+
 aside#filter-options select {
     width: 100%;
 }

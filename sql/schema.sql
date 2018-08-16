@@ -3,6 +3,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 DROP TABLE IF EXISTS variants CASCADE;
 DROP TABLE IF EXISTS guides CASCADE;
 DROP TABLE IF EXISTS summary_statistics CASCADE;
+DROP TABLE IF EXISTS entries_query_cache CASCADE;
 
 DROP INDEX IF EXISTS variants_start_idx;
 DROP INDEX IF EXISTS variants_end_idx;
@@ -113,4 +114,9 @@ CREATE INDEX guides_variant_id_idx ON guides(variant_id);
 CREATE TABLE summary_statistics (
   s_key TEXT PRIMARY KEY,
   s_value NUMERIC NOT NULL
+);
+
+CREATE TABLE entries_query_cache (
+  e_query BYTEA PRIMARY KEY,
+  e_value INTEGER NOT NULL
 );

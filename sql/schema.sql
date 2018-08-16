@@ -25,7 +25,7 @@ DROP INDEX IF EXISTS variants_gene_info_clinvar_idx;
 DROP INDEX IF EXISTS variants_gene_info_clinvar_trgm_idx;
 DROP INDEX IF EXISTS variants_mc_clinvar_idx;
 DROP INDEX IF EXISTS variants_citation_idx;
-DROP INDEX IF EXISTS variants_geneloc_idx;
+DROP INDEX IF EXISTS variants_location_idx;
 DROP INDEX IF EXISTS variants_var_l_idx;
 DROP INDEX IF EXISTS variants_mh_l_idx;
 DROP INDEX IF EXISTS variants_mh_1l_idx;

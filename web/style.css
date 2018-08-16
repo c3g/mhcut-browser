@@ -686,6 +686,13 @@ ul#advanced-search-conditions li button.remove-search-condition:hover span.mater
 
 
 
+div#export-options-modal {
+    max-width: 600px;
+    min-height: 250px;
+    margin: auto;
+    bottom: auto;
+}
+
 div#export-options-modal label {
     margin-right: 0.4em;
     font-family: "Roboto Mono", monospace;

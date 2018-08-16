@@ -134,11 +134,10 @@ document.addEventListener("DOMContentLoaded", function () {
             .attr("checked", "checked")
             .on("change", function () {
                 selectedChromosomes = [];
+
                 d3.selectAll(".chr-checkbox")
                     .filter(function () { return d3.select(this).property("checked"); })
                     .each(function () { selectedChromosomes.push(d3.select(this).attr("id")); });
-
-                if (selectedChromosomes.length === 0) this.checked = true;
             });
         chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
 

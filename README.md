@@ -1,4 +1,4 @@
-# CRISPR Cut Browser
+# MHcut Browser
 
 A web application for viewing, filtering, and searching CRISPR annotation TSV
 data.

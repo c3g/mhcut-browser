@@ -1,5 +1,5 @@
 {
-  "name": "crispr-cut-browser-web",
+  "name": "mhcut-browser-web",
   "version": "0.3.1",
   "description": "A TSV browser for SNP data.",
   "main": "src/index.js",

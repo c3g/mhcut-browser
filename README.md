@@ -88,6 +88,17 @@ sudo a2enmod rewrite
 sudo systemctl restart apache2
 ```
 
+##### Postgres
+
+MHcut Browser uses Postgres as a database in order to efficiently perform
+complex queries on the data.
+
+To install Postgres, use the following command:
+
+```bash
+sudo apt install postgresql postgresql-contrib
+```
+
 ##### NPM
 
 Install NPM via your method of choice (caution; the version in Aptitude
@@ -128,18 +139,63 @@ cd ..
 ```
 
 
-### Step 1: Build the Database
+### Step 1: Create the Database and Postgres User
 
-To build the database, run the `tsv_to_sqlite.py` script as follows to
-generate the `db.sqlite` relational database file, passing in the desired TSV
-file to convert as an argument:
+First, create a Postgres user for the application to use in order to access the
+data by opening a new `psql` session and issuing a `CREATE ROLE` command,
+specifying the database role's password:
 
 ```bash
-python ./tsv_to_sqlite.py variants.tsv
+sudo -u postgres psql
+```
+
+```postgresql
+CREATE ROLE mhcut LOGIN PASSWORD 'some_password';
+```
+
+This will prompt the user for a username (for example, one could enter `mhcut`)
+and whether the new user should be a super user (it should **not**).
+
+Then, create a database in the `psql` session:
+
+```postgresql
+CREATE DATABASE mhcut_db WITH OWNER mhcut;
+```
+
+Finally, edit the `pg_hba.conf` file (usually found in the
+`/etc/postgresql/10/main/` directory), adding the following line:
+
+Before:
+```
+local   all             postgres                                peer
+```
+
+After:
+```
+local   all             postgres                                peer
+local   all             mhcut                                   md5
 ```
 
 
-### Step 2: Running the Web Application
+### Step 2: Build the Database
+
+To build the database, run the `tsv_to_postgres.py` script as follows to
+generate the `db.sqlite` relational database file, passing in the desired TSV
+files to convert as arguments, as well as the name of the created database and
+database user:
+
+```bash
+python ./tsv_to_postgres.py variants.tsv guides.tsv mhcut_db mhcut
+```
+
+This will prompt the user for the database user's password before building the
+MHcut Browser database.
+
+**Warning:** The database construction process will take quite a while
+(~30 minutes). The resulting database is typically around **50 gigabytes**.
+
+
+### Step 3: Running the Web Application
 
 #### In Development
 

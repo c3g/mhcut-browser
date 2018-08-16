@@ -97,6 +97,9 @@ document.addEventListener("DOMContentLoaded", function () {
             .selectAll("th").data(guideFields, f => f["name"]);
 
         variantGuideTableColumns.enter().append("th").text(f => f["name"])
+            .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
+            .on("mousemove", () => updateColumnHelp(d3.event))
+            .on("mouseout", () => hideColumnHelp())
             .append("span").attr("class", "material-icons");
         variantGuideTableColumns.exit().remove();
 
@@ -293,6 +296,9 @@ function populateEntryTable() {
     tableColumns.enter()
         .append("th")
         .text(f => f["name"])
+        .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
+        .on("mousemove", () => updateColumnHelp(d3.event))
+        .on("mouseout", () => hideColumnHelp())
         .on("click", f => {
             if (dataDisplay === "guides") return;
 
@@ -606,4 +612,23 @@ function getSearchParams() {
 
         search_query: d3.select("#search-query").property("value")
     };
+}
+
+
+function showColumnHelp(event, columnName) {
+    d3.select("#column-help-text")
+        .classed("shown", true)
+        .style("top", (event.clientY + 10).toString(10) + "px")
+        .style("left", (event.clientX + 15).toString(10) + "px")
+        .text(COLUMN_HELP_TEXT[columnName]);
+}
+
+function updateColumnHelp(event) {
+    d3.select("#column-help-text")
+        .style("top", (event.clientY + 10).toString(10) + "px")
+        .style("left", (event.clientX + 15).toString(10) + "px");
+}
+
+function hideColumnHelp() {
+    d3.select("#column-help-text").classed("shown", false);
 }

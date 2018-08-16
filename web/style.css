@@ -843,6 +843,38 @@ div.row .col {
 
 
 
+div#column-help-text {
+    position: fixed;
+    z-index: 175;
+
+    /*top: 200px; left: 400px;*/
+
+    padding: 6px 10px;
+    max-width: 250px;
+
+    background-color: rgba(250, 250, 250, 0.95);
+    border: 1px solid #DFDFDF;
+    border-bottom-color: #D3D3D3;
+    border-radius: 4px;
+    box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+
+    font-family: "Roboto Mono", sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.3em;
+    color: #555;
+
+    pointer-events: none;
+
+    transition: opacity 0.15s ease-in-out;
+}
+
+div#column-help-text.shown {
+    opacity: 1;
+}
+
+
+
 @media screen and (max-width: 1400px) {
     div.modal {
         position: absolute;

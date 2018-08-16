@@ -276,6 +276,16 @@ aside#filter-options h3 {
     color: #333;
 }
 
+aside#filter-options h3 span.controls {
+    float: right;
+    color: #777;
+}
+aside#filter-options h3 span.controls a {
+    color: #607D8B;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 aside#filter-options label {
     display: block;
     margin-top: 10px;

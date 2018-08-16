@@ -122,6 +122,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
+        d3.select("#select-all-chr").on("click", () => {
+            selectedChromosomes = [...metadata["chr"]];
+            d3.selectAll(".chr-checkbox").property("checked", true);
+        });
+
+        d3.select("#deselect-all-chr").on("click", () => {
+            selectedChromosomes = [...metadata["chr"]];
+            d3.selectAll(".chr-checkbox").property("checked", false);
+        });
+
         const chromosomeLabels = d3.select("#chromosome-checkboxes").selectAll("label").data(metadata["chr"])
             .enter()
             .append("label")

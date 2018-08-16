@@ -203,7 +203,14 @@
     <h1>MHcut Browser</h1>
     <form id="filter-search-form">
         <h2>QUICK FILTERS</h2>
-        <h3>Chromosome</h3>
+        <h3>
+            Chromosomes
+            <span class="controls">
+                <a id="select-all-chr">All</a>
+                &bull;
+                <a id="deselect-all-chr">None</a>
+            </span>
+        </h3>
         <div id="chromosome-checkboxes"></div>
         <label for="start">Start Position</label>
         <input type="number" min="" max="" id="start" name="start">

@@ -1,5 +1,8 @@
 import * as d3 from "d3";
 
+import { CONDITION_OPERATORS, DEFAULT_CONDITION_BOOLEAN, COLUMN_HELP_TEXT } from "./constants";
+
+
 let dataDisplay = "variants";
 
 let page = 1;
@@ -36,14 +39,6 @@ let searchContainer = null;
 let exportContainer = null;
 let variantGuidesContainer = null;
 
-
-const CONDITION_OPERATORS = {
-    BOTH: ["equals", "<", "<=", ">", ">="],
-    TEXT: ["contains", "starts_with", "ends_with"],
-    NULLABLE: ["is_null"]
-};
-
-const DEFAULT_CONDITION_BOOLEAN = "AND";
 
 
 document.addEventListener("DOMContentLoaded", function () {

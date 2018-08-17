@@ -306,36 +306,17 @@ def guides():
 
     # TODO: ALLOW SORTING GUIDES AS WELL?
 
-    c.execute(
-        "SELECT * FROM guides WHERE variant_id IN ("
-        "  SELECT id FROM variants WHERE {}{}{}"
-        "  NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL))"
-        "  AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s)"
-        "  AND ({}) AND ({}) ORDER BY {} {} LIMIT %(items_per_page)s OFFSET %(start)s"
-        ") ORDER BY id".format(
-            "(chr IN {}) AND ".format(search_params["chr_fragment"])
-            if len(search_params["chr"]) < len(CHR_VALUES) else "",
-            "(location IN {}) AND ".format(search_params["location_fragment"])
-            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
-            search_params["position_filter_fragment"],
-            search_params["search_query_fragment"],
-            sort_by,
-            sort_order
-        ),
-        {
-            "start": (page - 1) * items_per_page,
-            "items_per_page": items_per_page,
-            "start_pos": search_params["start_pos"],
-            "end_pos": search_params["end_pos"],
-            "min_mh_l": search_params["min_mh_l"],
-            "dbsnp": search_params["dbsnp"],
-            "clinvar": search_params["clinvar"],
-            "ngg_pam_avail": search_params["ngg_pam_avail"],
-            "unique_guide_avail": search_params["unique_guide_avail"],
-            **search_params["search_query_data"]
-        }
-    )
+    c.execute("SELECT * FROM guides WHERE variant_id IN ({}) ORDER BY id".format(build_variants_query(
+        c,
+        "id",
+        search_params,
+
+        sort_by=sort_by,
+        sort_order=sort_order,
+
+        page=page,
+        items_per_page=items_per_page
+    ).decode("utf-8")))
 
     return json.jsonify(c.fetchall())
 
@@ -348,33 +329,9 @@ def guides_tsv():
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor()
-
-            c2.execute(
-                "SELECT * FROM guides WHERE variant_id IN ("
-                "  SELECT id FROM variants WHERE {}{}{}"
-                "  NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL))"
-                "  AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s)"
-                "  AND ({}) AND ({}))".format(
-                    "(chr IN {}) AND ".format(search_params["chr_fragment"])
-                    if len(search_params["chr"]) < len(CHR_VALUES) else "",
-                    "(location IN {}) AND ".format(search_params["location_fragment"])
-                    if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-                    "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
-                    search_params["position_filter_fragment"],
-                    search_params["search_query_fragment"]
-                ),
-                {
-                    "start_pos": search_params["start_pos"],
-                    "end_pos": search_params["end_pos"],
-                    "min_mh_l": search_params["min_mh_l"],
-                    "dbsnp": search_params["dbsnp"],
-                    "clinvar": search_params["clinvar"],
-                    "ngg_pam_avail": search_params["ngg_pam_avail"],
-                    "unique_guide_avail": search_params["unique_guide_avail"],
-                    **search_params["search_query_data"]
-                }
-            )
+            c2 = get_db().cursor("guides-tsv-cursor")
+            c2.execute("SELECT * FROM guides WHERE variant_id IN "
+                       "({})".format(build_variants_query(c, "id", search_params).decode("utf-8")))
 
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
@@ -451,30 +408,8 @@ def guides_entries():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
 
-    entries_query = c.mogrify(
-        "SELECT COUNT(*) FROM guides WHERE variant_id IN (SELECT id FROM variants WHERE {}{}{}"
-        "  NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL))"
-        "  AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s)"
-        "  AND ({}) AND ({}))".format(
-            "(chr IN {}) AND ".format(search_params["chr_fragment"])
-            if len(search_params["chr"]) < len(CHR_VALUES) else "",
-            "(location IN {}) AND ".format(search_params["location_fragment"])
-            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
-            search_params["position_filter_fragment"],
-            search_params["search_query_fragment"]
-        ),
-        {
-            "start_pos": search_params["start_pos"],
-            "end_pos": search_params["end_pos"],
-            "min_mh_l": search_params["min_mh_l"],
-            "dbsnp": search_params["dbsnp"],
-            "clinvar": search_params["clinvar"],
-            "ngg_pam_avail": search_params["ngg_pam_avail"],
-            "unique_guide_avail": search_params["unique_guide_avail"],
-            **search_params["search_query_data"]
-        }
-    )
+    entries_query = c.mogrify("SELECT COUNT(*) FROM guides WHERE variant_id IN "
+                              "({})".format(build_variants_query(c, "id", search_params).decode("utf-8")))
 
     c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
     cache_value = c.fetchone()

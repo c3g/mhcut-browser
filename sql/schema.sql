@@ -109,8 +109,6 @@ CREATE TABLE guides (
   bot_seq TEXT -- NULL means NA
 );
 
-CREATE INDEX guides_variant_id_idx ON guides(variant_id);
-
 CREATE TABLE summary_statistics (
   s_key TEXT PRIMARY KEY,
   s_value NUMERIC NOT NULL

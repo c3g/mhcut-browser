@@ -10,6 +10,7 @@ let itemsPerPage = 100;
 let loadedVariants = [];
 let loadedGuides = [];
 let totalVariantsCount = 0;
+let totalGuidesCount = 0;
 
 let variantFields = [];
 let guideFields = [];
@@ -23,22 +24,31 @@ let selectedChromosomes = [];
 let startPos = 0;
 let endPos = 12000000000000;
 
-let selectedGeneLocations = [];
+let selectedVariantLocations = [];
 
 let minMHL = 0;
 
 let mustHaveDBSNP = false;
 let mustHaveClinVar = false;
 
+let mustHaveNGGPAM = false;
+let mustHaveUniqueGuide = false;
+
 let currentFilterID = 0;
 let advancedSearchFilters = [];
 
 let transitioning = true;
+let loadingEntryCounts = false;
 
 let searchContainer = null;
 let exportContainer = null;
 let variantGuidesContainer = null;
 
+const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs}`;
+const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
+const bookshelfURL = nbk => `https://www.ncbi.nlm.nih.gov/books/${nbk}/`;
+const pubMedURL = pm => `https://www.ncbi.nlm.nih.gov/pubmed/${pm}/`;
+const clinVarURL = cv => `https://www.ncbi.nlm.nih.gov/clinvar/variation/${cv}/`;
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -53,11 +63,6 @@ document.addEventListener("DOMContentLoaded", function () {
             variantGuidesContainer.classed("shown", false);
     });
 
-    fetch(new Request("/api/entries")).then(r => r.json()).then(data => {
-        totalVariantsCount = data["variants"];
-        updatePagination();
-    });
-
     // noinspection JSCheckFunctionSignatures
     Promise.all([
         fetch(new Request(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`)),
@@ -69,13 +74,28 @@ document.addEventListener("DOMContentLoaded", function () {
         loadedVariants = data[0];
         loadedGuides = data[1];
 
+        loadingEntryCounts = true;
+        d3.select("#apply-filters").attr("disabled", "disabled");
+        d3.select("#clear-filters").attr("disabled", "disabled");
+        Promise.all([
+            fetch(new Request("/api/variants/entries")),
+            fetch(new Request("/api/guides/entries"))
+        ]).then(rs => Promise.all(rs.map(r => r.json()))).then(data => {
+            totalVariantsCount = data[0];
+            totalGuidesCount = data[1];
+            loadingEntryCounts = false;
+            d3.select("#apply-filters").attr("disabled", null);
+            d3.select("#clear-filters").attr("disabled", null);
+            updatePagination();
+        });
+
         variantFields = data[2]["variants"];
         guideFields = data[2]["guides"];
 
         metadata = data[3];
 
         selectedChromosomes = [...metadata["chr"]];
-        selectedGeneLocations = [...metadata["geneloc"]];
+        selectedVariantLocations = [...metadata["location"]];
 
         startPos = parseInt(metadata["min_pos"], 10);
         endPos = parseInt(metadata["max_pos"], 10);
@@ -94,9 +114,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         d3.select("#hide-variant-guides").on("click", () => variantGuidesContainer.classed("shown", false));
         const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
-            .selectAll("th").data(guideFields, f => f["name"]);
+            .selectAll("th").data(guideFields, f => f["column_name"]);
 
-        variantGuideTableColumns.enter().append("th").text(f => f["name"])
+        variantGuideTableColumns.enter().append("th").text(f => f["column_name"])
             .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
             .on("mousemove", () => updateColumnHelp(d3.event))
             .on("mouseout", () => hideColumnHelp())
@@ -173,7 +193,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
 
-        const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["geneloc"])
+        const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["location"])
             .enter()
             .append("label")
             .attr("class", "checkbox-label")
@@ -185,12 +205,13 @@ document.addEventListener("DOMContentLoaded", function () {
             .attr("name", l => l)
             .attr("checked", "checked")
             .on("change", function () {
-                selectedGeneLocations = [];
+                selectedVariantLocations = [];
+
                 d3.selectAll(".geneloc-checkbox")
                     .filter(function () { return d3.select(this).property("checked"); })
-                    .each(function () { selectedGeneLocations.push(d3.select(this).attr("id")); });
+                    .each(function () { selectedVariantLocations.push(d3.select(this).attr("id")); });
 
-                if (selectedGeneLocations.length === 0) this.checked = true;
+                if (selectedVariantLocations.length === 0) this.checked = true;
             });
         geneLocationLabels.append("span").text(l => " " + l);
 
@@ -208,8 +229,18 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#dbsnp").property("checked", mustHaveDBSNP).on("change", function () {
             mustHaveDBSNP = d3.select(this).property("checked");
         });
+
         d3.select("#clinvar").property("checked", mustHaveClinVar).on("change", function () {
             mustHaveClinVar = d3.select(this).property("checked");
+        });
+
+
+        d3.select("#ngg-pam-available").property("checked", mustHaveNGGPAM).on("change", function () {
+            mustHaveNGGPAM = d3.select(this).property("checked");
+        });
+
+        d3.select("#unique-guide-available").property("checked", mustHaveUniqueGuide).on("change", function () {
+            mustHaveUniqueGuide = d3.select(this).property("checked");
         });
 
 
@@ -228,6 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.selectAll(".modal").on("click", () => d3.event.stopPropagation());
 
         d3.select("#filter-search-form").on("submit", () => {
+            if (loadingEntryCounts) return;
             d3.event.preventDefault();
             page = 1;
             reloadPage(true);
@@ -284,7 +316,6 @@ function selectTablePage(p) {
     d3.select("#view-guides").classed("active", dataDisplay === "guides");
 
     populateEntryTable();
-    updatePagination();
     updateTableColumnHeaders();
 }
 
@@ -295,22 +326,22 @@ function populateEntryTable() {
     // TODO: Use original column name for display
     tableColumns.enter()
         .append("th")
-        .text(f => f["name"])
+        .text(f => f["column_name"])
         .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
         .on("mousemove", () => updateColumnHelp(d3.event))
         .on("mouseout", () => hideColumnHelp())
         .on("click", f => {
             if (dataDisplay === "guides") return;
 
-            if (sortBy === f["name"]) {
+            if (sortBy === f["column_name"]) {
                 sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");
             } else {
                 sortOrder = "ASC";
-                sortBy = f["name"];
+                sortBy = f["column_name"];
             }
 
             page = 1;
-            reloadPage();
+            reloadPage(false);
         })
         .append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
@@ -320,7 +351,8 @@ function populateEntryTable() {
     const rowEntry = tableRows.enter().append("tr");
 
     fields.forEach(f => rowEntry.append("td")
-        .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
+        .classed("lighter", e => e[f["column_name"]] === null || e[f["column_name"]] === "NA"
+            || e[f["column_name"]] === "-")
         .html(e => formatTableCell(e, f)));
 
     rowEntry.select(".show-guides-modal").on("mousedown", e => {
@@ -331,7 +363,8 @@ function populateEntryTable() {
             const variantGuides = d3.select("#variant-guides-table tbody").selectAll("tr").data(guides, g => g["id"]);
             const variantGuideEntry = variantGuides.enter().append("tr");
             guideFields.forEach(f => variantGuideEntry.append("td")
-                .classed("lighter", e => e[f["name"]] === null || e[f["name"]] === "NA" || e[f["name"]] === "-")
+                .classed("lighter", e => e[f["column_name"]] === null || e[f["column_name"]] === "NA"
+                    || e[f["column_name"]] === "-")
                 .html(e => formatTableCell(e, f)));
             variantGuides.exit().remove();
             d3.select("#export-variant-guides").on("click", () => {
@@ -345,55 +378,60 @@ function populateEntryTable() {
 }
 
 function formatTableCell(e, f) {
-    if (f["name"] === "rs") {
+    if (f["column_name"] === "rs") {
         if (e["rs"] === null) return "-";
-        return `<a href="https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${e["rs"]}"
-                   target="_blank" rel="noopener">${e["rs"]}</a>`
-    } else if (f["name"] === "gene_info" && e["gene_info"] !== "-" && e["gene_info"] !== "NA") {
-        return e["gene_info"]
-            .split("|")
-            .map(og => `<a href="https://www.ncbi.nlm.nih.gov/gene/${og.split(":")[1]}/"
-                           target="_blank" rel="noopener">${og}</a>`)
+        return e["rs"].split("|")
+            .map(rs => `<a href="${dbSNPURL(rs)}" target="_blank" rel="noopener">${rs}</a>`)
             .join("|");
-    } else if (f["name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== null) {
-        return e["gene_info_clinvar"]
-            .split("|")
-            .map(og => `<a href="https://www.ncbi.nlm.nih.gov/gene/${og.split(":")[1]}/"
-                           target="_blank" rel="noopener">${og}</a>`)
+    } else if ((f["column_name"] === "gene_info" && e["gene_info"] !== "-" && e["gene_info"] !== "NA")
+        || (f["column_name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== null)) {
+        return e[f["column_name"]].split("|")
+            .map(og => `<a href="${geneURL(og.split(":")[1])}" target="_blank" rel="noopener">${og}</a>`)
             .join("|");
-    } else if (f["name"] === "citation" && e["citation"] !== "NA" && e["citation"] !== "-") {
-        return e["citation"]
-            .split(";")
+    } else if (f["column_name"] === "citation" && e["citation"] !== "NA" && e["citation"] !== "-") {
+        return e["citation"].split(";")
             .map(id => id.substring(0, 2) === "NB"
-                ? `<a href="https://www.ncbi.nlm.nih.gov/books/${id}/" target="_blank" rel="noopener">${id}</a>`
-                : `<a href="https://www.ncbi.nlm.nih.gov/pubmed/${id.replace("PM", "")}/"
-                      target="_blank" rel="noopener">${id}</a>`)
+                ? `<a href="${bookshelfURL(id)}" target="_blank" rel="noopener">${id}</a>`
+                : `<a href="${pubMedURL(id.replace("PM", ""))}" target="_blank" rel="noopener">${id}</a>`)
             .join(";");
-    } else if (f["name"] === "allele_id" && e["allele_id"] !== "NA") {
-        return `<a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/${e["allele_id"]}/"
-                   target="_blank" rel="noopener">${e["allele_id"]}</a>`;
-    } else if (f["name"] === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
+    } else if (f["column_name"] === "allele_id" && e["allele_id"] !== null) {
+        return `<a href="${clinVarURL(e["allele_id"])}/" target="_blank" rel="noopener">${e["allele_id"]}</a>`;
+    } else if (f["column_name"] === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
         return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
     }
 
-    return e[f["name"]] === null ? "NA" : e[f["name"]]; // TODO: Maybe shouldn't always be NA
+    return e[f["column_name"]] === null ? "NA" : e[f["column_name"]]; // TODO: Maybe shouldn't always be NA
 }
 
 function updateTableColumnHeaders() {
     const fields = (dataDisplay === "variants" ? variantFields : guideFields);
-    d3.selectAll("table#entry-table thead th").data(fields, f => f["name"])
+    d3.selectAll("table#entry-table thead th").data(fields, f => f["column_name"])
         .select("span.material-icons")
-        .text(f => (sortBy === f["name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
+        .text(f => (sortBy === f["column_name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
+}
+
+function getLoadingPagesText() {
+    return loadedVariants.length >= itemsPerPage ? "multiple" : "1";
+}
+
+function getLoadingVariantsText() {
+    return loadedVariants.length >= itemsPerPage ? "many" : loadedVariants.length.toString(10);
+}
+
+function getLoadingGuidesText() {
+    return loadedVariants.length >= itemsPerPage ? "many" : loadedGuides.length.toString(10);
 }
 
 function updatePagination() {
     const totalPages = getTotalPages();
 
     d3.select("#current-page").text(page.toFixed(0));
-    d3.select("#total-pages").text(totalPages);
-    d3.select("#total-variants").text(totalVariantsCount);
+    d3.select("#total-pages").text(loadingEntryCounts ? getLoadingPagesText() : totalPages);
+    d3.select("#total-variants").text(loadingEntryCounts ? getLoadingVariantsText() : totalVariantsCount);
+    d3.select("#total-guides").text(loadingEntryCounts ? getLoadingGuidesText() : totalGuidesCount);
 
-    d3.select("#matching-variants-export").text(totalVariantsCount);
+    d3.select("#matching-variants-export").text(loadingEntryCounts ? getLoadingVariantsText() : totalVariantsCount);
+    d3.select("#matching-guides-export").text(loadingEntryCounts ? getLoadingGuidesText() : totalGuidesCount);
 
     d3.select("#first-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);
@@ -409,7 +447,8 @@ function reloadPage(reloadCounts) {
 
     let variantsURL = new URL("/api/", window.location.origin);
     let guidesURL = new URL("/api/guides", window.location.origin);
-    let countURL = new URL("/api/entries", window.location.origin);
+    let variantCountURL = new URL("/api/variants/entries", window.location.origin);
+    let guideCountURL = new URL("/api/guides/entries", window.location.origin);
     let params = {
         page: page.toString(10),
         items_per_page: itemsPerPage,
@@ -418,28 +457,52 @@ function reloadPage(reloadCounts) {
     Object.keys(params).forEach(key => {
         variantsURL.searchParams.append(key, params[key]);
         guidesURL.searchParams.append(key, params[key]);
-        if (reloadCounts) countURL.searchParams.append(key, params[key]);
+        if (reloadCounts) {
+            variantCountURL.searchParams.append(key, params[key]);
+            guideCountURL.searchParams.append(key, params[key]);
+        }
     });
+
+    if (reloadCounts) {
+        totalVariantsCount = 0;
+        totalGuidesCount = 0;
+
+        loadingEntryCounts = true;
+        d3.select("#apply-filters").attr("disabled", "disabled");
+        d3.select("#clear-filters").attr("disabled", "disabled");
+        updatePagination();
+    }
 
     // noinspection JSCheckFunctionSignatures
     return Promise.all([
             fetch(new Request(variantsURL.toString())),
-            fetch(new Request(guidesURL.toString())),
-            ...(reloadCounts ? [fetch(new Request(countURL.toString()))] : [])
+            fetch(new Request(guidesURL.toString()))
         ])
         .then(rs => Promise.all(rs.map(r => r.json())))
         .then(data => {
             loadedVariants = data[0];
             loadedGuides = data[1];
 
-            if (reloadCounts) {
-                totalVariantsCount = data[2]["variants"];
+            updatePagination();
+
+            if (reloadCounts && loadedVariants.length !== 0) {
+                Promise.all([
+                    fetch(new Request(variantCountURL.toString())),
+                    fetch(new Request(guideCountURL.toString()))
+                ]).then(rs => Promise.all(rs.map(r => r.json()))).then(data => {
+                    totalVariantsCount = data[0];
+                    totalGuidesCount = data[1];
+
+                    loadingEntryCounts = false;
+                    d3.select("#apply-filters").attr("disabled", null);
+                    d3.select("#clear-filters").attr("disabled", null);
+                    updatePagination();
+                }).catch(err => console.error(err));
             }
 
             if (transitioning && itemsPerPage >= 100) {
                 d3.select("#table-display").on("transitionend", () => {
                     populateEntryTable();
-                    updatePagination();
                     updateTableColumnHeaders();
                     d3.select("#table-display").classed("loading", false);
                     transitioning = false;
@@ -448,7 +511,6 @@ function reloadPage(reloadCounts) {
                 setTimeout(() => d3.select("#table-display").dispatch("transitionend"), 300);
             } else {
                 populateEntryTable();
-                updatePagination();
                 updateTableColumnHeaders();
                 d3.select("#table-display").classed("loading", false);
                 transitioning = false;
@@ -466,7 +528,7 @@ function resetFilters() {
     startPos = parseInt(metadata["min_pos"], 10);
     endPos = parseInt(metadata["max_pos"], 10);
 
-    selectedGeneLocations = [...metadata["geneloc"]];
+    selectedVariantLocations = [...metadata["location"]];
 
     d3.selectAll(".chr-checkbox").property("checked", true);
     d3.selectAll(".geneloc-checkbox").property("checked", true);
@@ -475,6 +537,9 @@ function resetFilters() {
 
     mustHaveDBSNP = false;
     mustHaveClinVar = false;
+
+    mustHaveNGGPAM = false;
+    mustHaveUniqueGuide = false;
 
     d3.select("#search-query").property("value", "");
     advancedSearchFilters = [];
@@ -488,6 +553,9 @@ function updateFilterDOM() {
 
     d3.select("#dbsnp").property("checked", mustHaveDBSNP);
     d3.select("#clinvar").property("checked", mustHaveClinVar);
+
+    d3.select("#ngg-pam-available").property("checked", mustHaveNGGPAM);
+    d3.select("#unique-guide-available").property("checked", mustHaveUniqueGuide);
 }
 
 function addAdvancedSearchCondition() {
@@ -544,11 +612,11 @@ function updateSearchFilterDOM() {
             updateSearchFilterDOM();
         })
         .selectAll("option")
-        .data([{name: ""}, ...variantFields], f => f["name"])
+        .data([{column_name: ""}, ...variantFields], f => f["column_name"])
         .enter()
         .append("option")
-        .attr("value", f => f["name"])
-        .text(f => f["name"]);
+        .attr("value", f => f["column_name"])
+        .text(f => f["column_name"]);
     filterEntry.append("select")
         .attr("class", "select-operator")
         .on("change", function (f) {
@@ -579,11 +647,13 @@ function updateSearchFilterDOM() {
     const filterOperators = allFilters.select("select.select-operator")
         .selectAll("option")
         .data(f => [
-            ...CONDITION_OPERATORS["BOTH"],
-            ...(f.field === "" ? [] : CONDITION_OPERATORS[variantFields.find(f2 => f2["name"] === f.field)["type"]]),
+            ...CONDITION_OPERATORS.both,
+            ...(f.field === ""
+                ? []
+                : CONDITION_OPERATORS[variantFields.find(f2 => f2["column_name"] === f.field)["data_type"]]),
             ...(f.field !== ""
-                ? (variantFields.find(f2 => f2["name"] === f.field)["notnull"] === 0
-                    ? CONDITION_OPERATORS["NULLABLE"]
+                ? (variantFields.find(f2 => f2["column_name"] === f.field)["is_nullable"] === "YES"
+                    ? CONDITION_OPERATORS.nullable
                     : [])
                 : [])
         ], o => o);
@@ -604,11 +674,14 @@ function getSearchParams() {
         chr: selectedChromosomes,
         start: startPos,
         end: endPos,
-        geneloc: selectedGeneLocations,
+        location: selectedVariantLocations,
         min_mh_l: minMHL,
 
         dbsnp: mustHaveDBSNP,
         clinvar: mustHaveClinVar,
+
+        ngg_pam_avail: mustHaveNGGPAM,
+        unique_guide_avail: mustHaveUniqueGuide,
 
         search_query: d3.select("#search-query").property("value")
     };

@@ -113,6 +113,7 @@
             <h2>Export Options</h2>
             <p>
                 <strong>Total Matching Variants:</strong> <span id="matching-variants-export">0</span> <br>
+                <strong>Total Matching Guides:</strong> <span id="matching-guides-export">0</span>
             </p>
             <form>
                 <label for="export-format">Export Format:</label>
@@ -174,9 +175,9 @@
         </label>
     </div>
     <div>
-        Page <span id="current-page">1</span> of <span id="total-pages">many</span>
+        Page <span id="current-page">1</span> of <span id="total-pages">multiple</span>
         <span id="total-entries-text">
-            (<span id="total-variants">many</span> variants)
+            (<span id="total-variants">many</span> variants, <span id="total-guides">many</span> guides)
         </span>
     </div>
     <div style="font-size: 0;">
@@ -203,6 +204,15 @@
     </div>-->
     <h1>MHcut Browser</h1>
     <form id="filter-search-form">
+        <h2><label for="search-query">SEARCH</label></h2>
+        <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
+        <span class="input-help-text">e.g. gene name, RS ID</span>
+        <div class="row">
+            <h3 style="margin: 0; padding-right: 0.6em; line-height: 39px;">OR</h3>
+            <button id="show-advanced-search" type="button" class="col"
+                    style="margin: 5px 0;">Advanced Search</button>
+        </div>
+        <hr>
         <h2>QUICK FILTERS</h2>
         <h3>
             Chromosomes
@@ -231,16 +241,15 @@
             <input type="checkbox" id="clinvar" name="clinvar" checked> Must be in ClinVar
         </label>
         <hr>
-        <h2><label for="search-query">SEARCH</label></h2>
-        <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
-        <div class="row">
-            <h3 style="margin: 0; padding-right: 0.6em; line-height: 39px;">OR</h3>
-            <button id="show-advanced-search" type="button" class="col"
-                    style="margin: 5px 0;">Advanced Search</button>
-        </div>
+        <label for="ngg-pam-available" class="checkbox-label">
+            <input type="checkbox" id="ngg-pam-available" name="ngg-pam-available"> NGG PAM Available
+        </label>
+        <label for="unique-guide-available" class="checkbox-label">
+            <input type="checkbox" id="unique-guide-available" name="unique-guide-available"> Unique Guide Avail.
+        </label>
         <hr>
-        <button id="apply-filters" type="submit">Apply Filters</button>
-        <button id="clear-filters" type="button">Clear Filters</button>
+        <button id="apply-filters" type="submit" disabled>Apply Filters</button>
+        <button id="clear-filters" type="button" disabled>Clear Filters</button>
     </form>
 </aside>
 </body>

@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 
 import csv
-import sqlite3
+import getpass
+import os
+import psycopg2
 import sys
 
+from io import StringIO
 from tqdm import tqdm
 
 
-INSERT_VARIANTS_QUERY = ("INSERT INTO variants(chr, start, end, rs, caf, topmed, gene_info, pm, mc, af_exac, af_tgp, "
-                         "                     allele_id, clndn, clnsig, dbvarid, gene_info_clinvar, mc_clinvar, "
-                         "                     citation, geneloc, var_l, mh_l, mh_1l, hom, nbmm, mh_dist, mh_seq_1, "
-                         "                     mh_seq_2, pam_mot, pam_uniq, guides_no_ot, guides_min_ot) "
-                         "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,"
-                         "       ?, ?, ?)")
+def int_or_null_cast(x):
+    """
+    Casts a provided value to an integer string, and returns backslash-N if the cast fails.
+    :param x: The value to attempt to cast to an integer.
+    :return: The cast value, or None if the cast fails.
+    """
+    try:
+        return str(int(x))
+    except ValueError:
+        return "\\N"
 
 
 def int_or_none_cast(x):
@@ -32,20 +39,19 @@ def main():
     Main method, runs when the script is ran directly.
     """
 
-    if len(sys.argv) != 3:
-        print("Usage: ./tsv_to_sqlite.py variants_file.tsv guides_file.tsv")
+    if len(sys.argv) != 5:
+        print("Usage: ./tsv_to_postgres.py variants_file.tsv guides_file.tsv database_name database_user")
         exit(1)
 
-    conn = sqlite3.connect("./db.sqlite")
+    db_password = os.environ.get("DB_PASSWORD")
+    if db_password is None:
+        db_password = getpass.getpass(prompt="Password for Database User: ")
+
+    conn = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[3], sys.argv[4], db_password))
     c = conn.cursor()
 
-    with open("./schema.sql", "r") as s:
-        c.executescript(s.read())
-
-    # Disable blocking write-to-disk at the cost of a chance of database corruption (which is fine, since we have the
-    # original files) in order to improve speed.
-    c.execute("PRAGMA synchronous=OFF")
-    c.execute("PRAGMA journal_mode=MEMORY")
+    with open("./sql/schema.sql", "r") as s:
+        c.execute(s.read())
 
     # Get number of lines for progress bars.
     n_variants = 0
@@ -61,64 +67,107 @@ def main():
         for _ in gs_file:
             n_guides += 1
 
-    item_bank = []
+    variant_copy = StringIO()
 
     with open(sys.argv[1], "r", newline="") as vs_file:
         reader = csv.DictReader(vs_file, delimiter="\t")
-        i = 0
-        for variant in tqdm(reader, total=n_variants, desc="variants"):  # TODO: Find total with wc -l
+        i = 1
+        for variant in tqdm(reader, total=n_variants, desc="variants"):
+            rs = variant["RS"].strip()
+            if rs == "-":
+                # Treat - as null (NA does not occur)
+                rs = "\\N"
+
+            af_exac = variant["AF_EXAC"].strip()
+            if af_exac == "NA":
+                # Treat NA as null
+                af_exac = "\\N"
+
             gene_info_clinvar = variant["GENEINFO.ClinVar"].strip()
             if gene_info_clinvar == "NA":
                 # Treat NA, but not -, as null
-                gene_info_clinvar = None
-            item_bank.append((variant["chr"], int(variant["start"]), int(variant["end"]),
-                              int_or_none_cast(variant["RS"]), variant["CAF"], variant["TOPMED"], variant["GENEINFO"],
-                              variant["PM"], variant["MC"], variant["AF_EXAC"], variant["AF_TGP"], variant["ALLELEID"],
-                              variant["CLNDN"], variant["CLNSIG"], variant["DBVARID"], gene_info_clinvar,
-                              variant["MC.ClinVar"], variant["citation"], variant["geneloc"], int(variant["varL"]),
-                              int(variant["mhL"]), int(variant["mh1L"]), variant["hom"], int(variant["nbMM"]),
-                              int_or_none_cast(variant["mhDist"]), variant["MHseq1"], variant["MHseq2"],
-                              int_or_none_cast(variant["pamMot"]), int_or_none_cast(variant["pamUniq"]),
-                              int_or_none_cast(variant["guidesNoOT"]), int_or_none_cast(variant["guidesMinOT"])))
+                gene_info_clinvar = "\\N"
 
-            if i % 100 == 0:
-                c.executemany(INSERT_VARIANTS_QUERY, item_bank)
-                item_bank = []
+            main_rows = (str(i), variant["chr"], variant["start"], variant["end"], rs, variant["CAF"],
+                         variant["TOPMED"], variant["GENEINFO"], variant["PM"], variant["MC"], af_exac,
+                         variant["AF_TGP"], int_or_null_cast(variant["ALLELEID"]), variant["CLNDN"], variant["CLNSIG"],
+                         variant["DBVARID"], gene_info_clinvar, variant["MC.ClinVar"], variant["citation"],
+                         variant["geneloc"], variant["varL"], variant["mhL"], variant["mh1L"], variant["hom"],
+                         variant["nbMM"], int_or_null_cast(variant["mhDist"]), variant["MHseq1"], variant["MHseq2"],
+                         int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
+                         int_or_null_cast(variant["guidesNoOT"]), int_or_null_cast(variant["guidesMinOT"]))
+
+            variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
+
+            if i % 500000 == 0:
+                variant_copy.seek(0)
+                c.copy_from(variant_copy, "variants")
+                variant_copy = StringIO()
+                conn.commit()
 
             i += 1
 
-            # Commit every once in a while when loading large files.
-            if i % 1000000 == 0:
-                conn.commit()
+    # Copy stragglers
+    variant_copy.seek(0)
+    c.copy_from(variant_copy, "variants")
 
-    if len(item_bank) > 0:
-        c.executemany(INSERT_VARIANTS_QUERY, item_bank)
+    conn.commit()
 
-    with open("./indices.sql", "r") as indices_file:
-        c.executescript(indices_file.read())
+    print("Creating indices...")
+    c.execute(open("./sql/variants_indices.sql", "r").read())
+    print("\tDone.")
+
+    conn.commit()
+
+    c.execute("INSERT INTO summary_statistics VALUES(%s, (SELECT MIN(pos_start) FROM variants))", ("min_pos",))
+    c.execute("INSERT INTO summary_statistics VALUES(%s, (SELECT MAX(pos_end) FROM variants))", ("max_pos",))
+    c.execute("INSERT INTO summary_statistics VALUES(%s, (SELECT MAX(mh_l) FROM variants))", ("max_mh_l",))
 
     conn.commit()
 
     with open(sys.argv[2], "r", newline="") as gs_file:
         reader = csv.DictReader(gs_file, delimiter="\t")
+        guide_copy = StringIO()
+        j = 1
         for guide in tqdm(reader, total=n_guides, desc="guides"):
-            c.execute("SELECT id FROM variants WHERE chr = :chr AND start = :start AND end = :end", {
-                "chr": guide["chr"],
-                "start": int(guide["start"]),
-                "end": int(guide["end"])
-            })
-            variant_id = c.fetchone()[0]
-            c.execute("INSERT INTO guides(variant_id, protospacer, mm0, mm1, mm2, m1_dist_1, m1_dist_2, mh_dist_1, "
-                      "mh_dist_2, nb_off_tgt, largest_off_tgt, bot_score, bot_size, bot_var_l, bot_gc, bot_seq)"
-                      "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                      (variant_id, guide["protospacer"], int_or_none_cast(guide["mm0"]),
-                       int_or_none_cast(guide["mm1"]), int_or_none_cast(guide["mm2"]), int(guide["m1Dist1"]),
-                       int(guide["m1Dist2"]), int(guide["mhDist1"]), int(guide["mhDist2"]),
-                       int_or_none_cast(guide["nbOffTgt"]), int_or_none_cast(guide["largestOffTgt"]), guide["botScore"],
-                       int_or_none_cast(guide["botSize"]), int_or_none_cast(guide["botVarL"]),
-                       int_or_none_cast(guide["botGC"]), guide["botSeq"]))
+            c.execute("SELECT id FROM variants WHERE chr = %s AND pos_start = %s AND pos_end = %s "
+                      "AND rs {}".format("IS NULL -- %s" if guide["RS"] == "-" else "= %s"),
+                      (guide["chr"], int(guide["start"]), int(guide["end"]), guide["RS"]))
+
+            variant = c.fetchone()
+            if variant is None:
+                tqdm.write("Could not find associated variant for guide:")
+                tqdm.write(str(guide))
+
+            variant_id = variant[0]
+
+            guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null_cast(guide["mm0"]),
+                                        int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
+                                        guide["m1Dist1"], guide["m1Dist2"], guide["mhDist1"],
+                                        guide["mhDist2"], int_or_null_cast(guide["nbOffTgt"]),
+                                        int_or_null_cast(guide["largestOffTgt"]), guide["botScore"],
+                                        int_or_null_cast(guide["botSize"]), int_or_null_cast(guide["botVarL"]),
+                                        int_or_null_cast(guide["botGC"]), guide["botSeq"])) + "\n")
+
+            j += 1
+
+            if j % 50000 == 0:
+                guide_copy.seek(0)
+                c.copy_from(guide_copy, "guides")
+                guide_copy = StringIO()
+                conn.commit()
+
+    guide_copy.seek(0)
+    c.copy_from(guide_copy, "guides")
 
     conn.commit()
+
+    c.execute("CREATE INDEX guides_variant_id_idx ON guides(variant_id)")
+    c.execute("CLUSTER guides USING guides_variant_id_idx")
+
+    conn.commit()
+
+    c.close()
     conn.close()
 
 

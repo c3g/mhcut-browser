@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import json as pyjson
+import os
 import os.path
 import re
-import sqlite3
+import psycopg2
+import psycopg2.extras
 
 from flask import Flask, g, json, request, Response
 from typing import Pattern
@@ -36,17 +38,11 @@ SEARCH_OPERATORS = {
     "is_null": ("IS NULL", "")
 }
 
-POSITION_OPERATORS = {
-    "overlap": "end >= :start_pos AND start <= :end_pos ",
-    "not_overlap": "end < :start_pos OR start > :end_pos",
-    "within": "start >= :start_pos AND end <= :end_pos"
-}
-
 # Domain lists for metadata endpoint
 CHR_VALUES = ("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
               "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
               "chr20", "chr21", "chr22", "chrX", "chrY")
-GENELOC_VALUES = ("intronic", "exonic", "intergenic")
+LOCATION_VALUES = ("intronic", "exonic", "intergenic")
 
 # Domains
 CHR_DOMAIN = re.compile("^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
@@ -79,28 +75,32 @@ def search_param(c):
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE_PATH)
-        db.row_factory = sqlite3.Row
+        db = g._database = psycopg2.connect("dbname=crispr user={} password={}".format(
+            os.environ.get("DB_USER"),
+            os.environ.get("DB_PASSWORD")
+        ))
     return db
 
 
 def get_variants_columns(c):
-    c.execute("PRAGMA table_info(variants)")
+    c.execute("SELECT column_name, is_nullable, data_type FROM information_schema.columns "
+              "WHERE table_schema = 'public' AND table_name = 'variants' AND column_name != 'full_row'")
     return tuple([dict(i) for i in c.fetchall()])
 
 
 def get_guides_columns(c):
-    c.execute("PRAGMA table_info(guides)")
+    c.execute("SELECT column_name, is_nullable, data_type FROM information_schema.columns "
+              "WHERE table_schema = 'public' AND table_name = 'guides'")
     return tuple([dict(i) for i in c.fetchall()])
 
 
 def build_search_query(raw_query, c):
-    columns = get_variants_columns(c)
-    column_names = [c["name"] for c in columns]
     search_query_fragment = ""
     search_query_data = {}
 
     try:
+        column_names = [c["column_name"] for c in get_variants_columns(c)]
+
         query_obj = json.loads(raw_query)
         for c in query_obj:
             if c["field"] not in column_names:
@@ -117,15 +117,17 @@ def build_search_query(raw_query, c):
             search_query_fragment += "({}({} {}".format("NOT " if c["negated"] else "", c["field"], op_data[0])
 
             if op_data[1] != "":
-                search_query_fragment += " :{}".format(search_param(c["id"]))
+                search_query_fragment += " %({})s".format(search_param(c["id"]))
                 search_query_data[search_param(c["id"])] = op_data[1].format(c["value"])
 
             search_query_fragment += "))"
 
     except (pyjson.decoder.JSONDecodeError, TypeError, AttributeError):
-        search_query_fragment = " OR ".join(["(CAST({} AS TEXT) LIKE :{})".format(c["name"], search_param(c["name"]))
-                                             for c in columns])
-        search_query_data = {search_param(c["name"]): "%{}%".format(raw_query.strip()) for c in columns}
+        if raw_query.strip() == "":
+            return "true", search_query_data
+
+        search_query_fragment = "full_row LIKE %(full_row_cond)s "
+        search_query_data = {"full_row_cond": "%{}%".format(raw_query.strip().lower())}
 
     return search_query_fragment, search_query_data
 
@@ -134,39 +136,46 @@ def get_search_params_from_request(c):
     chromosomes = [ch for ch in request.args.get("chr", "").split(",") if re.match(CHR_DOMAIN, ch)]
     if len(chromosomes) == 0:
         chromosomes = list(CHR_VALUES)
-    chr_fragment = "(" + ",".join(["'{}'".format(ch) for ch in chromosomes]) + ")"
+    chr_fragment = "(" + ",".join(["'{}'::CHROMOSOME".format(ch) for ch in chromosomes]) + ")"
 
     start_pos = int(verify_domain(request.args.get("start", "0"), NON_NEG_INT_DOMAIN))
     end_pos = int(verify_domain(request.args.get("end", "1000000000000"), POS_INT_DOMAIN))
-    position_filter_operator = verify_domain(request.args.get("position_filter_operator", "overlap"),
-                                             POSITION_OPERATOR_DOMAIN)
-    position_filter_fragment = POSITION_OPERATORS[position_filter_operator]
+    position_filter_fragment = ("pos_start <= %(end_pos)s AND pos_end >= %(start_pos)s"
+                                if not (start_pos == 0 and end_pos == 1000000000000) else "true")
 
-    gene_locations = [l.strip() for l in request.args.get("geneloc", "").split(",") if l.strip() in GENELOC_VALUES]
+    gene_locations = [l.strip() for l in request.args.get("location", "").split(",") if l.strip() in LOCATION_VALUES]
     if len(gene_locations) == 0:
-        gene_locations = list(GENELOC_VALUES)
-    geneloc_fragment = "(" + ",".join(["'{}'".format(l) for l in gene_locations]) + ")"
+        gene_locations = list(LOCATION_VALUES)
+    location_fragment = "(" + ",".join(["'{}'::GENE_LOCATION".format(l) for l in gene_locations]) + ")"
 
     min_mh_l = int(verify_domain(request.args.get("min_mh_l", "0"), NON_NEG_INT_DOMAIN))
 
-    dbsnp = int(verify_domain(request.args.get("dbsnp", "false"), BOOLEAN_DOMAIN) == "true")
-    clinvar = int(verify_domain(request.args.get("clinvar", "false"), BOOLEAN_DOMAIN) == "true")
+    dbsnp = verify_domain(request.args.get("dbsnp", "false"), BOOLEAN_DOMAIN) == "true"
+    clinvar = verify_domain(request.args.get("clinvar", "false"), BOOLEAN_DOMAIN) == "true"
+
+    ngg_pam_avail = verify_domain(request.args.get("ngg_pam_avail", "false"), BOOLEAN_DOMAIN) == "true"
+    unique_guide_avail = verify_domain(request.args.get("unique_guide_avail", "false"), BOOLEAN_DOMAIN) == "true"
 
     search_query_fragment, search_query_data = build_search_query(request.args.get("search_query", ""), c)
 
     return {
+        "chr": chromosomes,
         "chr_fragment": chr_fragment,
 
         "start_pos": start_pos,
         "end_pos": end_pos,
 
         "position_filter_fragment": position_filter_fragment,
-        "geneloc_fragment": geneloc_fragment,
+        "location": gene_locations,
+        "location_fragment": location_fragment,
 
         "min_mh_l": min_mh_l,
 
         "dbsnp": dbsnp,
         "clinvar": clinvar,
+
+        "ngg_pam_avail": ngg_pam_avail,
+        "unique_guide_avail": unique_guide_avail,
 
         "search_query_fragment": search_query_fragment,
         "search_query_data": search_query_data
@@ -178,22 +187,26 @@ def index():
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
     items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
 
-    c = get_db().cursor()
+    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     search_params = get_search_params_from_request(c)
 
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join([i["name"] for i in get_variants_columns(c)])))
+        re.compile("^({})$".format("|".join([i["column_name"] for i in get_variants_columns(c)])))
     )
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
     c.execute(
-        "SELECT * FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-        "AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
-        "ORDER BY {} {} LIMIT :items_per_page OFFSET :start".format(
-            search_params["chr_fragment"],
-            search_params["geneloc_fragment"],
+        "SELECT * FROM variants WHERE {}{}{} "
+        "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
+        "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
+        "AND ({}) AND ({}) ORDER BY {} {} LIMIT %(items_per_page)s OFFSET %(start)s".format(
+            "(chr IN {}) AND ".format(search_params["chr_fragment"])
+            if len(search_params["chr"]) < len(CHR_VALUES) else "",
+            "(location IN {}) AND ".format(search_params["location_fragment"])
+            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"],
             sort_by,
@@ -207,19 +220,25 @@ def index():
             "min_mh_l": search_params["min_mh_l"],
             "dbsnp": search_params["dbsnp"],
             "clinvar": search_params["clinvar"],
+            "ngg_pam_avail": search_params["ngg_pam_avail"],
+            "unique_guide_avail": search_params["unique_guide_avail"],
             **search_params["search_query_data"]
         }
     )
-    return json.jsonify([dict(i) for i in c.fetchall()])
+
+    results = c.fetchall()
+    for r in results:
+        del r["full_row"]
+    return json.jsonify(results)
 
 
 @app.route("/tsv", methods=["GET"])
 def variants_tsv():
-    c = get_db().cursor()
+    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     search_params = get_search_params_from_request(c)
 
-    column_names = [i["name"] for i in get_variants_columns(c)]
+    column_names = [i["column_name"] for i in get_variants_columns(c)]
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
         re.compile("^({})$".format("|".join(column_names)))
@@ -231,11 +250,15 @@ def variants_tsv():
             c2 = get_db().cursor()
 
             c2.execute(
-                "SELECT * FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-                "AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
-                "ORDER BY {} {}".format(
-                    search_params["chr_fragment"],
-                    search_params["geneloc_fragment"],
+                "SELECT * FROM variants WHERE {}{}{} "
+                "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
+                "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
+                "AND ({}) AND ({}) ORDER BY {} {}".format(
+                    ("(chr IN {}) AND ".format(search_params["chr_fragment"]))
+                    if len(search_params["chr"]) < len(CHR_VALUES) else "",
+                    "(location IN {}) AND ".format(search_params["location_fragment"])
+                    if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+                    "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
                     search_params["position_filter_fragment"],
                     search_params["search_query_fragment"],
                     sort_by,
@@ -247,6 +270,8 @@ def variants_tsv():
                     "min_mh_l": search_params["min_mh_l"],
                     "dbsnp": search_params["dbsnp"],
                     "clinvar": search_params["clinvar"],
+                    "ngg_pam_avail": search_params["ngg_pam_avail"],
+                    "unique_guide_avail": search_params["unique_guide_avail"],
                     **search_params["search_query_data"]
                 }
             )
@@ -254,7 +279,7 @@ def variants_tsv():
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
             while row is not None:
-                yield "\t".join([str(col) if col is not None else "NA" for col in tuple(row)]) + "\n"
+                yield "\t".join([str(col) if col is not None else "NA" for col in row[:-1]]) + "\n"
                 row = c2.fetchone()
 
     return Response(generate(), mimetype="text/tab-separated-values",
@@ -263,25 +288,25 @@ def variants_tsv():
 
 @app.route("/variants/<int:variant_id>/guides", methods=["GET"])
 def variant_guides(variant_id):
-    c = get_db().cursor()
-    c.execute("SELECT * FROM guides WHERE variant_id = ?", (variant_id,))
-    return json.jsonify([dict(i) for i in c.fetchall()])
+    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    c.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
+    return json.jsonify(c.fetchall())
 
 
 @app.route("/variants/<int:variant_id>/guides/tsv", methods=["GET"])
 def variant_guides_tsv(variant_id):
-    c = get_db().cursor()
-    column_names = [i["name"] for i in get_guides_columns(c)]
+    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    column_names = [i["column_name"] for i in get_guides_columns(c)]
 
     def generate():
         with app.app_context():
             c2 = get_db().cursor()
-            c2.execute("SELECT * FROM guides WHERE variant_id = ?", (variant_id,))
+            c2.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
 
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
             while row is not None:
-                yield "\t".join([str(col) if col is not None else "NA" for col in tuple(row)]) + "\n"
+                yield "\t".join([str(col) if col is not None else "NA" for col in row]) + "\n"
                 row = c2.fetchone()
 
     return Response(generate(), mimetype="text/tab-separated-values",
@@ -294,13 +319,13 @@ def guides():
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
     items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
 
-    c = get_db().cursor()
+    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     search_params = get_search_params_from_request(c)
 
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join([i["name"] for i in get_variants_columns(c)])))
+        re.compile("^({})$".format("|".join([i["column_name"] for i in get_variants_columns(c)])))
     )
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
@@ -308,12 +333,16 @@ def guides():
 
     c.execute(
         "SELECT * FROM guides WHERE variant_id IN ("
-        "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-        "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
-        "  ORDER BY {} {} LIMIT :items_per_page OFFSET :start"
-        ")".format(
-            search_params["chr_fragment"],
-            search_params["geneloc_fragment"],
+        "  SELECT id FROM variants WHERE {}{}{}"
+        "  NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL))"
+        "  AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s)"
+        "  AND ({}) AND ({}) ORDER BY {} {} LIMIT %(items_per_page)s OFFSET %(start)s"
+        ") ORDER BY id".format(
+            "(chr IN {}) AND ".format(search_params["chr_fragment"])
+            if len(search_params["chr"]) < len(CHR_VALUES) else "",
+            "(location IN {}) AND ".format(search_params["location_fragment"])
+            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"],
             sort_by,
@@ -327,17 +356,19 @@ def guides():
             "min_mh_l": search_params["min_mh_l"],
             "dbsnp": search_params["dbsnp"],
             "clinvar": search_params["clinvar"],
+            "ngg_pam_avail": search_params["ngg_pam_avail"],
+            "unique_guide_avail": search_params["unique_guide_avail"],
             **search_params["search_query_data"]
         }
     )
-    return json.jsonify([dict(i) for i in c.fetchall()])
+    return json.jsonify(c.fetchall())
 
 
 @app.route("/guides/tsv", methods=["GET"])
 def guides_tsv():
-    c = get_db().cursor()
+    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
-    column_names = [i["name"] for i in get_guides_columns(c)]
+    column_names = [i["column_name"] for i in get_guides_columns(c)]
 
     def generate():
         with app.app_context():
@@ -345,11 +376,15 @@ def guides_tsv():
 
             c2.execute(
                 "SELECT * FROM guides WHERE variant_id IN ("
-                "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-                "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({})"
-                ")".format(
-                    search_params["chr_fragment"],
-                    search_params["geneloc_fragment"],
+                "  SELECT id FROM variants WHERE {}{}{}"
+                "  NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL))"
+                "  AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s)"
+                "  AND ({}) AND ({}))".format(
+                    "(chr IN {}) AND ".format(search_params["chr_fragment"])
+                    if len(search_params["chr"]) < len(CHR_VALUES) else "",
+                    "(location IN {}) AND ".format(search_params["location_fragment"])
+                    if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+                    "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
                     search_params["position_filter_fragment"],
                     search_params["search_query_fragment"]
                 ),
@@ -359,6 +394,8 @@ def guides_tsv():
                     "min_mh_l": search_params["min_mh_l"],
                     "dbsnp": search_params["dbsnp"],
                     "clinvar": search_params["clinvar"],
+                    "ngg_pam_avail": search_params["ngg_pam_avail"],
+                    "unique_guide_avail": search_params["unique_guide_avail"],
                     **search_params["search_query_data"]
                 }
             )
@@ -366,7 +403,7 @@ def guides_tsv():
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
             while row is not None:
-                yield "\t".join([str(col) if col is not None else "NA" for col in tuple(row)]) + "\n"
+                yield "\t".join([str(col) if col is not None else "NA" for col in row]) + "\n"
                 row = c2.fetchone()
 
     return Response(generate(), mimetype="text/tab-separated-values",
@@ -375,10 +412,10 @@ def guides_tsv():
 
 @app.route("/combined/tsv", methods=["GET"])
 def combined_tsv():
-    c = get_db().cursor()
+    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
-    variants_column_names = [i["name"] for i in get_variants_columns(c)]
-    guides_column_names = [i["name"] for i in get_guides_columns(c)]
+    variants_column_names = [i["column_name"] for i in get_variants_columns(c)]
+    guides_column_names = [i["column_name"] for i in get_guides_columns(c)]
 
     sort_by = verify_domain(
         request.args.get("sort_by", "id"),
@@ -391,11 +428,15 @@ def combined_tsv():
             c2 = get_db().cursor()
 
             c2.execute(
-                "SELECT * FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-                "AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}) "
-                "ORDER BY {} {}".format(
-                    search_params["chr_fragment"],
-                    search_params["geneloc_fragment"],
+                "SELECT * FROM variants WHERE {}{}{} "
+                "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
+                "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
+                "AND ({}) AND ({}) ORDER BY {} {}".format(
+                    "(chr IN {}) AND ".format(search_params["chr_fragment"])
+                    if len(search_params["chr"]) < len(CHR_VALUES) else "",
+                    "(location IN {}) AND ".format(search_params["location_fragment"])
+                    if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+                    "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
                     search_params["position_filter_fragment"],
                     search_params["search_query_fragment"],
                     sort_by,
@@ -407,6 +448,8 @@ def combined_tsv():
                     "min_mh_l": search_params["min_mh_l"],
                     "dbsnp": search_params["dbsnp"],
                     "clinvar": search_params["clinvar"],
+                    "ngg_pam_avail": search_params["ngg_pam_avail"],
+                    "unique_guide_avail": search_params["unique_guide_avail"],
                     **search_params["search_query_data"]
                 }
             )
@@ -416,15 +459,15 @@ def combined_tsv():
             c3 = get_db().cursor()
             row = c2.fetchone()
             while row is not None:
-                row_to_return = [str(col) if col is not None else "NA" for col in tuple(row)]
+                row_to_return = [str(col) if col is not None else "NA" for col in row[:-1]]
 
                 yield "\t".join(row_to_return) + "\n"
 
-                c3.execute("SELECT * FROM guides WHERE variant_id = ?", (row_to_return[0],))
+                c3.execute("SELECT * FROM guides WHERE variant_id = %s", (row_to_return[0],))
                 guide_row = c3.fetchone()
                 while guide_row is not None:
-                    yield "\t".join(([""] * len(variants_column_names)) \
-                                    + [str(col) if col is not None else "NA" for col in tuple(guide_row)]) + "\n"
+                    yield "\t".join(([""] * len(variants_column_names))
+                                    + [str(col) if col is not None else "NA" for col in guide_row]) + "\n"
                     guide_row = c3.fetchone()
 
                 row = c2.fetchone()
@@ -434,15 +477,21 @@ def combined_tsv():
                                                     "filename=\"variants_with_guides.tsv\""})
 
 
-@app.route("/entries", methods=["GET"])
-def entries():
-    c = get_db().cursor()
+@app.route("/variants/entries", methods=["GET"])
+def variants_entries():
+    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
-    c.execute(
-        "SELECT COUNT(*) FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-        "AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({})".format(
-            search_params["chr_fragment"],
-            search_params["geneloc_fragment"],
+
+    entries_query = c.mogrify(
+        "SELECT COUNT(*) FROM variants WHERE {}{}{} "
+        "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
+        "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
+        "AND ({}) AND ({})".format(
+            "(chr IN {}) AND ".format(search_params["chr_fragment"])
+            if len(search_params["chr"]) < len(CHR_VALUES) else "",
+            "(location IN {}) AND ".format(search_params["location_fragment"])
+            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"]
         ),
@@ -452,16 +501,41 @@ def entries():
             "min_mh_l": search_params["min_mh_l"],
             "dbsnp": search_params["dbsnp"],
             "clinvar": search_params["clinvar"],
+            "ngg_pam_avail": search_params["ngg_pam_avail"],
+            "unique_guide_avail": search_params["unique_guide_avail"],
             **search_params["search_query_data"]
         }
     )
-    variant_count = c.fetchone()[0]
-    c.execute(
-        "SELECT COUNT(*) FROM guides WHERE variant_id IN ("
-        "  SELECT id FROM variants WHERE (chr IN {}) AND (geneloc IN {}) AND (mh_l >= :min_mh_l) "
-        "  AND NOT ((:dbsnp AND rs == '-') OR (:clinvar AND gene_info_clinvar IS NULL)) AND ({}) AND ({}))".format(
-            search_params["chr_fragment"],
-            search_params["geneloc_fragment"],
+
+    c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
+    cache_value = c.fetchone()
+
+    if cache_value is None:
+        c.execute(entries_query)
+        num_entries = c.fetchone()[0]
+        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s)", (entries_query, num_entries))
+        get_db().commit()
+    else:
+        num_entries = cache_value[1]
+
+    return json.jsonify(num_entries)
+
+
+@app.route("/guides/entries", methods=["GET"])
+def guides_entries():
+    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+    search_params = get_search_params_from_request(c)
+
+    entries_query = c.mogrify(
+        "SELECT COUNT(*) FROM guides WHERE variant_id IN (SELECT id FROM variants WHERE {}{}{}"
+        "  NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL))"
+        "  AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s)"
+        "  AND ({}) AND ({}))".format(
+            "(chr IN {}) AND ".format(search_params["chr_fragment"])
+            if len(search_params["chr"]) < len(CHR_VALUES) else "",
+            "(location IN {}) AND ".format(search_params["location_fragment"])
+            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
+            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"]
         ),
@@ -471,18 +545,29 @@ def entries():
             "min_mh_l": search_params["min_mh_l"],
             "dbsnp": search_params["dbsnp"],
             "clinvar": search_params["clinvar"],
+            "ngg_pam_avail": search_params["ngg_pam_avail"],
+            "unique_guide_avail": search_params["unique_guide_avail"],
             **search_params["search_query_data"]
         }
     )
-    return json.jsonify({
-        "variants": variant_count,
-        "guides": c.fetchone()[0]
-    })
+
+    c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
+    cache_value = c.fetchone()
+
+    if cache_value is None:
+        c.execute(entries_query)
+        num_entries = c.fetchone()[0]
+        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s)", (entries_query, num_entries))
+        get_db().commit()
+    else:
+        num_entries = cache_value[1]
+
+    return json.jsonify(num_entries)
 
 
 @app.route("/fields", methods=["GET"])
 def fields():
-    c = get_db().cursor()
+    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     return json.jsonify({
         "variants": get_variants_columns(c),
         "guides": get_guides_columns(c)
@@ -496,12 +581,14 @@ def metadata():
     parameters.
     :return: A JSON response with metadata and summary statistics.
     """
-    c = get_db().cursor()
-    c.execute("SELECT MIN(start) AS min_pos, MAX(end) AS max_pos, MAX(mh_l) AS max_mh_l FROM variants")
+    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+    c.execute("SELECT (SELECT CAST(s_value AS INTEGER) FROM summary_statistics WHERE s_key = 'min_pos') AS min_pos, "
+              "  (SELECT CAST(s_value AS INTEGER) FROM summary_statistics WHERE s_key = 'max_pos') AS max_pos, "
+              "  MAX(mh_l) AS max_mh_l FROM variants")
     return json.jsonify({
         **dict(c.fetchone()),
         "chr": CHR_VALUES,
-        "geneloc": GENELOC_VALUES,
+        "location": LOCATION_VALUES,
         "version": __version__
     })
 

@@ -88,6 +88,10 @@ def get_variants_columns(c):
     return tuple([dict(i) for i in c.fetchall()])
 
 
+def build_variants_columns_domain(c):
+    return re.compile("^({})$".format("|".join([i["column_name"] for i in get_variants_columns(c)])))
+
+
 def get_guides_columns(c):
     c.execute("SELECT column_name, is_nullable, data_type FROM information_schema.columns "
               "WHERE table_schema = 'public' AND table_name = 'guides'")
@@ -182,26 +186,13 @@ def get_search_params_from_request(c):
     }
 
 
-@app.route("/", methods=["GET"])
-def index():
-    page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
-    items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
-
-    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-    search_params = get_search_params_from_request(c)
-
-    sort_by = verify_domain(
-        request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join([i["column_name"] for i in get_variants_columns(c)])))
-    )
-    sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
-
-    c.execute(
-        "SELECT * FROM variants WHERE {}{}{} "
+def build_variants_query(c, selection, search_params, sort_by=None, sort_order=None, page=None, items_per_page=None):
+    return c.mogrify(
+        "SELECT {} FROM variants WHERE {}{}{} "
         "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
         "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-        "AND ({}) AND ({}) ORDER BY {} {} LIMIT %(items_per_page)s OFFSET %(start)s".format(
+        "AND ({}) AND ({}) {}{}{}".format(
+            selection,
             "(chr IN {}) AND ".format(search_params["chr_fragment"])
             if len(search_params["chr"]) < len(CHR_VALUES) else "",
             "(location IN {}) AND ".format(search_params["location_fragment"])
@@ -209,11 +200,12 @@ def index():
             "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"],
-            sort_by,
-            sort_order
+            "ORDER BY {} {} ".format(sort_by, sort_order) if sort_by is not None and sort_order is not None else "",
+            "LIMIT %(items_per_page)s " if items_per_page is not None else "",
+            "OFFSET %(start)s" if page is not None else ""
         ),
         {
-            "start": (page - 1) * items_per_page,
+            "start": ((page if page is not None else 0) - 1) * (items_per_page if items_per_page is not None else 0),
             "items_per_page": items_per_page,
             "start_pos": search_params["start_pos"],
             "end_pos": search_params["end_pos"],
@@ -225,6 +217,20 @@ def index():
             **search_params["search_query_data"]
         }
     )
+
+
+@app.route("/", methods=["GET"])
+def index():
+    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    c.execute(build_variants_query(
+        c,
+        "*",
+        get_search_params_from_request(c),
+        sort_by=verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c)),
+        sort_order=verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN),
+        page=int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN)),
+        items_per_page=int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
+    ))
 
     results = c.fetchall()
     for r in results:
@@ -238,43 +244,15 @@ def variants_tsv():
 
     search_params = get_search_params_from_request(c)
 
-    column_names = [i["column_name"] for i in get_variants_columns(c)]
-    sort_by = verify_domain(
-        request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join(column_names)))
-    )
+    sort_by = verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c))
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
+
+    column_names = [i["column_name"] for i in get_variants_columns(c)]
 
     def generate():
         with app.app_context():
             c2 = get_db().cursor()
-
-            c2.execute(
-                "SELECT * FROM variants WHERE {}{}{} "
-                "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
-                "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-                "AND ({}) AND ({}) ORDER BY {} {}".format(
-                    ("(chr IN {}) AND ".format(search_params["chr_fragment"]))
-                    if len(search_params["chr"]) < len(CHR_VALUES) else "",
-                    "(location IN {}) AND ".format(search_params["location_fragment"])
-                    if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-                    "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
-                    search_params["position_filter_fragment"],
-                    search_params["search_query_fragment"],
-                    sort_by,
-                    sort_order
-                ),
-                {
-                    "start_pos": search_params["start_pos"],
-                    "end_pos": search_params["end_pos"],
-                    "min_mh_l": search_params["min_mh_l"],
-                    "dbsnp": search_params["dbsnp"],
-                    "clinvar": search_params["clinvar"],
-                    "ngg_pam_avail": search_params["ngg_pam_avail"],
-                    "unique_guide_avail": search_params["unique_guide_avail"],
-                    **search_params["search_query_data"]
-                }
-            )
+            c2.execute(build_variants_query(c2, "*", search_params, sort_by=sort_by, sort_order=sort_order))
 
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
@@ -323,13 +301,10 @@ def guides():
 
     search_params = get_search_params_from_request(c)
 
-    sort_by = verify_domain(
-        request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join([i["column_name"] for i in get_variants_columns(c)])))
-    )
+    sort_by = verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c))
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
-    # TODO: SORT GUIDES AS WELL
+    # TODO: ALLOW SORTING GUIDES AS WELL?
 
     c.execute(
         "SELECT * FROM guides WHERE variant_id IN ("
@@ -361,6 +336,7 @@ def guides():
             **search_params["search_query_data"]
         }
     )
+
     return json.jsonify(c.fetchall())
 
 
@@ -413,46 +389,19 @@ def guides_tsv():
 @app.route("/combined/tsv", methods=["GET"])
 def combined_tsv():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     search_params = get_search_params_from_request(c)
+
+    sort_by = verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c))
+    sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
+
     variants_column_names = [i["column_name"] for i in get_variants_columns(c)]
     guides_column_names = [i["column_name"] for i in get_guides_columns(c)]
-
-    sort_by = verify_domain(
-        request.args.get("sort_by", "id"),
-        re.compile("^({})$".format("|".join(variants_column_names)))
-    )
-    sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
     def generate():
         with app.app_context():
             c2 = get_db().cursor()
-
-            c2.execute(
-                "SELECT * FROM variants WHERE {}{}{} "
-                "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
-                "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-                "AND ({}) AND ({}) ORDER BY {} {}".format(
-                    "(chr IN {}) AND ".format(search_params["chr_fragment"])
-                    if len(search_params["chr"]) < len(CHR_VALUES) else "",
-                    "(location IN {}) AND ".format(search_params["location_fragment"])
-                    if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-                    "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
-                    search_params["position_filter_fragment"],
-                    search_params["search_query_fragment"],
-                    sort_by,
-                    sort_order
-                ),
-                {
-                    "start_pos": search_params["start_pos"],
-                    "end_pos": search_params["end_pos"],
-                    "min_mh_l": search_params["min_mh_l"],
-                    "dbsnp": search_params["dbsnp"],
-                    "clinvar": search_params["clinvar"],
-                    "ngg_pam_avail": search_params["ngg_pam_avail"],
-                    "unique_guide_avail": search_params["unique_guide_avail"],
-                    **search_params["search_query_data"]
-                }
-            )
+            c2.execute(build_variants_query(c, "*", search_params, sort_by, sort_order))
 
             yield "\t".join(variants_column_names + [col if col != "id" else "guide_id"
                                                      for col in guides_column_names]) + "\n"
@@ -480,32 +429,8 @@ def combined_tsv():
 @app.route("/variants/entries", methods=["GET"])
 def variants_entries():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
-    search_params = get_search_params_from_request(c)
 
-    entries_query = c.mogrify(
-        "SELECT COUNT(*) FROM variants WHERE {}{}{} "
-        "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
-        "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-        "AND ({}) AND ({})".format(
-            "(chr IN {}) AND ".format(search_params["chr_fragment"])
-            if len(search_params["chr"]) < len(CHR_VALUES) else "",
-            "(location IN {}) AND ".format(search_params["location_fragment"])
-            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
-            search_params["position_filter_fragment"],
-            search_params["search_query_fragment"]
-        ),
-        {
-            "start_pos": search_params["start_pos"],
-            "end_pos": search_params["end_pos"],
-            "min_mh_l": search_params["min_mh_l"],
-            "dbsnp": search_params["dbsnp"],
-            "clinvar": search_params["clinvar"],
-            "ngg_pam_avail": search_params["ngg_pam_avail"],
-            "unique_guide_avail": search_params["unique_guide_avail"],
-            **search_params["search_query_data"]
-        }
-    )
+    entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c))
 
     c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
     cache_value = c.fetchone()

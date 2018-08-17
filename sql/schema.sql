@@ -39,6 +39,7 @@ DROP INDEX IF EXISTS variants_pam_mot_idx;
 DROP INDEX IF EXISTS variants_pam_uniq_idx;
 DROP INDEX IF EXISTS variants_guides_no_ot_idx;
 DROP INDEX IF EXISTS variants_guides_min_ot_idx;
+DROP INDEX IF EXISTS variants_max_2_cuts_dist_idx;
 DROP INDEX IF EXISTS variants_full_row_trgm_idx;
 
 DROP INDEX IF EXISTS guides_variant_id_idx;
@@ -85,6 +86,7 @@ CREATE TABLE variants (
   pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
   guides_no_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
   guides_min_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
+  max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
 
   full_row TEXT NOT NULL
 );

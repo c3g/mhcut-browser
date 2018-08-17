@@ -43,6 +43,7 @@ export const COLUMN_HELP_TEXT = {
     pam_uniq: "The number of PAMs in a valid location and whose protospacer sequence is unique in the genome.",
     guides_no_ot: "The number of guides that have no off-target MH.",
     guides_min_ot: "The number of off-target MHs for the guide which has the least off-target MHs.",
+    max_2_cuts_dist: "TODO", // TODO
 
     variant_id: "Corresponding variant database ID.",
 

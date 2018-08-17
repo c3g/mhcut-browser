@@ -34,4 +34,5 @@ CREATE INDEX variants_pam_mot_idx ON variants(pam_mot);
 CREATE INDEX variants_pam_uniq_idx ON variants(pam_uniq);
 CREATE INDEX variants_guides_no_ot_idx ON variants(guides_no_ot) WHERE guides_no_ot IS NOT NULL;
 CREATE INDEX variants_guides_min_ot_idx ON variants(guides_min_ot) WHERE guides_min_ot IS NOT NULL;
+CREATE INDEX variants_max_2_cuts_dist_idx ON variants(max_2_cuts_dist);
 CREATE INDEX variants_full_row_trgm_idx ON variants USING gin(full_row gin_trgm_ops);

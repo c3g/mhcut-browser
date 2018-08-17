@@ -95,7 +95,8 @@ def main():
                          variant["geneloc"], variant["varL"], variant["mhL"], variant["mh1L"], variant["hom"],
                          variant["nbMM"], int_or_null_cast(variant["mhDist"]), variant["MHseq1"], variant["MHseq2"],
                          int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
-                         int_or_null_cast(variant["guidesNoOT"]), int_or_null_cast(variant["guidesMinOT"]))
+                         int_or_null_cast(variant["guidesNoOT"]), int_or_null_cast(variant["guidesMinOT"]),
+                         int_or_null_cast(variant["max2cutsDist"]))
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
 

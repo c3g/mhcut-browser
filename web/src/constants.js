@@ -28,9 +28,9 @@ export const COLUMN_HELP_TEXT = {
     gene_info_clinvar: "Same as gene_info, but extracted from ClinVar.",
     mc_clinvar: "Molecular consequences, extracted from ClinVar.",
 
-    citation: "Citations.", // TODO
-    location: "Variant location.", // TODO
-    var_l: "TODO", // TODO
+    citation: "The citation(s) associated with the variant (from PubMed, PubMedCentral, or the NCBI Bookshelf).", // TODO
+    location: "The location of the variant relative to genes (Gencode v28).", // TODO
+    var_l: "The variant size (bp).", // TODO
 
     mh_l: "MH length.",
     mh_1l: "Number of first consecutive matches.",
@@ -39,8 +39,8 @@ export const COLUMN_HELP_TEXT = {
     mh_dist: "Distance between the end of MH and the variant boundary.",
     mh_seq_1: "Sequence 1 of the MH.",
     mh_seq_2: "Sequence 2 of the MH.",
-    pam_mot: "The number of PAMs in a valid location, no matter how unique the protospacer is.",
-    pam_uniq: "The number of PAMs in a valid location with a unique protospacer.",
+    pam_mot: "The number of PAMs in a valid location.",
+    pam_uniq: "The number of PAMs in a valid location and whose protospacer sequence is unique in the genome.",
     guides_no_ot: "The number of guides that have no off-target MH.",
     guides_min_ot: "The number of off-target MHs for the guide which has the least off-target MHs.",
 
@@ -50,10 +50,10 @@ export const COLUMN_HELP_TEXT = {
     mm0: "The number of positions in the genome where the sequence aligns with no mismatches.",
     mm1: "The number of positions in the genome where the sequence aligns with 1 mismatch.",
     mm2: "The number of positions in the genome where the sequence aligns with 2 mismatches.",
-    m1_dist_1: "The distance between the PAM cut the left stretch of perfect match.", // TODO: grammar???
-    m1_dist_2: "The distance between the PAM cut the right stretch of perfect match.", // TODO: grammar???
-    mh_dist_1: "The distance between the PAM cut the left micro-homology.", // TODO: grammar???
-    mh_dist_2: "The distance between the PAM cut the right micro-homology.", // TODO: grammar???
+    m1_dist_1: "Considering perfect homology only, the distance between the cut position and the upstream micro-homology.", // TODO: grammar???
+    m1_dist_2: "Considering perfect homology only, the distance between the cut position and the downstream micro-homology.", // TODO: grammar???
+    mh_dist_1: "The distance between the cut position and the upstream micro-homology.", // TODO: grammar???
+    mh_dist_2: "The distance between the cut position and the downstream micro-homology.", // TODO: grammar???
     nb_off_tgt: "The number of off-target MHs.",
     largest_off_tgt: "The size of the largest off-target MH.",
     bot_score: "The MMEJ score of the best off-target MH (\"best\" defined as the highest MMEJ score).",

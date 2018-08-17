@@ -168,11 +168,15 @@ Finally, edit the `pg_hba.conf` file (usually found in the
 Before:
 ```
 local   all             postgres                                peer
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
 ```
 
 After:
 ```
 local   all             postgres                                peer
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
 local   all             mhcut                                   md5
 ```
 

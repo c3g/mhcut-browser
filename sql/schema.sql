@@ -44,7 +44,7 @@ DROP INDEX IF EXISTS variants_full_row_trgm_idx;
 DROP INDEX IF EXISTS guides_variant_id_idx;
 
 DROP TYPE IF EXISTS CHROMOSOME;
-DROP TYPE IF EXISTS GENE_LOCATION;
+DROP TYPE IF EXISTS VARIANT_LOCATION;
 
 CREATE TYPE CHROMOSOME AS ENUM ('chr1', 'chr2', 'chr3', 'chr4', 'chr5', 'chr6', 'chr7', 'chr8', 'chr9', 'chr10',
                                 'chr11', 'chr12', 'chr13', 'chr14', 'chr15', 'chr16', 'chr17', 'chr18', 'chr19',

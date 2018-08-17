@@ -251,7 +251,7 @@ def variants_tsv():
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor()
+            c2 = get_db().cursor("variants-tsv-cursor")
             c2.execute(build_variants_query(c2, "*", search_params, sort_by=sort_by, sort_order=sort_order))
 
             yield "\t".join(column_names) + "\n"
@@ -278,7 +278,7 @@ def variant_guides_tsv(variant_id):
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor()
+            c2 = get_db().cursor("variant-guides-tsv-cursor")
             c2.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
 
             yield "\t".join(column_names) + "\n"
@@ -357,7 +357,7 @@ def combined_tsv():
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor()
+            c2 = get_db().cursor("combined-tsv-cursor")
             c2.execute(build_variants_query(c, "*", search_params, sort_by, sort_order))
 
             yield "\t".join(variants_column_names + [col if col != "id" else "guide_id"

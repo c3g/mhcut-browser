@@ -163,7 +163,8 @@ CREATE DATABASE mhcut_db WITH OWNER mhcut;
 ```
 
 Finally, edit the `pg_hba.conf` file (usually found in the
-`/etc/postgresql/10/main/` directory), adding the following line:
+`/etc/postgresql/10/main/` directory), adding the following line, and
+restart the database:
 
 Before:
 ```
@@ -178,6 +179,11 @@ local   all             postgres                                peer
 
 # TYPE  DATABASE        USER            ADDRESS                 METHOD
 local   all             mhcut                                   md5
+```
+
+Restart:
+```bash
+sudo systemctl restart postgresql
 ```
 
 

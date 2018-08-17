@@ -87,6 +87,7 @@ CREATE TABLE variants (
   guides_no_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
   guides_min_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
+  cartoon TEXT,
 
   full_row TEXT NOT NULL
 );

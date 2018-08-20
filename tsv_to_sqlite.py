@@ -4,10 +4,15 @@ import csv
 import getpass
 import os
 import psycopg2
-import sys
+import time
 
 from io import StringIO
+from multiprocessing import Process, Queue, Value
 from tqdm import tqdm
+
+import sys
+
+NUM_PROCESSES = 8
 
 
 def int_or_null_cast(x):
@@ -39,15 +44,16 @@ def main():
     Main method, runs when the script is ran directly.
     """
 
-    if len(sys.argv) != 5:
-        print("Usage: ./tsv_to_postgres.py variants_file.tsv guides_file.tsv database_name database_user")
+    if len(sys.argv) != 6:
+        print("Usage: ./tsv_to_postgres.py variants_file.tsv guides_file.tsv cartoons_file.tsv database_name "
+              "database_user")
         exit(1)
 
     db_password = os.environ.get("DB_PASSWORD")
     if db_password is None:
         db_password = getpass.getpass(prompt="Password for Database User: ")
 
-    conn = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[3], sys.argv[4], db_password))
+    conn = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
     c = conn.cursor()
 
     with open("./sql/schema.sql", "r") as s:
@@ -165,6 +171,93 @@ def main():
 
     c.execute("CREATE INDEX guides_variant_id_idx ON guides(variant_id)")
     c.execute("CLUSTER guides USING guides_variant_id_idx")
+
+    conn.commit()
+
+    def cartoon_saver(q, dc, s2):
+        conn2 = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
+        c2 = conn2.cursor()
+        cc = 1
+        pr = tqdm(desc="{}".format(s2), position=s2)
+        while dc.value != 1:
+            next_cartoon = q.get()
+            c2.execute("UPDATE variants SET cartoon = %(cartoon)s WHERE chr = %(chr)s "
+                       "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
+                       "AND (CASE WHEN %(rs)s = '-' THEN rs IS NULL ELSE rs = %(rs)s END)", next_cartoon)
+            cc += 1
+            pr.update(1)
+
+        pr.close()
+        conn2.commit()
+
+    print("Saving cartoons...")  # TODO: TQDM with real progress
+
+    done_cartoons = Value("i", 0)
+    cartoon_queue = Queue()
+
+    processes = []
+    for s in range(NUM_PROCESSES):
+        processes.append(Process(target=cartoon_saver, args=(cartoon_queue, done_cartoons, s)))
+        processes[-1].start()
+
+    with open(sys.argv[3], "r", newline="") as cs_file:
+        # Skip variant header row
+        next(cs_file)
+        next(cs_file)
+
+        line = next(cs_file)
+        current_stage = 0
+        current_variant = []
+        current_cartoon = ""
+
+        sys.stdout.write("0            \r")
+
+        k = 1
+        while line is not None:
+            if line == "\n":
+                if len(current_variant) > 0:
+                    cartoon_queue.put({
+                        "cartoon": current_cartoon,
+                        "chr": current_variant[0],
+                        "pos_start": int(current_variant[1]),
+                        "pos_end": int(current_variant[2]),
+                        "rs": current_variant[3]
+                    })
+
+                    if cartoon_queue.qsize() > 100000:
+                        time.sleep(3)
+
+                    current_stage = 0
+                    current_variant = []
+                    current_cartoon = ""
+
+                    k += 1
+
+                while line == "\n" and line is not None:
+                    line = next(cs_file)
+
+                continue
+
+            if current_stage == 0:
+                current_variant = line.split("\t")
+                current_stage = 1
+                line = next(cs_file)
+                continue
+
+            elif current_stage == 1:
+                current_cartoon = line + next(cs_file) + next(cs_file).strip()
+                current_stage = 2
+                line = next(cs_file)
+                continue
+
+            elif current_stage == 2:
+                # Optional stage where other non-blank lines are skipped.
+                while line != "\n" and line is not None:
+                    line = next(cs_file)
+
+    done_cartoons.value = 1
+    for p in processes:
+        p.join()
 
     conn.commit()
 

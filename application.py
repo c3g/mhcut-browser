@@ -186,13 +186,15 @@ def get_search_params_from_request(c):
     }
 
 
-def build_variants_query(c, selection, search_params, sort_by=None, sort_order=None, page=None, items_per_page=None):
+def build_variants_query(c, selection, search_params, cartoons=False, sort_by=None, sort_order=None, page=None,
+                         items_per_page=None):
     return c.mogrify(
-        "SELECT {} FROM variants WHERE {}{}{} "
+        "SELECT {} FROM variants {} WHERE {}{}{} "
         "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
         "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
         "AND ({}) AND ({}) {}{}{}".format(
             selection,
+            "LEFT JOIN cartoons ON id = variant_id" if cartoons else "",
             "(chr IN {}) AND ".format(search_params["chr_fragment"])
             if len(search_params["chr"]) < len(CHR_VALUES) else "",
             "(location IN {}) AND ".format(search_params["location_fragment"])
@@ -224,8 +226,9 @@ def index():
     c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute(build_variants_query(
         c,
-        "*",
+        "variants.*, cartoon_text AS cartoon",
         get_search_params_from_request(c),
+        cartoons=True,
         sort_by=verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c)),
         sort_order=verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN),
         page=int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN)),

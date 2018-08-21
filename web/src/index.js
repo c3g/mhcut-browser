@@ -77,6 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
         loadingEntryCounts = true;
         d3.select("#apply-filters").attr("disabled", "disabled");
         d3.select("#clear-filters").attr("disabled", "disabled");
+        // noinspection JSCheckFunctionSignatures
         Promise.all([
             fetch(new Request("/api/variants/entries")),
             fetch(new Request("/api/guides/entries"))
@@ -486,6 +487,7 @@ function reloadPage(reloadCounts) {
             updatePagination();
 
             if (reloadCounts && loadedVariants.length !== 0) {
+                // noinspection JSCheckFunctionSignatures
                 Promise.all([
                     fetch(new Request(variantCountURL.toString())),
                     fetch(new Request(guideCountURL.toString()))
@@ -650,7 +652,7 @@ function updateSearchFilterDOM() {
             ...CONDITION_OPERATORS.both,
             ...(f.field === ""
                 ? []
-                : CONDITION_OPERATORS[variantFields.find(f2 => f2["column_name"] === f.field)["data_type"]]),
+                : (CONDITION_OPERATORS[variantFields.find(f2 => f2["column_name"] === f.field)["data_type"]] || [])),
             ...(f.field !== ""
                 ? (variantFields.find(f2 => f2["column_name"] === f.field)["is_nullable"] === "YES"
                     ? CONDITION_OPERATORS.nullable

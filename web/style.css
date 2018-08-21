@@ -728,6 +728,35 @@ div#variant-guides-modal h2 {
 
 
 
+div#variant-cartoon-modal {
+    max-width: 960px;
+    min-height: 350px;
+    margin: auto;
+    bottom: auto;
+}
+
+div#variant-cartoon-modal div#variant-cartoon {
+    background-color: #FCFCFC;
+    border: 1px solid #DFDFDF;
+    border-top-color: #D3D3D3;
+    border-radius: 4px;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+div#variant-cartoon-modal div#variant-cartoon-code {
+    margin: 6px 15px;
+    padding: 6px 0;
+
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.825rem;
+    color: #444;
+
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+
+
 code {
     background-color: #FCFCFC;
     border: 1px solid #DFDFDF;

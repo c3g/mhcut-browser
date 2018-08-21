@@ -43,6 +43,7 @@ let loadingEntryCounts = false;
 let searchContainer = null;
 let exportContainer = null;
 let variantGuidesContainer = null;
+let variantCartoonContainer = null;
 
 const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs}`;
 const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
@@ -55,12 +56,15 @@ document.addEventListener("DOMContentLoaded", function () {
     searchContainer = d3.select("#advanced-search-container");
     exportContainer = d3.select("#export-options-container");
     variantGuidesContainer = d3.select("#variant-guides-container");
+    variantCartoonContainer = d3.select("#variant-cartoon-container");
 
     document.addEventListener("keyup", e => {
         if (e.key === "Escape" && searchContainer.classed("shown")) searchContainer.classed("shown", false);
         else if (e.key === "Escape" && exportContainer.classed("shown")) exportContainer.classed("shown", false);
         else if (e.key === "Escape" && variantGuidesContainer.classed("shown"))
             variantGuidesContainer.classed("shown", false);
+        else if (e.key === "Escape" && variantCartoonContainer.classed("shown"))
+            variantCartoonContainer.classed("shown", false);
     });
 
     // noinspection JSCheckFunctionSignatures
@@ -116,6 +120,8 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#hide-variant-guides").on("click", () => variantGuidesContainer.classed("shown", false));
         const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
             .selectAll("th").data(guideFields, f => f["column_name"]);
+
+        d3.select("#hide-variant-cartoon").on("click", () => variantCartoonContainer.classed("shown", false));
 
         variantGuideTableColumns.enter().append("th").text(f => f["column_name"])
             .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
@@ -321,7 +327,7 @@ function selectTablePage(p) {
 }
 
 function populateEntryTable() {
-    const fields = (dataDisplay === "variants" ? variantFields : guideFields);
+    const fields = (dataDisplay === "variants" ? variantFields.concat([{"column_name": "cartoon"}]) : guideFields);
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
     const tableColumns = d3.select("table#entry-table thead tr").selectAll("th").data(fields, f => f["name"]);
     // TODO: Use original column name for display
@@ -375,6 +381,12 @@ function populateEntryTable() {
         });
     });
 
+    rowEntry.select(".show-cartoon").on("mousedown", e => {
+        variantCartoonContainer.classed("shown", true);
+        d3.select("#variant-for-cartoon").text(e["id"]);
+        d3.select("#variant-cartoon-code").html(e["cartoon"].replace(/ /g, "&nbsp;").replace(/\n/g, "<br>"));
+    });
+
     tableRows.exit().remove();
 }
 
@@ -399,13 +411,15 @@ function formatTableCell(e, f) {
         return `<a href="${clinVarURL(e["allele_id"])}/" target="_blank" rel="noopener">${e["allele_id"]}</a>`;
     } else if (f["column_name"] === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
         return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
+    } else if (f["column_name"] === "cartoon" && e["cartoon"] !== null) {
+        return `<a class="show-cartoon">Show&nbsp;Cartoon</a>`;
     }
 
     return e[f["column_name"]] === null ? "NA" : e[f["column_name"]]; // TODO: Maybe shouldn't always be NA
 }
 
 function updateTableColumnHeaders() {
-    const fields = (dataDisplay === "variants" ? variantFields : guideFields);
+    const fields = (dataDisplay === "variants" ? variantFields.concat([{"column_name": "cartoon"}]) : guideFields);
     d3.selectAll("table#entry-table thead th").data(fields, f => f["column_name"])
         .select("span.material-icons")
         .text(f => (sortBy === f["column_name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));

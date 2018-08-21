@@ -2,6 +2,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 DROP TABLE IF EXISTS variants CASCADE;
 DROP TABLE IF EXISTS guides CASCADE;
+DROP TABLE IF EXISTS cartoons CASCADE;
 DROP TABLE IF EXISTS summary_statistics CASCADE;
 DROP TABLE IF EXISTS entries_query_cache CASCADE;
 
@@ -87,7 +88,6 @@ CREATE TABLE variants (
   guides_no_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
   guides_min_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
-  cartoon TEXT,
 
   full_row TEXT NOT NULL
 );
@@ -110,6 +110,11 @@ CREATE TABLE guides (
   bot_var_l INTEGER, -- NULL means NA
   bot_gc INTEGER, -- NULL means NA
   bot_seq TEXT -- NULL means NA
+);
+
+CREATE TABLE cartoons (
+  variant_id INTEGER PRIMARY KEY REFERENCES variants ON DELETE CASCADE,
+  cartoon_text TEXT
 );
 
 CREATE TABLE summary_statistics (

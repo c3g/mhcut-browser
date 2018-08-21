@@ -8,6 +8,7 @@ import time
 
 from io import StringIO
 from multiprocessing import Process, Queue, Value
+from queue import Empty
 from tqdm import tqdm
 
 import sys
@@ -177,18 +178,31 @@ def main():
     def cartoon_saver(q, dc, s2):
         conn2 = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
         c2 = conn2.cursor()
-        cc = 1
-        pr = tqdm(desc="{}".format(s2), position=s2)
-        while dc.value != 1:
-            next_cartoon = q.get()
-            c2.execute("UPDATE variants SET cartoon = %(cartoon)s WHERE chr = %(chr)s "
-                       "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
-                       "AND (CASE WHEN %(rs)s = '-' THEN rs IS NULL ELSE rs = %(rs)s END)", next_cartoon)
-            cc += 1
-            pr.update(1)
 
-        pr.close()
+        cc = 1
+
+        with tqdm(desc="{}".format(s2), position=s2) as pr:
+            while not (q.empty() and dc.value == 1):
+                try:
+                    next_cartoon = q.get(False)
+
+                    c2.execute("SELECT id FROM variants WHERE chr = %(chr)s "
+                               "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
+                               "AND (CASE WHEN %(rs)s = '-' THEN rs IS NULL ELSE rs = %(rs)s END) ", next_cartoon)
+
+                    v_id = c2.fetchone()[0]
+
+                    c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING", (v_id,
+                                                                                              next_cartoon["cartoon"]))
+
+                    cc += 1
+                    pr.update(1)
+
+                except Empty:
+                    continue
+
         conn2.commit()
+        conn2.close()
 
     print("Saving cartoons...")  # TODO: TQDM with real progress
 
@@ -213,51 +227,60 @@ def main():
         sys.stdout.write("0            \r")
 
         k = 1
-        while line is not None:
-            if line == "\n":
-                if len(current_variant) > 0:
-                    cartoon_queue.put({
-                        "cartoon": current_cartoon,
-                        "chr": current_variant[0],
-                        "pos_start": int(current_variant[1]),
-                        "pos_end": int(current_variant[2]),
-                        "rs": current_variant[3]
-                    })
+        while True:
+            try:
+                if line == "\n":
+                    if len(current_variant) > 0:
+                        cartoon_queue.put({
+                            "cartoon": current_cartoon,
+                            "chr": current_variant[0],
+                            "pos_start": int(current_variant[1]),
+                            "pos_end": int(current_variant[2]),
+                            "rs": current_variant[3]
+                        })
 
-                    if cartoon_queue.qsize() > 100000:
-                        time.sleep(3)
+                        if cartoon_queue.qsize() > 100000:
+                            time.sleep(0.1)
 
-                    current_stage = 0
-                    current_variant = []
-                    current_cartoon = ""
+                        current_stage = 0
+                        current_variant = []
+                        current_cartoon = ""
 
-                    k += 1
+                        k += 1
 
-                while line == "\n" and line is not None:
+                    while line == "\n":
+                        line = next(cs_file)
+
+                    continue
+
+                if current_stage == 0:
+                    current_variant = line.split("\t")
+                    current_stage = 1
                     line = next(cs_file)
+                    continue
 
-                continue
-
-            if current_stage == 0:
-                current_variant = line.split("\t")
-                current_stage = 1
-                line = next(cs_file)
-                continue
-
-            elif current_stage == 1:
-                current_cartoon = line + next(cs_file) + next(cs_file).strip()
-                current_stage = 2
-                line = next(cs_file)
-                continue
-
-            elif current_stage == 2:
-                # Optional stage where other non-blank lines are skipped.
-                while line != "\n" and line is not None:
+                elif current_stage == 1:
+                    current_cartoon = line + next(cs_file) + next(cs_file).strip()
+                    current_stage = 2
                     line = next(cs_file)
+                    continue
+
+                elif current_stage == 2:
+                    # Optional stage where other non-blank lines are skipped.
+                    while line != "\n":
+                        line = next(cs_file)
+
+            except StopIteration:
+                break
 
     done_cartoons.value = 1
+
     for p in processes:
         p.join()
+
+    for _ in range(NUM_PROCESSES):
+        # Clear the TQDM bars
+        print()
 
     conn.commit()
 

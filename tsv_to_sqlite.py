@@ -239,7 +239,7 @@ def main():
                             "rs": current_variant[3]
                         })
 
-                        if cartoon_queue.qsize() > 100000:
+                        if cartoon_queue.qsize() > 1000000:
                             time.sleep(0.1)
 
                         current_stage = 0
@@ -272,6 +272,9 @@ def main():
 
             except StopIteration:
                 break
+
+    cartoon_queue.close()
+    cartoon_queue.join_thread()
 
     done_cartoons.value = 1
 

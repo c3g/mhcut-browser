@@ -156,10 +156,12 @@ CREATE ROLE mhcut LOGIN PASSWORD 'some_password';
 This will prompt the user for a username (for example, one could enter `mhcut`)
 and whether the new user should be a super user (it should **not**).
 
-Then, create a database in the `psql` session:
+Then, create a database in the `psql` session and enable the trigram extension
+for indexing purposes:
 
 ```postgresql
 CREATE DATABASE mhcut_db WITH OWNER mhcut;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 ```
 
 Finally, edit the `pg_hba.conf` file (usually found in the

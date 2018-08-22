@@ -75,7 +75,8 @@ def search_param(c):
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = psycopg2.connect("dbname=crispr user={} password={}".format(
+        db = g._database = psycopg2.connect("dbname={} user={} password={}".format(
+            os.environ.get("DB_NAME"),
             os.environ.get("DB_USER"),
             os.environ.get("DB_PASSWORD")
         ))

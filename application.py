@@ -188,7 +188,7 @@ def get_search_params_from_request(c):
 
 
 def build_variants_query(c, selection, search_params, cartoons=False, sort_by=None, sort_order=None, page=None,
-                         items_per_page=None):
+                         items_per_page=None, outer_query=True):
     order_string = "ORDER BY {} {} ".format(sort_by, sort_order) \
         if sort_by is not None and sort_order is not None else ""
 
@@ -200,8 +200,8 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
             "SELECT {} FROM variants {} WHERE id IN ".format(
                 selection,
                 "LEFT JOIN cartoons ON id = variant_id" if cartoons else ""
-            ) if selection != "COUNT(*)" else "",
-            "COUNT(*)" if selection == "COUNT(*)" else "id",
+            ) if outer_query else "",
+            selection if not outer_query else "id",
             # selection,
             # "LEFT JOIN cartoons ON id = variant_id" if cartoons else "",
             "(chr IN {}) AND ".format(search_params["chr_fragment"])
@@ -214,7 +214,7 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
             order_string,
             "LIMIT %(items_per_page)s " if items_per_page is not None else "",
             "OFFSET %(start)s" if page is not None else "",
-            order_string if selection != "COUNT(*)" else ""
+            order_string if outer_query else ""
         ),
         {
             "start": ((page if page is not None else 0) - 1) * (items_per_page if items_per_page is not None else 0),
@@ -234,6 +234,16 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
 @app.route("/", methods=["GET"])
 def index():
     c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    print(build_variants_query(
+        c,
+        "variants.*, cartoon_text AS cartoon",
+        get_search_params_from_request(c),
+        cartoons=True,
+        sort_by=verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c)),
+        sort_order=verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN),
+        page=int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN)),
+        items_per_page=int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
+    ))
     c.execute(build_variants_query(
         c,
         "variants.*, cartoon_text AS cartoon",
@@ -328,7 +338,9 @@ def guides():
         sort_order=sort_order,
 
         page=page,
-        items_per_page=items_per_page
+        items_per_page=items_per_page,
+
+        outer_query=False
     ).decode("utf-8")))
 
     return json.jsonify(c.fetchall())
@@ -400,7 +412,7 @@ def combined_tsv():
 def variants_entries():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c))
+    entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c), outer_query=False)
 
     c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
     cache_value = c.fetchone()
@@ -408,7 +420,8 @@ def variants_entries():
     if cache_value is None:
         c.execute(entries_query)
         num_entries = c.fetchone()[0]
-        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s)", (entries_query, num_entries))
+        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s) ON CONFLICT DO NOTHING ",
+                  (entries_query, num_entries))
         get_db().commit()
     else:
         num_entries = cache_value[1]
@@ -422,7 +435,8 @@ def guides_entries():
     search_params = get_search_params_from_request(c)
 
     entries_query = c.mogrify("SELECT COUNT(*) FROM guides WHERE variant_id IN "
-                              "({})".format(build_variants_query(c, "id", search_params).decode("utf-8")))
+                              "({})".format(build_variants_query(c, "id", search_params,
+                                                                 outer_query=False).decode("utf-8")))
 
     c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
     cache_value = c.fetchone()
@@ -430,7 +444,8 @@ def guides_entries():
     if cache_value is None:
         c.execute(entries_query)
         num_entries = c.fetchone()[0]
-        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s)", (entries_query, num_entries))
+        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s) ON CONFLICT DO NOTHING ",
+                  (entries_query, num_entries))
         get_db().commit()
     else:
         num_entries = cache_value[1]

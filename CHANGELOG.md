@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 0.4.0 (UNRELEASED)
+## Version 0.4.0
 
 Renamed once again, this time to "MHcut Browser".
 
@@ -9,7 +9,7 @@ Renamed once again, this time to "MHcut Browser".
   * Reset "Minimum mhL" and "Database Sources" properly when filters are
     cleared.
   * Allow keyboard submission of filtering and searching form.
-  * Allow the user to escape the advanced search modal with the escape key.
+  * Allow the user to escape modals with the escape key.
   * Add instructions on using the advanced search feature.
   * Add an export modal window for exporting variant, guide, and combined
     search results as TSV files.
@@ -20,8 +20,8 @@ Renamed once again, this time to "MHcut Browser".
   * Add modal table for viewing a specific variant's guides.
   * Add a non-sortable column for viewing variant cartoons.
   * Add tooltips for variant table columns.
-  * Fix column formatting for PMC citations. -- TODO
-  * Several changes to aid performance with the complete data-set.
+  * Fix column formatting for PMC citations.
+  * Made several changes to aid performance with the complete data-set.
 
 ### Server and API
 
@@ -30,15 +30,18 @@ Renamed once again, this time to "MHcut Browser".
   * Add filtering support for "NGG PAM avail."/"Unique guide avail."
   * Add endpoints for viewing guides.
   * Include cartoons in variants endpoint.
-  * Several querying changes to aid performance with the complete data-set.
+  * Made several querying changes to aid performance with the complete
+    data-set.
   
 ### Database
 
   * Moved to **PostgreSQL**.
-  * Schema now includes tables for guides and key-value metadata.
+  * Schema now includes tables for guides, cartoons, key-value metadata, and
+    cached counts.
   * `tsv_to_postgres.py` now takes in additional arguments for guides and
-    cartoons files, as well as database name and user.
-  * Several schema changes to aid performance with the complete data-set.
+    cartoons files, as well as database name and user; it now adds these values
+    to the database and pre-computes some metadata.
+  * Made several schema changes to aid performance with the complete data-set.
 
 
 ## Version 0.3.1 (2018-08-02)

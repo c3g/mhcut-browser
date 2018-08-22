@@ -188,13 +188,21 @@ def get_search_params_from_request(c):
 
 def build_variants_query(c, selection, search_params, cartoons=False, sort_by=None, sort_order=None, page=None,
                          items_per_page=None):
+    order_string = "ORDER BY {} {} ".format(sort_by, sort_order) \
+        if sort_by is not None and sort_order is not None else ""
+
     return c.mogrify(
-        "SELECT {} FROM variants {} WHERE {}{}{} "
+        "{} (SELECT {} FROM variants WHERE {}{}{} "
         "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
         "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-        "AND ({}) AND ({}) {}{}{}".format(
-            selection,
-            "LEFT JOIN cartoons ON id = variant_id" if cartoons else "",
+        "AND ({}) AND ({}) {}{}{}) {}".format(
+            "SELECT {} FROM variants {} WHERE id IN ".format(
+                selection,
+                "LEFT JOIN cartoons ON id = variant_id" if cartoons else ""
+            ) if selection != "COUNT(*)" else "",
+            "COUNT(*)" if selection == "COUNT(*)" else "id",
+            # selection,
+            # "LEFT JOIN cartoons ON id = variant_id" if cartoons else "",
             "(chr IN {}) AND ".format(search_params["chr_fragment"])
             if len(search_params["chr"]) < len(CHR_VALUES) else "",
             "(location IN {}) AND ".format(search_params["location_fragment"])
@@ -202,9 +210,10 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
             "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"],
-            "ORDER BY {} {} ".format(sort_by, sort_order) if sort_by is not None and sort_order is not None else "",
+            order_string,
             "LIMIT %(items_per_page)s " if items_per_page is not None else "",
-            "OFFSET %(start)s" if page is not None else ""
+            "OFFSET %(start)s" if page is not None else "",
+            order_string if selection != "COUNT(*)" else ""
         ),
         {
             "start": ((page if page is not None else 0) - 1) * (items_per_page if items_per_page is not None else 0),

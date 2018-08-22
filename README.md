@@ -157,10 +157,11 @@ This will prompt the user for a username (for example, one could enter `mhcut`)
 and whether the new user should be a super user (it should **not**).
 
 Then, create a database in the `psql` session and enable the trigram extension
-for indexing purposes:
+on the database for indexing purposes:
 
 ```postgresql
 CREATE DATABASE mhcut_db WITH OWNER mhcut;
+\c mhcut_db
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 ```
 

@@ -12,21 +12,30 @@
   * Add an export modal window for exporting variant, guide, and combined
     search results as TSV files.
   * Fix some quick filters not resetting properly.
+  * Add quick filters for "NGG PAM avail."/"Unique guide avail."
   * Add tab for viewing guides that relate to the currently-loaded set of
     variants.
   * Add modal table for viewing a specific variant's guides.
+  * Add a non-sortable column for viewing variant cartoons.
+  * Add tooltips for variant table columns.
+  * Several changes to aid performance with the complete data-set.
 
 ### Server and API
 
   * Add endpoint for exporting TSV-formatted variant, guide, and combined
     search results.
+  * Add filtering support for "NGG PAM avail."/"Unique guide avail."
   * Add endpoints for viewing guides.
+  * Include cartoons in variants endpoint.
+  * Several querying changes to aid performance with the complete data-set.
   
 ### Database
 
+  * Moved to **PostgreSQL**.
   * Schema now includes tables for guides and key-value metadata.
-  * `tsv_to_sqlite.py` now takes in an additional argument for a guides TSV
-    file in order to populate the database.
+  * `tsv_to_postgres.py` now takes in additional arguments for guides and
+    cartoons files, as well as database name and user.
+  * Several schema changes to aid performance with the complete data-set.
 
 
 ## Version 0.3.1 (2018-08-02)

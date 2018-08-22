@@ -49,6 +49,7 @@ const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs
 const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
 const bookshelfURL = nbk => `https://www.ncbi.nlm.nih.gov/books/${nbk}/`;
 const pubMedURL = pm => `https://www.ncbi.nlm.nih.gov/pubmed/${pm}/`;
+const pmcURL = pmc => `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmc}/`;
 const clinVarURL = cv => `https://www.ncbi.nlm.nih.gov/clinvar/variation/${cv}/`;
 
 
@@ -406,7 +407,9 @@ function formatTableCell(e, f) {
         return e["citation"].split(";")
             .map(id => id.substring(0, 2) === "NB"
                 ? `<a href="${bookshelfURL(id)}" target="_blank" rel="noopener">${id}</a>`
-                : `<a href="${pubMedURL(id.replace("PM", ""))}" target="_blank" rel="noopener">${id}</a>`)
+                : (id.substring(0, 3) === "PMC"
+                    ? `<a href="${pmcURL(id)}" target="_blank" rel="noopener">${id}</a>`
+                    : `<a href="${pubMedURL(id.replace("PM", ""))}" target="_blank" rel="noopener">${id}</a>`))
             .join(";");
     } else if (f["column_name"] === "allele_id" && e["allele_id"] !== null) {
         return `<a href="${clinVarURL(e["allele_id"])}/" target="_blank" rel="noopener">${e["allele_id"]}</a>`;

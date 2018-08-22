@@ -2,6 +2,8 @@
 
 ## Version 0.4.0 (UNRELEASED)
 
+Renamed once again, this time to "MHcut Browser".
+
 ### Front End
 
   * Reset "Minimum mhL" and "Database Sources" properly when filters are
@@ -18,6 +20,7 @@
   * Add modal table for viewing a specific variant's guides.
   * Add a non-sortable column for viewing variant cartoons.
   * Add tooltips for variant table columns.
+  * Fix column formatting for PMC citations. -- TODO
   * Several changes to aid performance with the complete data-set.
 
 ### Server and API

@@ -334,11 +334,12 @@ function populateEntryTable() {
     tableColumns.enter()
         .append("th")
         .text(f => f["column_name"])
+        .classed("no-click", f => f["column_name"] === "cartoon")
         .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
         .on("mousemove", () => updateColumnHelp(d3.event))
         .on("mouseout", () => hideColumnHelp())
         .on("click", f => {
-            if (dataDisplay === "guides") return;
+            if (dataDisplay === "guides" || f["column_name"] === "cartoon") return;
 
             if (sortBy === f["column_name"]) {
                 sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");

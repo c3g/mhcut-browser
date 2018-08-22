@@ -45,6 +45,8 @@ export const COLUMN_HELP_TEXT = {
     guides_min_ot: "The number of off-target MHs for the guide which has the least off-target MHs.",
     max_2_cuts_dist: "The distance between the two cuts that are the furthest from each other. Only PAMs whose protospacer sequence is unique in the genome are considered", // TODO
 
+    cartoon: "Illustration.", // TODO
+
     variant_id: "Corresponding variant database ID.",
 
     protospacer: "The sequence of the protospacer.",

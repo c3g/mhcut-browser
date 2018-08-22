@@ -396,6 +396,8 @@ table#variant-guides-table thead th {
     font-size: 0.7rem;
     font-family: "Roboto Mono", monospace;
     white-space: nowrap;
+
+    cursor: default;
 }
 
 table#entry-table thead th {
@@ -403,6 +405,10 @@ table#entry-table thead th {
     top: 0;
 
     cursor: pointer;
+}
+
+table#entry-table thead th.no-click {
+    cursor: default;
 }
 
 table#entry-table thead th span.material-icons {

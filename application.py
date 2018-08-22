@@ -151,7 +151,7 @@ def get_search_params_from_request(c):
     gene_locations = [l.strip() for l in request.args.get("location", "").split(",") if l.strip() in LOCATION_VALUES]
     if len(gene_locations) == 0:
         gene_locations = list(LOCATION_VALUES)
-    location_fragment = "(" + ",".join(["'{}'::GENE_LOCATION".format(l) for l in gene_locations]) + ")"
+    location_fragment = "(" + ",".join(["'{}'::VARIANT_LOCATION".format(l) for l in gene_locations]) + ")"
 
     min_mh_l = int(verify_domain(request.args.get("min_mh_l", "0"), NON_NEG_INT_DOMAIN))
 

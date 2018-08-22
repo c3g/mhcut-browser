@@ -451,8 +451,9 @@ function updatePagination() {
 
     d3.select("#first-page").attr("disabled", page === 1 ? "disabled" : null);
     d3.select("#prev-page").attr("disabled", page === 1 ? "disabled" : null);
-    d3.select("#next-page").attr("disabled", page.toString(10) === totalPages ? "disabled" : null);
-    d3.select("#last-page").attr("disabled", page.toString(10) === totalPages ? "disabled" : null);
+    d3.select("#next-page").attr("disabled", (page.toString(10) === totalPages) ? "disabled" : null);
+    d3.select("#last-page").attr("disabled", (page.toString(10) === totalPages || loadingEntryCounts)
+        ? "disabled" : null);
 }
 
 function reloadPage(reloadCounts) {
@@ -498,6 +499,13 @@ function reloadPage(reloadCounts) {
         .then(data => {
             loadedVariants = data[0];
             loadedGuides = data[1];
+
+            if (loadedVariants.length === itemsPerPage && loadingEntryCounts) {
+                // Re-enable next page button to let people do some basic exploration while counts are loading...
+                totalVariantsCount = page * itemsPerPage + 1;
+            } else if (loadedVariants.length < itemsPerPage && loadingEntryCounts) {
+                totalVariantsCount = (page - 1) * itemsPerPage + loadedVariants.length;
+            }
 
             updatePagination();
 

@@ -198,19 +198,22 @@ files to convert as arguments, as well as the name of the created database and
 database user:
 
 ```bash
-python ./tsv_to_postgres.py variants.tsv guides.tsv mhcut_db mhcut
+python ./tsv_to_postgres.py variants.tsv guides.tsv cartoons.tsv mhcut_db mhcut
 ```
 
 This will prompt the user for the database user's password before building the
 MHcut Browser database.
 
 **Warning:** The database construction process will take quite a while
-(~30 minutes). The resulting database is typically around **50 gigabytes**.
+(~30 minutes). The resulting database is typically around **20-60 gigabytes**.
 
 
 ### Step 3: Running the Web Application
 
 #### In Development
+
+TODO: FIGURE OUT DEPLOYMENT UNDER NGINX AND ADD INSTRUCTIONS FOR EDITING
+`wsgi.py`!!!!!
 
 ##### A. Activate the Virtual Environment
 
@@ -345,6 +348,9 @@ If it is not running, check the terminal in which the server is running for
 any possible error messages.
 
 #### In Production
+
+TODO: FIGURE OUT DEPLOYMENT UNDER NGINX AND ADD INSTRUCTIONS FOR EDITING
+`wsgi.py`!!!!!
 
 In production, the McGill Network web application is designed to be deployed
 with uWSGI and NGINX as a systemd service.

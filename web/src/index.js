@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         d3.select("#deselect-all-chr").on("click", () => {
-            selectedChromosomes = [...metadata["chr"]];
+            selectedChromosomes = [];
             d3.selectAll(".chr-checkbox").property("checked", false);
         });
 

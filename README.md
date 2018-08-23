@@ -212,8 +212,6 @@ MHcut Browser database.
 
 #### In Development
 
-TODO: FIGURE OUT DEPLOYMENT UNDER NGINX!!!!!
-
 ##### A. Activate the Virtual Environment
 
 If not already in the virtual environment, activate it by running the following
@@ -348,9 +346,6 @@ any possible error messages.
 
 #### In Production
 
-TODO: FIGURE OUT DEPLOYMENT UNDER NGINX AND ADD INSTRUCTIONS FOR EDITING
-`wsgi.py`!!!!!
-
 In production, the McGill Network web application is designed to be deployed
 with uWSGI and NGINX as a systemd service.
 
@@ -445,9 +440,9 @@ sudo a2ensite mcgill-network
 sudo systemctl restart apache2
 ```
 
-###### Setting Up Database Credentials
+##### C. Setting Up Database Credentials
 
-In order to run the server in an Apache 2 production environment, the `wsgi.py`
+In order to run the server in either production environment, the `wsgi.py`
 file must be edited to contain the production database name and credentials.
 Change the following variables to contain the production values, within the
 quotes:
@@ -458,13 +453,15 @@ os.environ["DB_USER"] = "your_production_db_user"
 os.environ["DB_PASSWORD"] = "your_production_db_password"
 ```
 
-Then, restart Apache with the following command:
+###### If Apache is Used:
+
+Restart Apache with the following command:
 
 ```bash
 sudo systemctl restart apache2
 ```
 
-##### C. Build the JavaScript Bundle
+##### D. Build the JavaScript Bundle
 
 In this case, the production-environment bundle is built. This must be run from
 the product directory.
@@ -476,16 +473,16 @@ npm run build
 cd ..
 ```
 
-##### D. *(for NGINX only)* Configure Project `systemd` Service
+##### E. *(for NGINX only)* Configure Project `systemd` Service
 
 First, edit the example `mcb.example.service` file to match the paths the
-application is being served out of.
+application is being served out of and set a correct service user.
 
 Then, copy the example `mcb.example.service` file to the `systemd` services
-folder as follows:
+folder as follows, and change any paths and user specifications in the service:
 
 ```bash
-cp ./mcb.example.service /etc/systemd/system/mcb.service
+sudo cp ./mcb.example.service /etc/systemd/system/mcb.service
 ```
 
 Finally, start the service and enable it to start at boot time:

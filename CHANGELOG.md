@@ -1,13 +1,11 @@
 # Changelog
 
-## Version 0.4.0
+## Version 0.4.0 (2018-08-23)
 
 Renamed once again, this time to "MHcut Browser".
 
 ### Front End
 
-  * Reset "Minimum mhL" and "Database Sources" properly when filters are
-    cleared.
   * Allow keyboard submission of filtering and searching form.
   * Allow the user to escape modals with the escape key.
   * Add instructions on using the advanced search feature.

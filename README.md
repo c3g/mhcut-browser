@@ -212,8 +212,7 @@ MHcut Browser database.
 
 #### In Development
 
-TODO: FIGURE OUT DEPLOYMENT UNDER NGINX AND ADD INSTRUCTIONS FOR EDITING
-`wsgi.py`!!!!!
+TODO: FIGURE OUT DEPLOYMENT UNDER NGINX!!!!!
 
 ##### A. Activate the Virtual Environment
 
@@ -337,7 +336,7 @@ development server:
 export FLASK_APP=application.py
 export FLASK_ENV=development
 
-flask run
+DB_NAME=mhcut_db DB_USER=mhcut DB_PASSWORD=your_db_password flask run
 ```
 
 To check if the server is running, visit

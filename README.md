@@ -234,7 +234,7 @@ Example configuration file, located in `/etc/nginx/sites-available/`:
 server {
 	listen 80;
 
-	root /path/to/crispr/browser/web;
+	root /path/to/mhcut/browser/web;
 	index index.html index.htm;
 
 	server_name your-domain-name.local;
@@ -271,12 +271,12 @@ Example configuration file, located in `/etc/apache2/sites-available/`:
     ServerName your-domain-name.local
 
     ServerAdmin webmaster@localhost
-    DocumentRoot /path/to/crispr/browser/web
+    DocumentRoot /path/to/mhcut/browser/web
 
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-    <Directory /path/to/crispr/browser/web>
+    <Directory /path/to/mhcut/browser/web>
         Require all granted
 
         RewriteEngine on
@@ -368,14 +368,14 @@ Example configuration, located in `/etc/nginx/sites-available/`:
 server {
 	listen 80;
 
-	root /path/to/crispr/browser/web;
+	root /path/to/mhcut/browser/web;
 	index index.html index.htm;
 
 	server_name your-domain-name.com;
 
 	location /api/ {
 		include uwsgi_params;
-		uwsgi_pass unix:/path/to/crispr/browser/ccb.sock;
+		uwsgi_pass unix:/path/to/mhcut/browser/mcb.sock;
 		uwsgi_param SCRIPT_NAME /api/;
 	}
 
@@ -406,12 +406,12 @@ Example configuration, located in `/etc/apache2/sites-available/`:
     ServerName your-domain-name.com
 
     ServerAdmin webmaster@localhost
-    DocumentRoot /path/to/crispr/browser/web
+    DocumentRoot /path/to/mhcut/browser/web
 
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-    <Directory /path/to/crispr/browser/web>
+    <Directory /path/to/mhcut/browser/web>
         Require all granted
 
         RewriteEngine on
@@ -423,15 +423,15 @@ Example configuration, located in `/etc/apache2/sites-available/`:
         RewriteRule ^ index.html [L]
     </Directory>
 
-    <Directory /path/to/crispr/browser>
+    <Directory /path/to/mhcut/browser>
         <Files wsgi.py>
             Require all granted
         </Files>
     </Directory>
 
-    WSGIDaemonProcess ccb python-home=/path/to/crispr/browser/env python-path=/path/to/crispr/browser
-    WSGIProcessGroup ccb
-    WSGIScriptAlias /api /path/to/crispr/browser/wsgi.py
+    WSGIDaemonProcess mcb python-home=/path/to/mhcut/browser/env python-path=/path/to/mhcut/browser
+    WSGIProcessGroup mcb
+    WSGIScriptAlias /api /path/to/mhcut/browser/wsgi.py
 </VirtualHost>
 ```
 

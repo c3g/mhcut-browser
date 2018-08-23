@@ -458,6 +458,12 @@ os.environ["DB_USER"] = "your_production_db_user"
 os.environ["DB_PASSWORD"] = "your_production_db_password"
 ```
 
+Then, restart Apache with the following command:
+
+```bash
+sudo systemctl restart apache2
+```
+
 ##### C. Build the JavaScript Bundle
 
 In this case, the production-environment bundle is built. This must be run from

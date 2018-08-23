@@ -478,21 +478,21 @@ cd ..
 
 ##### D. *(for NGINX only)* Configure Project `systemd` Service
 
-First, edit the example `ccb.example.service` file to match the paths the
+First, edit the example `mcb.example.service` file to match the paths the
 application is being served out of.
 
-Then, copy the example `ccb.example.service` file to the `systemd` services
+Then, copy the example `mcb.example.service` file to the `systemd` services
 folder as follows:
 
 ```bash
-cp ./ccb.example.service /etc/systemd/system/ccb.service
+cp ./mcb.example.service /etc/systemd/system/mcb.service
 ```
 
 Finally, start the service and enable it to start at boot time:
 
 ```bash
-sudo systemctl start ccb
-sudo systemctl enable ccb
+sudo systemctl start mcb
+sudo systemctl enable mcb
 ```
 
 To check if the software is running, visit
@@ -503,7 +503,7 @@ If it is not running, make sure the service started correctly with the
 following command:
 
 ```bash
-sudo systemctl status ccb
+sudo systemctl status mcb
 ```
 
 If a `502` HTTP error appears, check if the socket path is correct in the NGINX

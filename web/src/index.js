@@ -508,11 +508,14 @@ function reloadPage(reloadCounts) {
                 totalVariantsCount = page * itemsPerPage + 1;
             } else if (loadedVariants.length < itemsPerPage && loadingEntryCounts) {
                 totalVariantsCount = (page - 1) * itemsPerPage + loadedVariants.length;
+                d3.select("#apply-filters").attr("disabled", null);
+                d3.select("#clear-filters").attr("disabled", null);
+                loadingEntryCounts = false;
             }
 
             updatePagination();
 
-            if (reloadCounts && loadedVariants.length !== 0) {
+            if (reloadCounts && loadingEntryCounts && loadedVariants.length !== 0) {
                 // noinspection JSCheckFunctionSignatures
                 Promise.all([
                     fetch(new Request(variantCountURL.toString())),
@@ -526,6 +529,9 @@ function reloadPage(reloadCounts) {
                     d3.select("#clear-filters").attr("disabled", null);
                     updatePagination();
                 }).catch(err => console.error(err));
+            } else if (loadedVariants.length === 0) {
+                d3.select("#apply-filters").attr("disabled", null);
+                d3.select("#clear-filters").attr("disabled", null);
             }
 
             if (transitioning && itemsPerPage >= 100) {

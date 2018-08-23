@@ -445,6 +445,19 @@ sudo a2ensite mcgill-network
 sudo systemctl restart apache2
 ```
 
+###### Setting Up Database Credentials
+
+In order to run the server in an Apache 2 production environment, the `wsgi.py`
+file must be edited to contain the production database name and credentials.
+Change the following variables to contain the production values, within the
+quotes:
+
+```python
+os.environ["DB_NAME"] = "your_production_db_name"
+os.environ["DB_USER"] = "your_production_db_user"
+os.environ["DB_PASSWORD"] = "your_production_db_password"
+```
+
 ##### C. Build the JavaScript Bundle
 
 In this case, the production-environment bundle is built. This must be run from

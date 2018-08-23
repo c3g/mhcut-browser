@@ -138,10 +138,10 @@ def build_search_query(raw_query, c):
 
 
 def get_search_params_from_request(c):
-    chromosomes = [ch for ch in request.args.get("chr", "").split(",") if re.match(CHR_DOMAIN, ch)]
-    if len(chromosomes) == 0:
-        chromosomes = list(CHR_VALUES)
+    chromosomes = [ch for ch in request.args.get("chr", ",".join(CHR_VALUES)).split(",") if re.match(CHR_DOMAIN, ch)]
     chr_fragment = "(" + ",".join(["'{}'::CHROMOSOME".format(ch) for ch in chromosomes]) + ")"
+    if len(chromosomes) == 0:
+        chr_fragment = "(NULL)"
 
     start_pos = int(verify_domain(request.args.get("start", "0"), NON_NEG_INT_DOMAIN))
     end_pos = int(verify_domain(request.args.get("end", "1000000000000"), POS_INT_DOMAIN))

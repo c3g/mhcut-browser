@@ -95,14 +95,19 @@ def main():
                 # Treat NA, but not -, as null
                 gene_info_clinvar = "\\N"
 
+            gc = variant["GC"].strip()
+            if gc == "NA":
+                # Treat NA as null
+                gc = "\\N"
+
             main_rows = (str(i), variant["chr"], variant["start"], variant["end"], rs, variant["CAF"],
                          variant["TOPMED"], variant["GENEINFO"], variant["PM"], variant["MC"], af_exac,
                          variant["AF_TGP"], int_or_null_cast(variant["ALLELEID"]), variant["CLNDN"], variant["CLNSIG"],
                          variant["DBVARID"], gene_info_clinvar, variant["MC.ClinVar"], variant["citation"],
                          variant["geneloc"], variant["varL"], variant["mhL"], variant["mh1L"], variant["hom"],
                          variant["nbMM"], int_or_null_cast(variant["mhDist"]), variant["MHseq1"], variant["MHseq2"],
-                         int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
-                         int_or_null_cast(variant["guidesNoOT"]), int_or_null_cast(variant["guidesMinOT"]),
+                         gc, int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
+                         int_or_null_cast(variant["guidesNoNMH"]), int_or_null_cast(variant["guidesMinNMH"]),
                          int_or_null_cast(variant["max2cutsDist"]) if "max2cutsDist" in variant else "\\N")
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
@@ -152,10 +157,10 @@ def main():
             guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null_cast(guide["mm0"]),
                                         int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
                                         guide["m1Dist1"], guide["m1Dist2"], guide["mhDist1"],
-                                        guide["mhDist2"], int_or_null_cast(guide["nbOffTgt"]),
-                                        int_or_null_cast(guide["largestOffTgt"]), guide["botScore"],
-                                        int_or_null_cast(guide["botSize"]), int_or_null_cast(guide["botVarL"]),
-                                        int_or_null_cast(guide["botGC"]), guide["botSeq"])) + "\n")
+                                        guide["mhDist2"], int_or_null_cast(guide["nbNMH"]),
+                                        int_or_null_cast(guide["largestNMH"]), guide["nmhScore"],
+                                        int_or_null_cast(guide["nmhSize"]), int_or_null_cast(guide["nmhVarL"]),
+                                        int_or_null_cast(guide["nmhGC"]), guide["nmhSeq"])) + "\n")
 
             j += 1
 

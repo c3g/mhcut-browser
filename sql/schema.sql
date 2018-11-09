@@ -8,6 +8,7 @@ DROP INDEX IF EXISTS variants_start_idx;
 DROP INDEX IF EXISTS variants_end_idx;
 DROP INDEX IF EXISTS variants_chr_start_end_rs_idx;
 DROP INDEX IF EXISTS variants_mh_l_start_end_idx;
+DROP INDEX IF EXISTS variants_mh_1l_start_end_idx;
 DROP INDEX IF EXISTS variants_rs_idx;
 DROP INDEX IF EXISTS variants_caf_idx;
 DROP INDEX IF EXISTS variants_topmed_idx;
@@ -34,12 +35,17 @@ DROP INDEX IF EXISTS variants_nbmm_idx;
 DROP INDEX IF EXISTS variants_mh_dist_idx;
 DROP INDEX IF EXISTS variants_mh_seq_1_idx;
 DROP INDEX IF EXISTS variants_mh_seq_2_idx;
+DROP INDEX IF EXISTS variants_gc_idx;
 DROP INDEX IF EXISTS variants_pam_mot_idx;
 DROP INDEX IF EXISTS variants_pam_uniq_idx;
-DROP INDEX IF EXISTS variants_guides_no_ot_idx;
-DROP INDEX IF EXISTS variants_guides_min_ot_idx;
+DROP INDEX IF EXISTS variants_guides_no_nmh_idx;
+DROP INDEX IF EXISTS variants_guides_min_nmh_idx;
 DROP INDEX IF EXISTS variants_max_2_cuts_dist_idx;
 DROP INDEX IF EXISTS variants_full_row_trgm_idx;
+
+-- TODO: REMOVE
+DROP INDEX IF EXISTS variants_guides_no_ot_idx;
+DROP INDEX IF EXISTS variants_guides_min_ot_idx;
 
 DROP INDEX IF EXISTS guides_variant_id_idx;
 
@@ -81,10 +87,11 @@ CREATE TABLE variants (
   mh_dist INTEGER,
   mh_seq_1 TEXT,
   mh_seq_2 TEXT,
+  gc NUMERIC CHECK (gc >= 0 AND gc <= 1),
   pam_mot INTEGER CHECK (pam_mot >= 0), -- NULL means NA
   pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
-  guides_no_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
-  guides_min_ot INTEGER CHECK (guides_min_ot >= 0), -- NULL means NA
+  guides_no_nmh INTEGER CHECK (guides_no_nmh >= 0), -- NULL means NA
+  guides_min_nmh INTEGER CHECK (guides_min_nmh >= 0), -- NULL means NA
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
 
   full_row TEXT NOT NULL
@@ -101,13 +108,13 @@ CREATE TABLE guides (
   m1_dist_2 INTEGER NOT NULL,
   mh_dist_1 INTEGER NOT NULL,
   mh_dist_2 INTEGER NOT NULL,
-  nb_off_tgt INTEGER, -- NULL means NA
-  largest_off_tgt INTEGER, -- NULL means NA
-  bot_score TEXT NOT NULL,
-  bot_size TEXT,
-  bot_var_l INTEGER, -- NULL means NA
-  bot_gc INTEGER, -- NULL means NA
-  bot_seq TEXT -- NULL means NA
+  nb_nmh INTEGER, -- NULL means NA
+  largest_nmh INTEGER, -- NULL means NA
+  nmh_score TEXT NOT NULL,
+  nmh_size TEXT,
+  nmh_var_l INTEGER, -- NULL means NA
+  nmh_gc INTEGER, -- NULL means NA
+  nmh_seq TEXT -- NULL means NA
 );
 
 CREATE TABLE cartoons (

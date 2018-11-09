@@ -39,10 +39,11 @@ export const COLUMN_HELP_TEXT = {
     mh_dist: "Distance between the end of MH and the variant boundary.",
     mh_seq_1: "Sequence 1 of the MH.",
     mh_seq_2: "Sequence 2 of the MH.",
+    gc: "GC content of the MH sequence.",
     pam_mot: "The number of PAMs in a valid location.",
     pam_uniq: "The number of PAMs in a valid location and whose protospacer sequence is unique in the genome.",
-    guides_no_ot: "The number of guides that have no off-target MH.",
-    guides_min_ot: "The number of off-target MHs for the guide which has the least off-target MHs.",
+    guides_no_nmh: "The number of guides that have no nested MH.",
+    guides_min_nmh: "The number of off-target MHs for the guide which has the least amount of nested MH.",
     max_2_cuts_dist: "The distance between the two cuts that are the furthest from each other. Only PAMs whose protospacer sequence is unique in the genome are considered", // TODO
 
     cartoon: "Cartoon showing the variant region, annotated with the micro-homology (top) and the positions of valid cuts (bottom).", // TODO
@@ -57,11 +58,11 @@ export const COLUMN_HELP_TEXT = {
     m1_dist_2: "Considering perfect homology only, the distance between the cut position and the downstream micro-homology.", // TODO: grammar???
     mh_dist_1: "The distance between the cut position and the upstream micro-homology.", // TODO: grammar???
     mh_dist_2: "The distance between the cut position and the downstream micro-homology.", // TODO: grammar???
-    nb_off_tgt: "The number of off-target MHs.",
-    largest_off_tgt: "The size of the largest off-target MH.",
-    bot_score: "The MMEJ score of the best off-target MH (\"best\" defined as the highest MMEJ score).",
-    bot_size: "The MH length of the best off-target MH (\"best\" defined as the highest MMEJ score).",
-    bot_var_l: "The length of the variant created by the best off-target MH (\"best\" defined as the highest MMEJ score).",
-    bot_gc: "The GC content of the best off-target MH (\"best\" defined as the highest MMEJ score).",
-    bot_seq: "The sequence of the best off-target MH (\"best\" defined as the highest MMEJ score).",
+    nb_nmh: "The number of off-target MHs.",
+    largest_nmh: "The size of the largest nested MH.",
+    nmh_score: "The MMEJ score of the best nested MH (\"best\" defined as the highest MMEJ score).",
+    nmh_size: "The MH length of the best nested MH (\"best\" defined as the highest MMEJ score).",
+    nmh_var_l: "The length of the variant created by the best nested MH (\"best\" defined as the highest MMEJ score).",
+    nmh_gc: "The GC content of the best nested MH (\"best\" defined as the highest MMEJ score).",
+    nmh_seq: "The sequence of the best nested MH (\"best\" defined as the highest MMEJ score).",
 };

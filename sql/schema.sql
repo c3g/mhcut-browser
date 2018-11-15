@@ -79,6 +79,7 @@ CREATE TABLE variants (
   pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
   guides_no_nmh INTEGER CHECK (guides_no_nmh >= 0), -- NULL means NA
 
+  guides_min_nmh INTEGER CHECK (guides_min_nmh >= 0), -- NULL means NA
   caf TEXT, -- TODO: WHAT IS THIS?
   topmed TEXT, -- TODO: WHAT IS THIS?
   pm TEXT, -- TODO: WHAT IS THIS? - NA VS. "-"
@@ -91,7 +92,6 @@ CREATE TABLE variants (
   mc_clinvar TEXT,
   citation TEXT,
   nbmm INTEGER NOT NULL CHECK (nbmm >= 0),
-  guides_min_nmh INTEGER CHECK (guides_min_nmh >= 0), -- NULL means NA
   gc NUMERIC CHECK (gc >= 0 AND gc <= 1),
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
 

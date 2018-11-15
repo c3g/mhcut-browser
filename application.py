@@ -160,7 +160,7 @@ def get_search_params_from_request(c):
         gene_locations = list(LOCATION_VALUES)
     location_fragment = "(" + ",".join(["'{}'::VARIANT_LOCATION".format(l) for l in gene_locations]) + ")"
 
-    min_mh_l = int(verify_domain(request.args.get("min_mh_l", "0"), NON_NEG_INT_DOMAIN))
+    min_mh_1l = int(verify_domain(request.args.get("min_mh_1l", "0"), NON_NEG_INT_DOMAIN))
 
     dbsnp = verify_domain(request.args.get("dbsnp", "false"), BOOLEAN_DOMAIN) == "true"
     clinvar = verify_domain(request.args.get("clinvar", "false"), BOOLEAN_DOMAIN) == "true"
@@ -181,7 +181,7 @@ def get_search_params_from_request(c):
         "location": gene_locations,
         "location_fragment": location_fragment,
 
-        "min_mh_l": min_mh_l,
+        "min_mh_1l": min_mh_1l,
 
         "dbsnp": dbsnp,
         "clinvar": clinvar,
@@ -215,7 +215,7 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
             if len(search_params["chr"]) < len(CHR_VALUES) else "",
             "(location IN {}) AND ".format(search_params["location_fragment"])
             if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-            "(mh_l >= %(min_mh_l)s) AND " if search_params["min_mh_l"] > 0 else "",
+            "(mh_1l >= %(min_mh_1l)s) AND " if search_params["min_mh_1l"] > 0 else "",
             search_params["position_filter_fragment"],
             search_params["search_query_fragment"],
             order_string,
@@ -228,7 +228,7 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
             "items_per_page": items_per_page,
             "start_pos": search_params["start_pos"],
             "end_pos": search_params["end_pos"],
-            "min_mh_l": search_params["min_mh_l"],
+            "min_mh_1l": search_params["min_mh_1l"],
             "dbsnp": search_params["dbsnp"],
             "clinvar": search_params["clinvar"],
             "ngg_pam_avail": search_params["ngg_pam_avail"],

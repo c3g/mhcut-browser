@@ -26,7 +26,7 @@ let endPos = 12000000000000;
 
 let selectedVariantLocations = [];
 
-let minMHL = 0;
+let minMH1L = 0;
 
 let mustHaveDBSNP = false;
 let mustHaveClinVar = false;
@@ -224,13 +224,13 @@ document.addEventListener("DOMContentLoaded", function () {
         geneLocationLabels.append("span").text(l => " " + l);
 
 
-        d3.select("#min-mh-l")
+        d3.select("#min-mh-1l")
             .attr("min", 0)
-            .attr("max", metadata["max_mh_l"])
-            .property("value", minMHL)
+            .attr("max", metadata["max_mh_1l"])
+            .property("value", minMH1L)
             .on("change", function () {
-                minMHL = parseInt(this.value, 10);
-                if (isNaN(minMHL)) minMHL = 0;
+                minMH1L = parseInt(this.value, 10);
+                if (isNaN(minMH1L)) minMH1L = 0;
             });
 
 
@@ -574,7 +574,7 @@ function resetFilters() {
     d3.selectAll(".chr-checkbox").property("checked", true);
     d3.selectAll(".geneloc-checkbox").property("checked", true);
 
-    minMHL = 0;
+    minMH1L = 0;
 
     mustHaveDBSNP = false;
     mustHaveClinVar = false;
@@ -590,7 +590,7 @@ function updateFilterDOM() {
     d3.select("#start").property("value", startPos);
     d3.select("#end").property("value", endPos);
 
-    d3.select("#min-mh-l").property("value", minMHL);
+    d3.select("#min-mh-1l").property("value", minMH1L);
 
     d3.select("#dbsnp").property("checked", mustHaveDBSNP);
     d3.select("#clinvar").property("checked", mustHaveClinVar);
@@ -716,7 +716,7 @@ function getSearchParams() {
         start: startPos,
         end: endPos,
         location: selectedVariantLocations,
-        min_mh_l: minMHL,
+        min_mh_1l: minMH1L,
 
         dbsnp: mustHaveDBSNP,
         clinvar: mustHaveClinVar,

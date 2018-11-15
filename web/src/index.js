@@ -328,7 +328,10 @@ function selectTablePage(p) {
 }
 
 function populateEntryTable() {
-    const fields = (dataDisplay === "variants" ? variantFields.concat([{"column_name": "cartoon"}]) : guideFields);
+    let variantFieldsWithCartoon = [...variantFields];
+    // TODO: Don't hardcode ID...
+    variantFieldsWithCartoon.splice(19, 0, {"column_name": "cartoon"});
+    const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
     const tableColumns = d3.select("table#entry-table thead tr").selectAll("th").data(fields, f => f["name"]);
     // TODO: Use original column name for display
@@ -423,7 +426,11 @@ function formatTableCell(e, f) {
 }
 
 function updateTableColumnHeaders() {
-    const fields = (dataDisplay === "variants" ? variantFields.concat([{"column_name": "cartoon"}]) : guideFields);
+    let variantFieldsWithCartoon = [...variantFields];
+    // TODO: Don't hardcode ID...
+    variantFieldsWithCartoon.splice(19, 0, {"column_name": "cartoon"});
+
+    const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
     d3.selectAll("table#entry-table thead th").data(fields, f => f["column_name"])
         .select("span.material-icons")
         .text(f => (sortBy === f["column_name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));

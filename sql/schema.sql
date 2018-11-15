@@ -63,35 +63,36 @@ CREATE TABLE variants (
   chr CHROMOSOME NOT NULL,
   pos_start INTEGER NOT NULL CHECK (pos_start >= 0),
   pos_end INTEGER NOT NULL CHECK (pos_end >= 0),
+  location VARIANT_LOCATION NOT NULL,
   rs TEXT, -- NULL means "-"
+  gene_info TEXT, -- TODO: WHAT IS THIS?
+  clndn TEXT,
+  clnsig TEXT,
+  var_l INTEGER NOT NULL CHECK (var_l >= 0), -- Variant Size
+  mh_l INTEGER NOT NULL CHECK (mh_l >= 0), -- Micro-Homology Length
+  mh_1l INTEGER NOT NULL CHECK (mh_1l >= 0), -- Number of First Consecutive Matches
+  hom TEXT, -- Decimal field with precision 1 or 2
+  mh_dist INTEGER,
+  mh_seq_1 TEXT,
+  mh_seq_2 TEXT,
+  pam_mot INTEGER CHECK (pam_mot >= 0), -- NULL means NA
+  pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
+  guides_no_nmh INTEGER CHECK (guides_no_nmh >= 0), -- NULL means NA
+
   caf TEXT, -- TODO: WHAT IS THIS?
   topmed TEXT, -- TODO: WHAT IS THIS?
-  gene_info TEXT, -- TODO: WHAT IS THIS?
   pm TEXT, -- TODO: WHAT IS THIS? - NA VS. "-"
   mc TEXT, -- TODO: NA VS. "-"?
   af_exac TEXT, -- NULL means NA
   af_tgp TEXT,
   allele_id INTEGER CHECK (allele_id >= 0),
-  clndn TEXT,
-  clnsig TEXT,
   dbvarid TEXT,
   gene_info_clinvar TEXT, -- NA is represented as NULL, '-' is left as-is
   mc_clinvar TEXT,
   citation TEXT,
-  location VARIANT_LOCATION NOT NULL,
-  var_l INTEGER NOT NULL CHECK (var_l >= 0), -- Variant Size
-  mh_l INTEGER NOT NULL CHECK (mh_l >= 0), -- Micro-Homology Length
-  mh_1l INTEGER NOT NULL CHECK (mh_1l >= 0), -- Number of First Consecutive Matches
-  hom TEXT, -- Decimal field with precision 1 or 2
   nbmm INTEGER NOT NULL CHECK (nbmm >= 0),
-  mh_dist INTEGER,
-  mh_seq_1 TEXT,
-  mh_seq_2 TEXT,
-  gc NUMERIC CHECK (gc >= 0 AND gc <= 1),
-  pam_mot INTEGER CHECK (pam_mot >= 0), -- NULL means NA
-  pam_uniq INTEGER CHECK (pam_uniq >= 0), -- NULL means NA
-  guides_no_nmh INTEGER CHECK (guides_no_nmh >= 0), -- NULL means NA
   guides_min_nmh INTEGER CHECK (guides_min_nmh >= 0), -- NULL means NA
+  gc NUMERIC CHECK (gc >= 0 AND gc <= 1),
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
 
   full_row TEXT NOT NULL

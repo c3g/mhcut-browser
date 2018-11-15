@@ -21,6 +21,13 @@ __version__ = json.load(open(os.path.join(BASE_DIR, "web/package.json"), "r"))["
 DATABASE_PATH = os.path.join(BASE_DIR, "db.sqlite")
 
 
+# Preferred Column Order
+COLUMN_ORDER = ("id", "chr", "pos_start", "pos_end", "location", "rs", "gene_info", "clndn", "clnsig", "var_l", "mh_l",
+                "mh_1l", "hom", "mh_dist", "mh_seq_1", "mh_seq_2", "pam_mot", "pam_uniq", "guides_no_nmh", "cartoon",
+                "caf", "topmed", "pm", "mc", "af_exac", "af_tgp", "allele_id", "dbvarid", "gene_info_clinvar",
+                "mc_clinvar", "citation", "nbmm", "guides_min_nmh", "gc", "max_2_cuts_dist")
+
+
 # Search Operator / Condition Domains
 SEARCH_OPERATORS = {
     "equals": ("=", "{}"),
@@ -86,7 +93,7 @@ def get_db():
 def get_variants_columns(c):
     c.execute("SELECT column_name, is_nullable, data_type FROM information_schema.columns "
               "WHERE table_schema = 'public' AND table_name = 'variants' AND column_name != 'full_row'")
-    return tuple([dict(i) for i in c.fetchall()])
+    return tuple(sorted([dict(i) for i in c.fetchall()], key=lambda i: COLUMN_ORDER.index(i["column_name"])))
 
 
 def build_variants_columns_domain(c):
@@ -257,6 +264,7 @@ def index():
 
     results = c.fetchall()
     for r in results:
+        r["gc"] = str(r["gc"])
         del r["full_row"]
     return json.jsonify(results)
 
@@ -275,7 +283,8 @@ def variants_tsv():
     def generate():
         with app.app_context():
             c2 = get_db().cursor("variants-tsv-cursor")
-            c2.execute(build_variants_query(c2, "*", search_params, sort_by=sort_by, sort_order=sort_order))
+            c2.execute(build_variants_query(c2, ",".join(column_names), search_params, sort_by=sort_by,
+                                            sort_order=sort_order))
 
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
@@ -383,7 +392,7 @@ def combined_tsv():
     def generate():
         with app.app_context():
             c2 = get_db().cursor("combined-tsv-cursor")
-            c2.execute(build_variants_query(c, "*", search_params, sort_by, sort_order))
+            c2.execute(build_variants_query(c, ",".join(variants_column_names), search_params, sort_by, sort_order))
 
             yield "\t".join(variants_column_names + [col if col != "id" else "guide_id"
                                                      for col in guides_column_names]) + "\n"
@@ -472,7 +481,7 @@ def metadata():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     c.execute("SELECT (SELECT CAST(s_value AS INTEGER) FROM summary_statistics WHERE s_key = 'min_pos') AS min_pos, "
               "  (SELECT CAST(s_value AS INTEGER) FROM summary_statistics WHERE s_key = 'max_pos') AS max_pos, "
-              "  MAX(mh_l) AS max_mh_l FROM variants")
+              "  MAX(mh_l) AS max_mh_l, MAX(mh_1l) AS max_mh_1l FROM variants")
     return json.jsonify({
         **dict(c.fetchone()),
         "chr": CHR_VALUES,

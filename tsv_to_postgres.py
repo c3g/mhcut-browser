@@ -100,15 +100,17 @@ def main():
                 # Treat NA as null
                 gc = "\\N"
 
-            main_rows = (str(i), variant["chr"], variant["start"], variant["end"], rs, variant["CAF"],
-                         variant["TOPMED"], variant["GENEINFO"], variant["PM"], variant["MC"], af_exac,
-                         variant["AF_TGP"], int_or_null_cast(variant["ALLELEID"]), variant["CLNDN"], variant["CLNSIG"],
-                         variant["DBVARID"], gene_info_clinvar, variant["MC.ClinVar"], variant["citation"],
-                         variant["geneloc"], variant["varL"], variant["mhL"], variant["mh1L"], variant["hom"],
-                         variant["nbMM"], int_or_null_cast(variant["mhDist"]), variant["MHseq1"], variant["MHseq2"],
-                         gc, int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
-                         int_or_null_cast(variant["guidesNoNMH"]), int_or_null_cast(variant["guidesMinNMH"]),
-                         int_or_null_cast(variant["max2cutsDist"]) if "max2cutsDist" in variant else "\\N")
+            main_rows = (str(i), variant["chr"], variant["start"], variant["end"], variant["geneloc"], rs,
+                         variant["GENEINFO"], variant["CLNDN"], variant["CLNSIG"], variant["varL"], variant["mhL"],
+                         variant["mh1L"], variant["hom"], int_or_null_cast(variant["mhDist"]), variant["MHseq1"],
+                         variant["MHseq2"], int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
+                         int_or_null_cast(variant["guidesNoNMH"]),  # cartoon goes here...
+
+                         int_or_null_cast(variant["guidesMinNMH"]),
+                         variant["CAF"], variant["TOPMED"], variant["PM"], variant["MC"], af_exac, variant["AF_TGP"],
+                         int_or_null_cast(variant["ALLELEID"]), variant["DBVARID"], gene_info_clinvar,
+                         variant["MC.ClinVar"], variant["citation"], variant["nbMM"],
+                         gc, int_or_null_cast(variant["max2cutsDist"]) if "max2cutsDist" in variant else "\\N")
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
 

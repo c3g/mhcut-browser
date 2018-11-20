@@ -162,7 +162,6 @@ def get_search_params_from_request(c):
 
     min_mh_1l = int(verify_domain(request.args.get("min_mh_1l", "0"), NON_NEG_INT_DOMAIN))
 
-    dbsnp = verify_domain(request.args.get("dbsnp", "false"), BOOLEAN_DOMAIN) == "true"
     clinvar = verify_domain(request.args.get("clinvar", "false"), BOOLEAN_DOMAIN) == "true"
 
     ngg_pam_avail = verify_domain(request.args.get("ngg_pam_avail", "false"), BOOLEAN_DOMAIN) == "true"
@@ -183,7 +182,6 @@ def get_search_params_from_request(c):
 
         "min_mh_1l": min_mh_1l,
 
-        "dbsnp": dbsnp,
         "clinvar": clinvar,
 
         "ngg_pam_avail": ngg_pam_avail,
@@ -201,7 +199,7 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
 
     return c.mogrify(
         "{} (SELECT {} FROM variants WHERE {}{}{} "
-        "NOT ((%(dbsnp)s AND rs IS NULL) OR (%(clinvar)s AND gene_info_clinvar IS NULL)) "
+        "NOT (%(clinvar)s AND gene_info_clinvar IS NULL) "
         "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
         "AND ({}) AND ({}) {}{}{}) {}".format(
             "SELECT {} FROM variants {} WHERE id IN ".format(
@@ -209,8 +207,6 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
                 "LEFT JOIN cartoons ON id = variant_id" if cartoons else ""
             ) if outer_query else "",
             selection if not outer_query else "id",
-            # selection,
-            # "LEFT JOIN cartoons ON id = variant_id" if cartoons else "",
             "(chr IN {}) AND ".format(search_params["chr_fragment"])
             if len(search_params["chr"]) < len(CHR_VALUES) else "",
             "(location IN {}) AND ".format(search_params["location_fragment"])
@@ -229,7 +225,6 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
             "start_pos": search_params["start_pos"],
             "end_pos": search_params["end_pos"],
             "min_mh_1l": search_params["min_mh_1l"],
-            "dbsnp": search_params["dbsnp"],
             "clinvar": search_params["clinvar"],
             "ngg_pam_avail": search_params["ngg_pam_avail"],
             "unique_guide_avail": search_params["unique_guide_avail"],

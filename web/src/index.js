@@ -28,7 +28,6 @@ let selectedVariantLocations = [];
 
 let minMH1L = 0;
 
-let mustHaveDBSNP = false;
 let mustHaveClinVar = false;
 
 let mustHaveNGGPAM = false;
@@ -233,10 +232,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (isNaN(minMH1L)) minMH1L = 0;
             });
 
-
-        d3.select("#dbsnp").property("checked", mustHaveDBSNP).on("change", function () {
-            mustHaveDBSNP = d3.select(this).property("checked");
-        });
 
         d3.select("#clinvar").property("checked", mustHaveClinVar).on("change", function () {
             mustHaveClinVar = d3.select(this).property("checked");
@@ -576,7 +571,6 @@ function resetFilters() {
 
     minMH1L = 0;
 
-    mustHaveDBSNP = false;
     mustHaveClinVar = false;
 
     mustHaveNGGPAM = false;
@@ -592,7 +586,6 @@ function updateFilterDOM() {
 
     d3.select("#min-mh-1l").property("value", minMH1L);
 
-    d3.select("#dbsnp").property("checked", mustHaveDBSNP);
     d3.select("#clinvar").property("checked", mustHaveClinVar);
 
     d3.select("#ngg-pam-available").property("checked", mustHaveNGGPAM);
@@ -718,7 +711,6 @@ function getSearchParams() {
         location: selectedVariantLocations,
         min_mh_1l: minMH1L,
 
-        dbsnp: mustHaveDBSNP,
         clinvar: mustHaveClinVar,
 
         ngg_pam_avail: mustHaveNGGPAM,

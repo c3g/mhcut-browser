@@ -74,6 +74,7 @@
                     with "quick filters" in the sidebar before being used to filter the variants.
                 </p>
             </div>
+            <!--
             <p style="margin-top: 0;">
                 <strong>Order of Boolean Operations:</strong>
                 In chains of <strong>AND</strong> and <strong>OR</strong>, <strong>AND</strong> takes precedence. For
@@ -90,6 +91,18 @@
                     <strong>(</strong>cond_4 <strong>AND</strong> cond_5 <strong>AND</strong> cond_6<strong>)</strong>
                 </code>
             </div>
+            -->
+            <p style="margin-top: 0;">
+                For example to select exonic rare variants whose micro-homology starts with at least 3 exact matches,
+                with at most 10 bp of non-homologous sequence and with at least one PAM with unique protospacer:
+            </p>
+            <div class="code-comparison">
+                <code>
+                    location equals exon <strong>AND</strong> topmed < 0.01 <strong>AND</strong> mh_1l >= 3
+                    <strong>AND</strong> mh_dist <= 10 <strong>AND</strong> pam_uniq > 0
+                </code>
+            </div>
+
             <ul id="advanced-search-conditions"></ul>
         </div>
         <div id="advanced-search-modal-options" class="modal-options">

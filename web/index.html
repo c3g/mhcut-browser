@@ -174,11 +174,26 @@
 </div>
 <main>
 <nav id="table-view-nav">
-    <ul>
-        <li class="active" id="view-variants">Variants</li>
-        <li id="view-guides">Corresponding Guides</li>
-    </ul>
-    <button id="show-export">Export Matches...</button>
+    <div>
+        <ul>
+            <li class="active" id="view-variants">Variants</li>
+            <li id="view-guides">Corresponding Guides</li>
+        </ul>
+    </div>
+    <div>
+        <label for="show-additional-columns">
+            <input type="checkbox" name="show-additional-columns" id="show-additional-columns" checked>
+            Show Additional Columns
+        </label>
+    </div>
+    <!--
+    <div>
+        <span class="help-text">Hover over column names to see description.</span>
+    </div>
+    -->
+    <div style="flex: 1;">
+        <button id="show-export">Export Matches...</button>
+    </div>
 </nav>
 <section id="table-display" class="loading">
     <table id="entry-table"><thead><tr></tr></thead><tbody></tbody></table>

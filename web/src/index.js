@@ -19,6 +19,8 @@ let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
 
+let showAdditionalColumns = true;
+
 let selectedChromosomes = [];
 
 let startPos = 0;
@@ -98,6 +100,15 @@ document.addEventListener("DOMContentLoaded", function () {
         guideFields = data[2]["guides"];
 
         metadata = data[3];
+
+        showAdditionalColumns = d3.select("#show-additional-columns").property("checked");
+        d3.select("#show-additional-columns").on("click", () => {
+            showAdditionalColumns = d3.select("#show-additional-columns").property("checked");
+
+            // TODO: Could probably be optimized
+            populateEntryTable();
+            updateTableColumnHeaders();
+        });
 
         selectedChromosomes = [...metadata["chr"]];
         selectedVariantLocations = [...metadata["location"]];
@@ -324,6 +335,11 @@ function selectTablePage(p) {
 
 function populateEntryTable() {
     let variantFieldsWithCartoon = [...variantFields];
+    if (!showAdditionalColumns) {
+        // TODO: Don't hardcode index
+        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 19);
+    }
+
     // TODO: Don't hardcode ID...
     variantFieldsWithCartoon.splice(19, 0, {"column_name": "cartoon"});
     const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
@@ -422,6 +438,11 @@ function formatTableCell(e, f) {
 
 function updateTableColumnHeaders() {
     let variantFieldsWithCartoon = [...variantFields];
+    if (!showAdditionalColumns) {
+        // TODO: Don't hardcode index
+        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 19);
+    }
+
     // TODO: Don't hardcode ID...
     variantFieldsWithCartoon.splice(19, 0, {"column_name": "cartoon"});
 

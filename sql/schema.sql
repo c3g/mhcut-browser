@@ -28,11 +28,13 @@ DROP INDEX IF EXISTS variants_mc_clinvar_idx;
 DROP INDEX IF EXISTS variants_citation_idx;
 DROP INDEX IF EXISTS variants_location_idx;
 DROP INDEX IF EXISTS variants_var_l_idx;
+DROP INDEX IF EXISTS variants_mh_max_cons_idx;
 DROP INDEX IF EXISTS variants_mh_l_idx;
 DROP INDEX IF EXISTS variants_mh_1l_idx;
 DROP INDEX IF EXISTS variants_hom_idx;
 DROP INDEX IF EXISTS variants_nbmm_idx;
 DROP INDEX IF EXISTS variants_mh_dist_idx;
+DROP INDEX IF EXISTS variants_mh_1dist_idx;
 DROP INDEX IF EXISTS variants_mh_seq_1_idx;
 DROP INDEX IF EXISTS variants_mh_seq_2_idx;
 DROP INDEX IF EXISTS variants_gc_idx;
@@ -72,7 +74,9 @@ CREATE TABLE variants (
   mh_l INTEGER NOT NULL CHECK (mh_l >= 0), -- Micro-Homology Length
   mh_1l INTEGER NOT NULL CHECK (mh_1l >= 0), -- Number of First Consecutive Matches
   hom TEXT, -- Decimal field with precision 1 or 2
+  mh_max_cons INTEGER,
   mh_dist INTEGER,
+  mh_1dist INTEGER,
   mh_seq_1 TEXT,
   mh_seq_2 TEXT,
   pam_mot INTEGER CHECK (pam_mot >= 0), -- NULL means NA

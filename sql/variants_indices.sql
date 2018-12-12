@@ -28,7 +28,9 @@ CREATE INDEX variants_mh_1l_start_end_idx ON variants(mh_1l, pos_start, pos_end)
 CREATE INDEX variants_mh_1l_idx ON variants(mh_1l);
 CREATE INDEX variants_hom_idx ON variants(hom);
 CREATE INDEX variants_nbmm_idx ON variants(nbmm);
+CREATE INDEX variants_mh_max_cons_idx ON variants(mh_max_cons);
 CREATE INDEX variants_mh_dist_idx ON variants(mh_dist);
+CREATE INDEX variants_mh_1dist_idx ON variants(mh_1dist);
 CREATE INDEX variants_mh_seq_1_idx ON variants(mh_seq_1);
 CREATE INDEX variants_mh_seq_2_idx ON variants(mh_seq_2);
 CREATE INDEX variants_pam_mot_idx ON variants(pam_mot);

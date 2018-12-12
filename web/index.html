@@ -252,25 +252,16 @@
                     style="margin: 5px 0;">Advanced Search</button>
         </div>
         <hr>
+        <h2>POSITION SEARCH</h2>
+        <input type="text" name="position-query" id="position-query" placeholder="chr#:start-end">
+        <span class="input-help-text">e.g. chr1:10109-10245</span>
+        <hr>
         <h2>QUICK FILTERS</h2>
-        <h3>
-            Chromosomes
-            <span class="controls">
-                <a id="select-all-chr">All</a>
-                &bull;
-                <a id="deselect-all-chr">None</a>
-            </span>
-        </h3>
-        <div id="chromosome-checkboxes"></div>
-        <label for="start">Start Position</label>
-        <input type="number" min="" max="" id="start" name="start">
-        <label for="end">End Position</label>
-        <input type="number" min="" max="" id="end" name="end">
         <h3>Variant Location</h3>
         <div id="gene-location-checkboxes"></div>
         <hr>
-        <label for="min-mh-l">Minimum consecutive first match in MH</label>
-        <input type="number" min="0" value="0" id="min-mh-1l" name="min-mh-1l" >
+        <label for="min-mh-1l">Minimum consecutive first match in MH</label>
+        <input type="number" min="0" value="0" id="min-mh-1l" name="min-mh-1l">
         <hr>
         <label for="clinvar" class="checkbox-label">
             <input type="checkbox" id="clinvar" name="clinvar" checked> Variant in ClinVar

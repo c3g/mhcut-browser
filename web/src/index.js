@@ -21,7 +21,7 @@ let sortOrder = "ASC";
 
 let showAdditionalColumns = true;
 
-let selectedChromosomes = [];
+let selectedChromosome = null;
 
 let startPos = 0;
 let endPos = 12000000000000;
@@ -110,7 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
             updateTableColumnHeaders();
         });
 
-        selectedChromosomes = [...metadata["chr"]];
         selectedVariantLocations = [...metadata["location"]];
 
         startPos = parseInt(metadata["min_pos"], 10);
@@ -162,53 +161,34 @@ document.addEventListener("DOMContentLoaded", function () {
             window.location.href = downloadURL.toString();
         });
 
+        const onPositionQueryChange = () => {
+            const positionData = d3.select("#position-query").property("value").replace(/[ ]/g, "").split(":");
+            if (![1, 2].includes(positionData.length) || positionData[0] === "") {
+                selectedChromosome = null;
+                startPos = parseInt(metadata["min_pos"], 10);
+                endPos = parseInt(metadata["max_pos"], 10);
+                return;
+            }
 
-        d3.select("#select-all-chr").on("click", () => {
-            selectedChromosomes = [...metadata["chr"]];
-            d3.selectAll(".chr-checkbox").property("checked", true);
-        });
+            const chromosome = positionData[0].toLocaleLowerCase();
+            selectedChromosome = chromosome;
 
-        d3.select("#deselect-all-chr").on("click", () => {
-            selectedChromosomes = [];
-            d3.selectAll(".chr-checkbox").property("checked", false);
-        });
+            if (positionData.length === 1) {
+                startPos = parseInt(metadata["min_pos"], 10);
+                endPos = parseInt(metadata["max_pos"], 10);
+                return;
+            }
 
-        const chromosomeLabels = d3.select("#chromosome-checkboxes").selectAll("label").data(metadata["chr"])
-            .enter()
-            .append("label")
-            .attr("for", c => c);
-        chromosomeLabels.append("input")
-            .attr("type", "checkbox")
-            .attr("id", c => c)
-            .attr("class", "chr-checkbox")
-            .attr("name", c => c)
-            .attr("checked", "checked")
-            .on("change", function () {
-                selectedChromosomes = [];
+            const startEnd = positionData[1].split("-").map(p => parseInt(p, 10));
+            if (startEnd.length !== 2) return;
 
-                d3.selectAll(".chr-checkbox")
-                    .filter(function () { return d3.select(this).property("checked"); })
-                    .each(function () { selectedChromosomes.push(d3.select(this).attr("id")); });
-            });
-        chromosomeLabels.append("span").text(c => `${c.replace("chr", "")}`);
+            selectedChromosome = chromosome;
+            startPos = startEnd[0];
+            endPos = startEnd[1];
+        };
 
-
-        d3.select("#start")
-            .attr("min", metadata["min_pos"])
-            .attr("max", metadata["max_pos"])
-            .property("value", metadata["min_pos"])
-            .on("change", function () {
-                startPos = parseInt(this.value, 10);
-                if (isNaN(startPos)) startPos = parseInt(metadata["min_pos"], 10);
-            });
-        d3.select("#end")
-            .attr("min", metadata["min_pos"])
-            .attr("max", metadata["max_pos"])
-            .property("value", metadata["max_pos"])
-            .on("change", function () {
-                endPos = parseInt(this.value, 10);
-                if (isNaN(endPos)) endPos = parseInt(metadata["max_pos"], 10);
-            });
+        d3.select("#position-query").on("change", onPositionQueryChange);
+        onPositionQueryChange();
 
 
         const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["location"])
@@ -580,7 +560,7 @@ function getTotalPages() {
 }
 
 function resetFilters() {
-    selectedChromosomes = [...metadata["chr"]];
+    selectedChromosome = null;
 
     startPos = parseInt(metadata["min_pos"], 10);
     endPos = parseInt(metadata["max_pos"], 10);
@@ -726,7 +706,7 @@ function getSearchParams() {
         sort_by: sortBy,
         sort_order: sortOrder,
 
-        chr: selectedChromosomes,
+        chr: selectedChromosome,
         start: startPos,
         end: endPos,
         location: selectedVariantLocations,

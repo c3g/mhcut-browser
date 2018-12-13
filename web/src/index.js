@@ -317,11 +317,11 @@ function populateEntryTable() {
     let variantFieldsWithCartoon = [...variantFields];
     if (!showAdditionalColumns) {
         // TODO: Don't hardcode index
-        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 19);
+        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 21);
     }
 
     // TODO: Don't hardcode ID...
-    variantFieldsWithCartoon.splice(19, 0, {"column_name": "cartoon"});
+    variantFieldsWithCartoon.splice(21, 0, {"column_name": "cartoon"});
     const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
     const tableColumns = d3.select("table#entry-table thead tr").selectAll("th").data(fields, f => f["name"]);
@@ -420,11 +420,11 @@ function updateTableColumnHeaders() {
     let variantFieldsWithCartoon = [...variantFields];
     if (!showAdditionalColumns) {
         // TODO: Don't hardcode index
-        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 19);
+        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 21);
     }
 
     // TODO: Don't hardcode ID...
-    variantFieldsWithCartoon.splice(19, 0, {"column_name": "cartoon"});
+    variantFieldsWithCartoon.splice(21, 0, {"column_name": "cartoon"});
 
     const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
     d3.selectAll("table#entry-table thead th").data(fields, f => f["column_name"])

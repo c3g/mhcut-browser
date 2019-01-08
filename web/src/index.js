@@ -127,6 +127,11 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.select("#show-export").on("click", () => exportContainer.classed("shown", true));
         d3.select("#hide-export").on("click", () => exportContainer.classed("shown", false));
 
+        d3.select("#sidebar-toggle").on("click", () => {
+            d3.select("body").classed("no-sidebar", !d3.select("body").classed("no-sidebar"));
+            d3.select("#sidebar-toggle").classed("active", !d3.select("body").classed("no-sidebar"));
+        });
+
         d3.select("#hide-variant-guides").on("click", () => variantGuidesContainer.classed("shown", false));
         const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
             .selectAll("th").data(guideFields, f => f["column_name"]);

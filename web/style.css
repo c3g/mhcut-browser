@@ -109,7 +109,6 @@ nav#table-view-nav ul li.active {
 }
 
 nav#table-view-nav button {
-    float: right;
     padding: 0 10px;
     margin-left: 5px;
     height: 28px;
@@ -126,6 +125,29 @@ nav#table-view-nav button#show-export {
     color: #E3F2FD;
 }
 
+nav#table-view-nav button#sidebar-toggle {
+    padding: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+nav#table-view-nav button#sidebar-toggle.active {
+    background: linear-gradient(#FCFCFC, #FEFEFE);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    border-color: #BFBFBF;
+    border-top-color: #B3B3B3;
+    border-bottom-color: #BCBCBC;
+
+    color: rgba(38, 50, 56, 0.85);
+
+    transition: all 0.15s ease-in-out;
+}
+
+nav#table-view-nav button#sidebar-toggle span.material-icons {
+    min-width: 30px;
+    font-size: 1.2rem;
+    line-height: 25px;
+}
+
 
 
 main {
@@ -138,6 +160,12 @@ main {
     border-bottom-color: #D3D3D3;
     border-radius: 4px;
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
+
+    transition: all 0.3s ease-in-out;
+}
+
+body.no-sidebar main {
+    right: 15px;
 }
 
 
@@ -266,6 +294,13 @@ aside#filter-options {
     background-color: #ECEFF1;
 
     overflow-y: auto;
+
+    transition: all 0.3s ease-in-out;
+}
+
+body.no-sidebar aside#filter-options {
+    right: -220px;
+    opacity: 0;
 }
 
 aside#filter-options div#app-logo-container {
@@ -282,10 +317,31 @@ aside#filter-options h1 {
     margin-top: 15px;
     margin-bottom: 10px;
     font-family: "Roboto Mono", monospace;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: normal;
     text-align: center;
     color: #555;
+}
+
+aside#filter-options div#developed-by {
+    text-align: center;
+}
+
+aside#filter-options div#developed-by span {
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: normal;
+    text-align: center;
+    color: #555;
+}
+
+aside#filter-options div#developed-by img {
+    margin-top: 10px;
+    max-width: 200px;
+    width: 70%;
+    height: auto;
+
+    border: none;
 }
 
 aside#filter-options h2 {

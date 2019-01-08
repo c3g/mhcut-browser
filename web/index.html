@@ -191,8 +191,11 @@
         <span class="help-text">Hover over column names to see description.</span>
     </div>
     -->
-    <div style="flex: 1;">
+    <div style="flex: 1; text-align: right;">
         <button id="show-export">Export Matches...</button>
+        <button id="sidebar-toggle" class="active" title="Sidebar Toggle">
+            <span class="material-icons">vertical_split</span>
+        </button>
     </div>
 </nav>
 <section id="table-display" class="loading">
@@ -242,6 +245,13 @@
         <img src="/logo.png" alt="MHcut Browser Logo" id="app-logo">
     </div>-->
     <h1>MHcut Browser</h1>
+    <div id="developed-by">
+        <span>developed by</span>
+        <a href="http://www.computationalgenomics.ca/">
+            <img src="/c3g_logo_small.png" alt="C3G">
+        </a>
+    </div>
+    <hr>
     <form id="filter-search-form">
         <h2><label for="search-query">SEARCH</label></h2>
         <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">

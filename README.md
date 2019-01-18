@@ -109,7 +109,7 @@ Using external NodeJS Aptitude repositories, this can be done with the
 following commands:
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt install nodejs
 sudo npm install -g npm  # Update NPM to the latest version
 npm -v  # The version should be at least 6.x.x

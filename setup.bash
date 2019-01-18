@@ -44,7 +44,7 @@ fi
 
 if ! [ -x "$(command -v npm)" ]; then
   echo "Attempting to install NPM from nodesource via apt..."
-  curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+  curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
   sudo apt-get install -y nodejs
 fi
 

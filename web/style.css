@@ -1026,4 +1026,12 @@ div#column-help-text.shown {
         position: absolute;
         top: 40px; left: 80px; right: 80px; bottom: 40px;
     }
+
+    section#table-pagination {
+        overflow-x: auto;
+    }
+
+    section#table-pagination span#total-entries-text {
+        display: none;
+    }
 }

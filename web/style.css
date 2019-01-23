@@ -313,8 +313,21 @@ aside#filter-options img#app-logo {
     height: auto;
 }
 
-aside#filter-options h1 {
+aside#filter-options div#cira-logo {
     margin-top: 15px;
+    text-align: center;
+}
+
+aside#filter-options div#cira-logo a {
+    border: none;
+}
+
+aside#filter-options div#cira-logo img {
+    width: 90%;
+}
+
+aside#filter-options h1 {
+    margin-top: 0;
     margin-bottom: 10px;
     font-family: "Roboto Mono", monospace;
     font-size: 1.2rem;

@@ -37,9 +37,9 @@ SEARCH_OPERATORS = {
     ">=": (">=", "{}"),
 
     # TEXT
-    "contains": ("LIKE", "%{}%"),
-    "starts_with": ("LIKE", "{}%"),
-    "ends_with": ("LIKE", "%{}"),
+    "contains": ("ILIKE", "%{}%"),
+    "starts_with": ("ILIKE", "{}%"),
+    "ends_with": ("ILIKE", "%{}"),
 
     # NULLABLE
     "is_null": ("IS NULL", "")

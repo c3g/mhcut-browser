@@ -12,10 +12,10 @@
   "author": "David Lougheed <david.lougheed@mail.mcgill.ca>",
   "license": "UNLICENSED",
   "devDependencies": {
-    "webpack": "^4.17.1",
-    "webpack-cli": "^3.1.0"
+    "webpack": "^4.29.0",
+    "webpack-cli": "^3.2.1"
   },
   "dependencies": {
-    "d3": "^5.6.0"
+    "d3": "^5.7.0"
   }
 }

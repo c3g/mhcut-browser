@@ -66,7 +66,7 @@ CREATE TABLE variants (
   pos_start INTEGER NOT NULL CHECK (pos_start >= 0),
   pos_end INTEGER NOT NULL CHECK (pos_end >= 0),
   location VARIANT_LOCATION NOT NULL,
-  rs TEXT, -- NULL means "-"
+  rs INTEGER, -- NULL means "-"
   gene_info TEXT, -- TODO: WHAT IS THIS?
   clndn TEXT,
   clnsig TEXT,

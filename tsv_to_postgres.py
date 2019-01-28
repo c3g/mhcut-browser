@@ -80,10 +80,7 @@ def main():
         reader = csv.DictReader(vs_file, delimiter="\t")
         i = 1
         for variant in tqdm(reader, total=n_variants, desc="variants"):
-            rs = variant["RS"].strip()
-            if rs == "-":
-                # Treat - as null (NA does not occur)
-                rs = "\\N"
+            rs = int_or_null_cast(variant["RS"].strip())
 
             af_exac = variant["AF_EXAC"].strip()
             if af_exac == "NA":
@@ -197,7 +194,8 @@ def main():
 
                     c2.execute("SELECT id FROM variants WHERE chr = %(chr)s "
                                "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
-                               "AND (CASE WHEN %(rs)s = '-' THEN rs IS NULL ELSE rs = %(rs)s END) ", next_cartoon)
+                               "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
+                               next_cartoon)
 
                     v_id = c2.fetchone()[0]
 

@@ -394,7 +394,7 @@ function populateEntryTable() {
 function formatTableCell(e, f) {
     if (f["column_name"] === "rs") {
         if (e["rs"] === null) return "-";
-        return e["rs"].split("|")
+        return e["rs"].toString().split("|")
             .map(rs => `<a href="${dbSNPURL(rs)}" target="_blank" rel="noopener">${rs}</a>`)
             .join("|");
     } else if ((f["column_name"] === "gene_info" && e["gene_info"] !== "-" && e["gene_info"] !== "NA")

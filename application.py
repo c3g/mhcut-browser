@@ -52,12 +52,12 @@ CHR_VALUES = ("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "c
 LOCATION_VALUES = ("intronic", "exonic", "intergenic", "utr")
 
 # Domains
-CHR_DOMAIN = re.compile("^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
-POS_INT_DOMAIN = re.compile("^[1-9]\d*$")
-NON_NEG_INT_DOMAIN = re.compile("^\d+$")
-BOOLEAN_DOMAIN = re.compile("^(true|false)$")
-POSITION_OPERATOR_DOMAIN = re.compile("^(overlap|not_overlap|within)$")
-SORT_ORDER_DOMAIN = re.compile("^(ASC|DESC)$")
+CHR_DOMAIN = re.compile(r"^(chr(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|X|Y)|any)$")
+POS_INT_DOMAIN = re.compile(r"^[1-9]\d*$")
+NON_NEG_INT_DOMAIN = re.compile(r"^\d+$")
+BOOLEAN_DOMAIN = re.compile(r"^(true|false)$")
+POSITION_OPERATOR_DOMAIN = re.compile(r"^(overlap|not_overlap|within)$")
+SORT_ORDER_DOMAIN = re.compile(r"^(ASC|DESC)$")
 
 app = Flask(__name__)
 

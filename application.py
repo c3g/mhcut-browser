@@ -286,7 +286,7 @@ def variants_tsv():
             yield "\t".join(column_names) + "\n"
             row = c2.fetchone()
             while row is not None:
-                yield "\t".join([str(col) if col is not None else "NA" for col in row[:-1]]) + "\n"
+                yield "\t".join([str(col) if col is not None else "NA" for col in row]) + "\n"
                 row = c2.fetchone()
 
     return Response(generate(), mimetype="text/tab-separated-values",
@@ -396,9 +396,9 @@ def combined_tsv():
             c3 = get_db().cursor()
             row = c2.fetchone()
             while row is not None:
-                row_to_return = [str(col) if col is not None else "NA" for col in row[:-1]]
 
                 yield "\t".join(row_to_return) + "\n"
+                row_to_return = [str(col) if col is not None else "NA" for col in row]
 
                 c3.execute("SELECT * FROM guides WHERE variant_id = %s", (row_to_return[0],))
                 guide_row = c3.fetchone()

@@ -380,6 +380,8 @@ def combined_tsv():
 
     search_params = get_search_params_from_request(c)
 
+    guides_with_variant_info = request.args.get("guides_with_variant_info", "true").lower() == "true"
+
     sort_by = verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c))
     sort_order = verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN)
 
@@ -396,15 +398,21 @@ def combined_tsv():
             c3 = get_db().cursor()
             row = c2.fetchone()
             while row is not None:
-
-                yield "\t".join(row_to_return) + "\n"
                 row_to_return = [str(col) if col is not None else "NA" for col in row]
 
                 c3.execute("SELECT * FROM guides WHERE variant_id = %s", (row_to_return[0],))
                 guide_row = c3.fetchone()
+
+                if guide_row is None or not guides_with_variant_info:
+                    # No guides, or displaying guides with variant info is disabled
+                    yield "\t".join(row_to_return) + "\n"
+
                 while guide_row is not None:
-                    yield "\t".join(([""] * len(variants_column_names))
-                                    + [str(col) if col is not None else "NA" for col in guide_row]) + "\n"
+                    guide_info = [str(col) if col is not None else "NA" for col in guide_row]
+                    if guides_with_variant_info:
+                        yield "\t".join(row_to_return + guide_info) + "\n"
+                    else:
+                        yield "\t".join(([""] * len(variants_column_names)) + guide_info) + "\n"
                     guide_row = c3.fetchone()
 
                 row = c2.fetchone()

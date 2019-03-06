@@ -45,10 +45,10 @@ export const COLUMN_HELP_TEXT = {
     pam_mot: "The number of PAMs in a valid location.",
     pam_uniq: "The number of PAMs in a valid location and whose protospacer sequence is unique in the genome.",
     guides_no_nmh: "The number of guides that have no nested MH.",
-    guides_min_nmh: "The number of off-target MHs for the guide which has the least amount of nested MH.",
+    guides_min_nmh: "The number of nested MHs for the guide which has the least amount of nested MH.",
     max_2_cuts_dist: "The distance between the two cuts that are the furthest from each other. Only PAMs whose protospacer sequence is unique in the genome are considered", // TODO
 
-    cartoon: "Cartoon showing the variant region, annotated with the micro-homology (top) and the positions of valid cuts (bottom).", // TODO
+    cartoon: "Cartoon showing the variant region, annotated with the microhomology (top) and the positions of valid cuts (bottom).", // TODO
 
     variant_id: "Corresponding variant database ID.",
 
@@ -56,11 +56,11 @@ export const COLUMN_HELP_TEXT = {
     mm0: "The number of positions in the genome where the sequence aligns with no mismatches.",
     mm1: "The number of positions in the genome where the sequence aligns with 1 mismatch.",
     mm2: "The number of positions in the genome where the sequence aligns with 2 mismatches.",
-    m1_dist_1: "Considering perfect homology only, the distance between the cut position and the upstream micro-homology.", // TODO: grammar???
-    m1_dist_2: "Considering perfect homology only, the distance between the cut position and the downstream micro-homology.", // TODO: grammar???
-    mh_dist_1: "The distance between the cut position and the upstream micro-homology.", // TODO: grammar???
-    mh_dist_2: "The distance between the cut position and the downstream micro-homology.", // TODO: grammar???
-    nb_nmh: "The number of off-target MHs.",
+    m1_dist_1: "Considering perfect homology only, the distance between the cut position and the upstream microhomology.", // TODO: grammar???
+    m1_dist_2: "Considering perfect homology only, the distance between the cut position and the downstream microhomology.", // TODO: grammar???
+    mh_dist_1: "The distance between the cut position and the upstream microhomology.", // TODO: grammar???
+    mh_dist_2: "The distance between the cut position and the downstream microhomology.", // TODO: grammar???
+    nb_nmh: "The number of nested MHs.",
     largest_nmh: "The size of the largest nested MH.",
     nmh_score: "The MMEJ score of the best nested MH (\"best\" defined as the highest MMEJ score).",
     nmh_size: "The MH length of the best nested MH (\"best\" defined as the highest MMEJ score).",

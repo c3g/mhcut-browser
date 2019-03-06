@@ -261,7 +261,7 @@ def index():
 
     results = c.fetchall()
     for r in results:
-        r["gc"] = str(r["gc"])
+        r["gc"] = str(r["gc"]) if r["gc"] is not None else None
         del r["full_row"]
     return json.jsonify(results)
 

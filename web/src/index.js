@@ -175,7 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            const chromosome = positionData[0].toLocaleLowerCase();
+            const chromosome = positionData[0].toLocaleLowerCase()
+                .replace("x", "X")
+                .replace("y", "Y");
             selectedChromosome = chromosome;
 
             if (positionData.length === 1) {

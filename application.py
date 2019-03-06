@@ -145,7 +145,9 @@ def build_search_query(raw_query, c):
 
 
 def get_search_params_from_request(c):
-    chromosomes = [ch for ch in request.args.get("chr", ",".join(CHR_VALUES)).split(",") if re.match(CHR_DOMAIN, ch)]
+    # Ensure chromosomes match spec. Make chrx/chry into chrX/chrY.
+    chromosomes = [ch.upper().replace("CHR", "chr") for ch in request.args.get("chr", ",".join(CHR_VALUES)).split(",")
+                   if re.match(CHR_DOMAIN, ch.upper().replace("CHR", "chr"))]
     chr_fragment = "(" + ",".join(["'{}'::CHROMOSOME".format(ch) for ch in chromosomes]) + ")"
     if len(chromosomes) == 0:
         chr_fragment = "(" + ",".join(["'{}'::CHROMOSOME".format(ch) for ch in CHR_VALUES]) + ")"

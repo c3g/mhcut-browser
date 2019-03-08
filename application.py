@@ -297,7 +297,12 @@ def variants_tsv():
 def variant_guides(variant_id):
     c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
-    return json.jsonify(c.fetchall())
+
+    results = c.fetchall()
+    for r in results:
+        r["nmh_gc"] = str(r["nmh_gc"]) if r["nmh_gc"] is not None else None
+
+    return json.jsonify(results)
 
 
 @app.route("/variants/<int:variant_id>/guides/tsv", methods=["GET"])
@@ -349,7 +354,11 @@ def guides():
         outer_query=False
     ).decode("utf-8")))
 
-    return json.jsonify(c.fetchall())
+    results = c.fetchall()
+    for r in results:
+        r["nmh_gc"] = str(r["nmh_gc"]) if r["nmh_gc"] is not None else None
+
+    return json.jsonify(results)
 
 
 @app.route("/guides/tsv", methods=["GET"])

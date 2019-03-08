@@ -155,13 +155,18 @@ def main():
 
             variant_id = variant[0]
 
+            nmh_gc = guide["nmhGC"].strip()
+            if nmh_gc == "NA":
+                # Treat NA as null
+                nmh_gc = "\\N"
+
             guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null_cast(guide["mm0"]),
                                         int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
                                         guide["m1Dist1"], guide["m1Dist2"], guide["mhDist1"],
                                         guide["mhDist2"], int_or_null_cast(guide["nbNMH"]),
                                         int_or_null_cast(guide["largestNMH"]), guide["nmhScore"],
                                         int_or_null_cast(guide["nmhSize"]), int_or_null_cast(guide["nmhVarL"]),
-                                        int_or_null_cast(guide["nmhGC"]), guide["nmhSeq"])) + "\n")
+                                        nmh_gc, guide["nmhSeq"])) + "\n")
 
             j += 1
 

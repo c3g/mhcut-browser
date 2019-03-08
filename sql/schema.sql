@@ -118,7 +118,7 @@ CREATE TABLE guides (
   nmh_score TEXT NOT NULL,
   nmh_size TEXT,
   nmh_var_l INTEGER, -- NULL means NA
-  nmh_gc INTEGER, -- NULL means NA
+  nmh_gc NUMERIC CHECK (nmh_gc >= 0 AND nmh_gc <= 1), -- NULL means NA
   nmh_seq TEXT -- NULL means NA
 );
 

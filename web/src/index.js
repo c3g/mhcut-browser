@@ -516,8 +516,9 @@ function reloadPage(reloadCounts) {
             if (loadedVariants.length === itemsPerPage && loadingEntryCounts) {
                 // Re-enable next page button to let people do some basic exploration while counts are loading...
                 totalVariantsCount = page * itemsPerPage + 1;
-            } else if (loadedVariants.length < itemsPerPage && loadingEntryCounts) {
-                totalVariantsCount = (page - 1) * itemsPerPage + loadedVariants.length;
+            } else if (page === 1 && loadedVariants.length < itemsPerPage && loadingEntryCounts) {
+                totalVariantsCount = loadedVariants.length;
+                totalGuidesCount = loadedGuides.length;
                 d3.select("#apply-filters").attr("disabled", null);
                 d3.select("#clear-filters").attr("disabled", null);
                 loadingEntryCounts = false;

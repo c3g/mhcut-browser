@@ -808,15 +808,26 @@ ul#advanced-search-conditions li button.remove-search-condition:hover span.mater
 
 div#export-options-modal {
     max-width: 600px;
-    min-height: 250px;
+    min-height: 265px;
     margin: auto;
     bottom: auto;
 }
 
 div#export-options-modal label {
+    display: block;
     margin-right: 0.4em;
+    margin-bottom: 0.8em;
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
+}
+
+div#export-options-modal label:last-of-type {
+    margin-bottom: 0;
+}
+
+div#export-options-modal input[type="checkbox"] {
+    vertical-align: top;
+    margin-top: 2px;
 }
 
 

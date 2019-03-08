@@ -125,14 +125,20 @@
         <div class="modal-scroll-container">
             <h2>Export Options</h2>
             <p>
-                <strong>Total Matching Variants:</strong> <span id="matching-variants-export">0</span> <br>
-                <strong>Total Matching Guides:</strong> <span id="matching-guides-export">0</span>
+                <strong>Total Matching Variants:</strong> <span id="matching-variants-export">many</span> <br>
+                <strong>Total Matching Guides:</strong> <span id="matching-guides-export">many</span>
             </p>
             <form>
-                <label for="export-format">Export Format:</label>
-                <select name="export-format" id="export-format">
-                    <option value="tsv">TSV</option>
-                </select>
+                <label for="export-format">
+                    Export Format:
+                    <select name="export-format" id="export-format">
+                        <option value="tsv">TSV</option>
+                    </select>
+                </label>
+                <label for="guides-with-variant-info" id="label-guides-with-variants-info">
+                    <input type="checkbox" id="guides-with-variant-info" name="guides-with-variant-info" checked>
+                    Include variant information in guide rows? <em>(recommended)</em>
+                </label>
             </form>
         </div>
         <div class="modal-options">

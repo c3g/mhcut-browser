@@ -145,17 +145,26 @@ document.addEventListener("DOMContentLoaded", function () {
             .append("span").attr("class", "material-icons");
         variantGuideTableColumns.exit().remove();
 
-        d3.select("#export-variants").on("click", () => {
-            let downloadURL = new URL("/api/tsv", window.location.origin);
-            let params = getSearchParams();
-            Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
-            window.location.href = downloadURL.toString();
-        });
+        d3.select("#export-variants")
+            .on("click", () => {
+                let downloadURL = new URL("/api/tsv", window.location.origin);
+                let params = getSearchParams();
+                Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+                window.location.href = downloadURL.toString();
+            })
+            .on("mouseover", () => {
+                d3.select("#label-guides-with-variants-info").transition().style("opacity", 0.5);
+            })
+            .on("mouseout", () => {
+                d3.select("#label-guides-with-variants-info").transition().style("opacity", 1);
+            });
 
         d3.select("#export-guides").on("click", () => {
             let downloadURL = new URL("/api/guides/tsv", window.location.origin);
             let params = getSearchParams();
             Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+            downloadURL.searchParams.append("guides_with_variant_info",
+                d3.select("#guides-with-variant-info").property("checked"));
             window.location.href = downloadURL.toString();
         });
 
@@ -163,6 +172,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let downloadURL = new URL("/api/combined/tsv", window.location.origin);
             let params = getSearchParams();
             Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+            downloadURL.searchParams.append("guides_with_variant_info",
+                d3.select("#guides-with-variant-info").property("checked"));
             window.location.href = downloadURL.toString();
         });
 

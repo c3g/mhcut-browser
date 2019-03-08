@@ -365,15 +365,31 @@ def guides():
 def guides_tsv():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
+    variant_column_names = [i["column_name"] for i in get_variants_columns(c)]
     column_names = [i["column_name"] for i in get_guides_columns(c)]
+
+    guides_with_variant_info = request.args.get("guides_with_variant_info", "true").lower() == "true"
 
     def generate():
         with app.app_context():
             c2 = get_db().cursor("guides-tsv-cursor")
-            c2.execute("SELECT * FROM guides WHERE variant_id IN "
-                       "({})".format(build_variants_query(c, "id", search_params).decode("utf-8")))
 
-            yield "\t".join(column_names) + "\n"
+            if guides_with_variant_info:
+                c2.execute(
+                    "SELECT {}, guides.* FROM variants RIGHT JOIN guides ON variants.id = guides.variant_id "
+                    "WHERE variant_id IN "
+                    "({})".format(
+                        ", ".join(["variants.{}".format(col) for col in variant_column_names[1:]]),
+                        build_variants_query(c, "id", search_params).decode("utf-8")
+                    )
+                )
+                yield "\t".join(variant_column_names[1:] + column_names) + "\n"
+
+            else:
+                c2.execute("SELECT * FROM guides WHERE variant_id IN "
+                           "({})".format(build_variants_query(c, "id", search_params).decode("utf-8")))
+                yield "\t".join(column_names) + "\n"
+
             row = c2.fetchone()
             while row is not None:
                 yield "\t".join([str(col) if col is not None else "NA" for col in row]) + "\n"

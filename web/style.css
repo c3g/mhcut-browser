@@ -18,7 +18,7 @@ nav#table-view-nav {
     padding: 11px 15px;
 
     background-color: #FAFAFA;
-    border-bottom: 1px solid #F0F0F0;
+    border-bottom: 1px solid #E9E9E9;
 }
 
 nav#table-view-nav div:not(:first-child):not(:last-child) {
@@ -172,8 +172,9 @@ body.no-sidebar main {
 
 section#table-display {
     position: absolute;
-    top: 51px; left: 0; right: 0; bottom: 50px;
+    top: 50px; left: 0; right: 0; bottom: 50px;
     overflow: auto;
+    background-color: #F4F4F4;
 }
 
 section#table-display::after {
@@ -485,24 +486,87 @@ table#variant-guides-table {
 table#entry-table thead th,
 table#variant-guides-table thead th {
     vertical-align: top;
-    padding: 4px 10px 6px 10px;
+    padding: 0;
+    background-color: #F4F4F4;
+    white-space: nowrap;
+    cursor: default;
+}
 
+table#entry-table thead tr#group-row th,
+table#variant-guides-table thead tr#group-row th {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+table#entry-table thead tr#group-row th:first-child,
+table#variant-guides-table thead tr#group-row th:first-child {
+    padding-left: 8px;
+}
+
+table#entry-table thead tr#group-row th:last-child,
+table#variant-guides-table thead tr#group-row th:last-child {
+    padding-right: 8px;
+}
+
+table#entry-table thead th div,
+table#variant-guides-table thead th div {
+    padding: 5px 10px 6px 10px;
     background-color: #FEFEFE;
     box-shadow: inset 0 -1px 0 #E6E6E6, 0 1px 10px rgba(0, 0, 0, 0.01);
 
     color: #444;
     font-size: 0.7rem;
     font-family: "Roboto Mono", monospace;
-    white-space: nowrap;
-
-    cursor: default;
 }
 
-table#entry-table thead th {
+table#entry-table thead tr#group-row th div,
+table#variant-guides-table thead tr#group-row th div {
+    box-shadow: inset 0 -1px 0 #E9E9E9;
+    background-color: #F4F4F4;
+    color: #666;
+    font-size: 0.65rem;
+}
+
+table#entry-table thead tr#group-row th {
     position: sticky;
     top: 0;
+}
+
+table#entry-table thead tr#header-row th {
+    position: sticky;
+    top: 25px;
 
     cursor: pointer;
+}
+
+table#entry-table thead th.first,
+table#variant-guides-table thead th.first {
+    padding-left: 1px;
+}
+
+table#entry-table thead th.first:first-child,
+table#variant-guides-table thead th.first:first-child {
+    padding-left: 7px;
+}
+
+table#entry-table thead th.first div,
+table#variant-guides-table thead th.first div {
+    border-left: 1px solid #E6E6E6;
+}
+
+table#entry-table thead th.last,
+table#variant-guides-table thead th.last {
+    padding-right: 1px;
+}
+
+table#entry-table thead th.last:last-child,
+table#variant-guides-table thead th.last:last-child {
+    padding-right: 7px;
+}
+
+table#entry-table thead th.last div,
+table#variant-guides-table thead th.last div {
+    border-right: 1px solid #E6E6E6;
 }
 
 table#entry-table thead th.no-click {
@@ -524,36 +588,82 @@ table#entry-table.guides thead th span.material-icons {
     display: none;
 }
 
-table#entry-table tbody tr:nth-child(even) td,
-table#variant-guides-table tbody tr:nth-child(even) td {
+table#entry-table tbody tr {
+    height: 1px;
+}
+
+table#entry-table tbody tr:nth-child(even) td div,
+table#variant-guides-table tbody tr:nth-child(even) td div {
     background-color: #F8F8F8;
+}
+
+table#entry-table tbody tr:nth-child(odd) td div,
+table#variant-guides-table tbody tr:nth-child(odd) td div {
+    background-color: #FEFEFE;
 }
 
 table#entry-table tbody td,
 table#variant-guides-table tbody td {
+    padding: 0;
+    background-color: #F4F4F4;
+    height: 100%;
+}
+
+table#entry-table tbody td.first,
+table#variant-guides-table tbody td.first {
+    padding-left: 1px;
+}
+
+table#entry-table tbody td.first:first-child,
+table#variant-guides-table tbody td.first:first-child {
+    padding-left: 7px;
+}
+
+table#entry-table tbody td.last,
+table#variant-guides-table tbody td.last {
+    padding-right: 1px;
+}
+
+table#entry-table tbody td.last:last-child,
+table#variant-guides-table tbody td.last:last-child {
+    padding-right: 7px;
+}
+
+table#entry-table tbody td div,
+table#variant-guides-table tbody td div {
+    height: 100%;
     padding: 4px 10px;
-    border-bottom: 1px solid #F0F0F0;
+    box-sizing: border-box;
+
+    border-bottom: 1px solid #ECECEC;
+
     font-size: 0.8rem;
     font-family: "Roboto Mono", monospace;
     color: #333;
+
+    transition: background-color 0.1s ease-in-out;
 }
 
-table#entry-table thead th:first-child,
-table#entry-table tbody td:first-child,
-table#variant-guides-table thead th:first-child,
-table#variant-guides-table tbody td:first-child {
-    padding-left: 15px;
-}
-table#entry-table thead th:last-child,
-table#entry-table tbody td:last-child,
-table#variant-guides-table thead th:last-child,
-table#variant-guides-table tbody td:last-child {
-    padding-right: 15px;
+table#entry-table tbody td.first div,
+table#variant-guides-table tbody td.first div {
+    border-left: 1px solid #E9E9E9;
 }
 
-table#entry-table tbody td.lighter,
-table#variant-guides-table tbody td.lighter {
+table#entry-table tbody td.last div,
+table#variant-guides-table tbody td.last div {
+    border-right: 1px solid #E9E9E9;
+}
+
+table#entry-table tbody td.lighter div,
+table#variant-guides-table tbody td.lighter div {
     color: #B0B0B0;
+}
+
+table#entry-table tbody td div pre,
+table#variant-guides-table tbody td div pre {
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.8rem;
+    color: #333;
 }
 
 table#entry-table tbody td a {
@@ -839,35 +949,6 @@ div#variant-guides-modal div.modal-scroll-container {
 div#variant-guides-modal h2 {
     margin-left: 30px;
     margin-right: 30px;
-}
-
-
-
-div#variant-cartoon-modal {
-    max-width: 960px;
-    min-height: 350px;
-    margin: auto;
-    bottom: auto;
-}
-
-div#variant-cartoon-modal div#variant-cartoon {
-    background-color: #FCFCFC;
-    border: 1px solid #DFDFDF;
-    border-top-color: #D3D3D3;
-    border-radius: 4px;
-    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-div#variant-cartoon-modal div#variant-cartoon-code {
-    margin: 6px 15px;
-    padding: 6px 0;
-
-    font-family: "Roboto Mono", monospace;
-    font-size: 0.825rem;
-    color: #444;
-
-    white-space: nowrap;
-    overflow-x: auto;
 }
 
 

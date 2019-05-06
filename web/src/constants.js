@@ -68,3 +68,65 @@ export const COLUMN_HELP_TEXT = {
     nmh_gc: "The GC content of the best nested MH (\"best\" defined as the highest MMEJ score).",
     nmh_seq: "The sequence of the best nested MH (\"best\" defined as the highest MMEJ score).",
 };
+
+export const VARIANTS_LAYOUT = [
+    {
+        group_name: "IDs",
+        default_columns: ["id", "rs"],
+        optional_columns: ["allele_id", "dbvarid"]
+    },
+    {
+        group_name: "Variant Features",
+        default_columns: ["gene_info", "chr", "pos_start", "pos_end", "location", "var_l"],
+        optional_columns: ["gene_info_clinvar"]
+    },
+    {
+        group_name: "Clinical Significance",
+        default_columns: ["clndn", "clnsig", "mc"],
+        optional_columns: ["mc_clinvar", "pm", "citation"]
+    },
+    {
+        group_name: "Microhomology Features",
+        default_columns: ["mh_l", "mh_1l", "hom", "mh_dist", "mh_1dist", "mh_seq_1", "mh_seq_2"],
+        optional_columns: ["nbmm", "mh_max_cons", "gc"]
+    },
+    {
+        group_name: "Guide RNA Features",
+        default_columns: ["pam_mot", "pam_uniq", "guides_no_nmh"],
+        optional_columns: ["guides_min_nmh", "max_2_cuts_dist"]
+    },
+    {
+        group_name: "Cartoon",
+        default_columns: ["cartoon"],
+        optional_columns: []
+    },
+    {
+        // TODO: OPTIONAL GROUP
+        group_name: "Allele Frequency",
+        default_columns: ["caf", "topmed", "af_exac", "af_tgp"],
+        optional_columns: []
+    }
+];
+
+export const GUIDES_LAYOUT = [
+    {
+        group_name: "IDs",
+        default_columns: ["id", "variant_id"],
+        optional_columns: []
+    },
+    {
+        group_name: "Guide RNA Features",
+        default_columns: ["protospacer", "mm0", "mm1", "mm2", "m1_dist_1", "m1_dist_2", "mh_dist_1", "mh_dist_2"],
+        optional_columns: []
+    },
+    {
+        group_name: "Nested Microhomologies",
+        default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq"],
+        optional_columns: ["nmh_gc"]
+    },
+    {
+        group_name: "Scores",
+        default_columns: [],
+        optional_columns: []
+    }
+];

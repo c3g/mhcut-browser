@@ -1,6 +1,12 @@
 import * as d3 from "d3";
 
-import { CONDITION_OPERATORS, DEFAULT_CONDITION_BOOLEAN, COLUMN_HELP_TEXT } from "./constants";
+import {
+    CONDITION_OPERATORS,
+    DEFAULT_CONDITION_BOOLEAN,
+    COLUMN_HELP_TEXT,
+    VARIANTS_LAYOUT,
+    GUIDES_LAYOUT
+} from "./constants";
 
 
 let dataDisplay = "variants";
@@ -28,7 +34,7 @@ let endPos = 12000000000000;
 
 let selectedVariantLocations = [];
 
-let minMH1L = 0;
+let minMH1L = 3;
 
 let mustHaveClinVar = false;
 
@@ -133,6 +139,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         d3.select("#hide-variant-guides").on("click", () => variantGuidesContainer.classed("shown", false));
+
+        // TODO: FIX THIS (SHOULDN'T BE HERE)
         const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
             .selectAll("th").data(guideFields, f => f["column_name"]);
 
@@ -331,6 +339,20 @@ function selectTablePage(p) {
     updateTableColumnHeaders();
 }
 
+function headersFromLayout(layout) {
+    let headers = [];
+    layout.forEach(group => {
+        group.default_columns.forEach((column, i) => {
+            let classes = "";
+            if (i === 0) classes += " first";
+            if (i === group.default_columns.length - 1) classes += " last";
+            if (column === "cartoon") classes += " no-click";
+            headers.push({column, classes: classes.trim()});
+        });
+    });
+    return headers;
+}
+
 function populateEntryTable() {
     let variantFieldsWithCartoon = [...variantFields];
     if (!showAdditionalColumns) {
@@ -340,40 +362,63 @@ function populateEntryTable() {
 
     // TODO: Don't hardcode ID...
     variantFieldsWithCartoon.splice(21, 0, {"column_name": "cartoon"});
-    const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
-    const tableColumns = d3.select("table#entry-table thead tr").selectAll("th").data(fields, f => f["name"]);
-    // TODO: Use original column name for display
-    tableColumns.enter()
+
+    // TODO: Optional Columns
+    const layout = dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
+    const headers = headersFromLayout(layout);
+
+    const tableGroups = d3.select("table#entry-table thead tr#group-row")
+        .selectAll("th")
+        .data(layout, () => Math.random().toString()); // TODO: Fix ID
+
+    tableGroups.enter()
         .append("th")
-        .text(f => f["column_name"])
-        .classed("no-click", f => f["column_name"] === "cartoon")
-        .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
+        .attr("colspan", g => g.default_columns.length)
+        .append("div")
+        .text(g => g.group_name);
+
+    tableGroups.exit().remove();
+
+    const tableColumns = d3.select("table#entry-table thead tr#header-row")
+        .selectAll("th")
+        .data(headers, h => h.column);
+
+    const column = tableColumns.enter()
+        .append("th")
+        .attr("class", f => f.classes)
+        .on("mouseover", f => showColumnHelp(d3.event, f.column))
         .on("mousemove", () => updateColumnHelp(d3.event))
         .on("mouseout", () => hideColumnHelp())
         .on("click", f => {
-            if (dataDisplay === "guides" || f["column_name"] === "cartoon") return;
+            if (dataDisplay === "guides" || f.column === "cartoon") return;
 
-            if (sortBy === f["column_name"]) {
+            if (sortBy === f.column) {
                 sortOrder = (sortOrder === "ASC" ? "DESC" : "ASC");
             } else {
                 sortOrder = "ASC";
-                sortBy = f["column_name"];
+                sortBy = f.column;
             }
 
             page = 1;
             reloadPage(false);
-        })
-        .append("span").attr("class", "material-icons");
+        });
+    column.append("div").text(f => f.column).append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
 
     const tableRows = d3.select("table#entry-table tbody").selectAll("tr")
         .data(entries, () => Math.random().toString()); // TODO: Fix IDs
     const rowEntry = tableRows.enter().append("tr");
 
-    fields.forEach(f => rowEntry.append("td")
-        .classed("lighter", e => e[f["column_name"]] === null || e[f["column_name"]] === "NA"
-            || e[f["column_name"]] === "-")
+    headers.forEach(f => rowEntry.append("td")
+        .attr("class", e => {
+            let classes = f.classes;
+            if (e[f.column] === null || e[f.column] === "NA" || e[f.column] === "-") {
+                classes += " lighter"
+            }
+            return classes;
+        })
+        .append("div")
         .html(e => formatTableCell(e, f)));
 
     rowEntry.select(".show-guides-modal").on("mousedown", e => {
@@ -395,27 +440,21 @@ function populateEntryTable() {
         });
     });
 
-    rowEntry.select(".show-cartoon").on("mousedown", e => {
-        variantCartoonContainer.classed("shown", true);
-        d3.select("#variant-for-cartoon").text(e["id"]);
-        d3.select("#variant-cartoon-code").html(e["cartoon"].replace(/ /g, "&nbsp;").replace(/\n/g, "<br>"));
-    });
-
     tableRows.exit().remove();
 }
 
 function formatTableCell(e, f) {
-    if (f["column_name"] === "rs") {
+    if (f.column === "rs") {
         if (e["rs"] === null) return "-";
         return e["rs"].toString().split("|")
             .map(rs => `<a href="${dbSNPURL(rs)}" target="_blank" rel="noopener">${rs}</a>`)
             .join("|");
-    } else if ((f["column_name"] === "gene_info" && e["gene_info"] !== "-" && e["gene_info"] !== "NA")
+    } else if ((f.column === "gene_info" && e["gene_info"] !== "-" && e["gene_info"] !== "NA")
         || (f["column_name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== null)) {
-        return e[f["column_name"]].split("|")
+        return e[f.column].split("|")
             .map(og => `<a href="${geneURL(og.split(":")[1])}" target="_blank" rel="noopener">${og}</a>`)
             .join("|");
-    } else if (f["column_name"] === "citation" && e["citation"] !== "NA" && e["citation"] !== "-") {
+    } else if (f.column === "citation" && e["citation"] !== "NA" && e["citation"] !== "-") {
         return e["citation"].split(";")
             .map(id => id.substring(0, 2) === "NB"
                 ? `<a href="${bookshelfURL(id)}" target="_blank" rel="noopener">${id}</a>`
@@ -423,15 +462,15 @@ function formatTableCell(e, f) {
                     ? `<a href="${pmcURL(id)}" target="_blank" rel="noopener">${id}</a>`
                     : `<a href="${pubMedURL(id.replace("PM", ""))}" target="_blank" rel="noopener">${id}</a>`))
             .join(";");
-    } else if (f["column_name"] === "allele_id" && e["allele_id"] !== null) {
+    } else if (f.column === "allele_id" && e["allele_id"] !== null) {
         return `<a href="${clinVarURL(e["allele_id"])}/" target="_blank" rel="noopener">${e["allele_id"]}</a>`;
-    } else if (f["column_name"] === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
+    } else if (f.column === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
         return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
-    } else if (f["column_name"] === "cartoon" && e["cartoon"] !== null) {
-        return `<a class="show-cartoon">Show&nbsp;Cartoon</a>`;
+    } else if (f.column === "cartoon" && e["cartoon"] !== null) {
+        return `<pre>${e["cartoon"]}</pre>`;
     }
 
-    return e[f["column_name"]] === null ? "NA" : e[f["column_name"]]; // TODO: Maybe shouldn't always be NA
+    return e[f.column] === null ? "NA" : e[f.column]; // TODO: Maybe shouldn't always be NA
 }
 
 function updateTableColumnHeaders() {

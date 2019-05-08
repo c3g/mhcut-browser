@@ -153,7 +153,7 @@ nav#table-view-nav button#sidebar-toggle span.material-icons {
 main {
     position: fixed;
     z-index: 10;
-    top: 15px; left: 15px; right: 220px; bottom: 15px;
+    top: 70px; left: 15px; right: 240px; bottom: 15px;
     overflow: hidden;
     background-color: #FEFEFE;
     border: 1px solid #DCDCDC;
@@ -166,6 +166,101 @@ main {
 
 body.no-sidebar main {
     right: 15px;
+}
+
+
+
+
+header#main-header {
+    position: fixed;
+    z-index: 9;
+    height: 50px;
+    top: 15px; left: 15px; right: 15px;
+
+    display: flex;
+
+    padding: 0 15px;
+}
+
+body.no-sidebar header#main-header {
+    right: 15px;
+}
+
+header#main-header div {
+    flex: 1;
+    text-align: center;
+}
+
+header#main-header div:last-child {
+    text-align: right;
+}
+
+
+header#main-header h1 {
+    margin: 0 1.5rem 0 0;
+
+    line-height: 36px;
+
+    font-family: "Roboto Mono", monospace;
+    font-size: 1.2rem;
+    font-weight: normal;
+    text-align: center;
+    color: #555;
+}
+
+header#main-header div#developed-by {
+    height: 40px;
+    text-align: left;
+}
+
+header#main-header div#developed-by a {
+    text-decoration: none;
+}
+
+header#main-header div#developed-by span {
+    vertical-align: top;
+    line-height: 38px;
+
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: normal;
+    text-align: center;
+    color: #555;
+}
+
+header#main-header div#developed-by img {
+    margin-left: 0.5rem;
+    height: 40px;
+    width: auto;
+
+    border: none;
+}
+
+
+header#main-header button {
+    padding: 0;
+    margin-left: 1.5rem;
+    background: none;
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid #ECEFF1;
+
+    font-size: 0.9rem;
+    line-height: 38px;
+
+    cursor: pointer;
+
+    transition: border 0.15s ease-in-out;
+}
+
+header#main-header button:hover {
+    border-bottom-color: #BBBDBF;
+}
+
+header#main-header button span.material-icons {
+    /*font-size: 1.2rem;*/
+    vertical-align: top;
+    line-height: 39px;
 }
 
 
@@ -286,11 +381,11 @@ section#table-pagination span#total-entries-text {
 aside#filter-options {
     position: fixed;
     z-index: 15;
-    top: 0; right: 0; bottom: 0;
+    top: 70px; right: 0; bottom: 0;
 
     box-sizing: border-box;
-    width: 220px;
-    padding: 0 15px;
+    width: 240px;
+    padding: 5px 15px 0 15px;
 
     background-color: #ECEFF1;
 
@@ -300,7 +395,7 @@ aside#filter-options {
 }
 
 body.no-sidebar aside#filter-options {
-    right: -220px;
+    right: -240px;
     opacity: 0;
 }
 
@@ -312,37 +407,6 @@ aside#filter-options div#app-logo-container {
 aside#filter-options img#app-logo {
     max-width: 100%;
     height: auto;
-}
-
-aside#filter-options h1 {
-    margin-top: 15px;
-    margin-bottom: 10px;
-    font-family: "Roboto Mono", monospace;
-    font-size: 1.2rem;
-    font-weight: normal;
-    text-align: center;
-    color: #555;
-}
-
-aside#filter-options div#developed-by {
-    text-align: center;
-}
-
-aside#filter-options div#developed-by span {
-    font-family: "Roboto Mono", monospace;
-    font-size: 0.7rem;
-    font-weight: normal;
-    text-align: center;
-    color: #555;
-}
-
-aside#filter-options div#developed-by img {
-    margin-top: 10px;
-    max-width: 200px;
-    width: 85%;
-    height: auto;
-
-    border: none;
 }
 
 aside#filter-options h2 {
@@ -444,7 +508,14 @@ aside#filter-options div#chromosome-checkboxes label input {
 }
 
 aside#filter-options div#gene-location-checkboxes label {
-    margin: 1px 0;
+    margin: 0;
+    width: 50%;
+    display: inline-block;
+}
+
+aside#filter-options div#gene-location-checkboxes label input {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 aside#filter-options button#apply-filters {
@@ -461,6 +532,7 @@ aside#filter-options button#apply-filters {
 
 aside#filter-options button#clear-filters {
     margin-top: 2px;
+    margin-bottom: 5px;
 }
 
 aside#filter-options hr {
@@ -500,12 +572,12 @@ table#variant-guides-table thead tr#group-row th {
 
 table#entry-table thead tr#group-row th:first-child,
 table#variant-guides-table thead tr#group-row th:first-child {
-    padding-left: 8px;
+    padding-left: 15px;
 }
 
 table#entry-table thead tr#group-row th:last-child,
 table#variant-guides-table thead tr#group-row th:last-child {
-    padding-right: 8px;
+    padding-right: 15px;
 }
 
 table#entry-table thead th div,
@@ -546,7 +618,7 @@ table#variant-guides-table thead th.first {
 
 table#entry-table thead th.first:first-child,
 table#variant-guides-table thead th.first:first-child {
-    padding-left: 7px;
+    padding-left: 14px;
 }
 
 table#entry-table thead th.first div,
@@ -561,7 +633,7 @@ table#variant-guides-table thead th.last {
 
 table#entry-table thead th.last:last-child,
 table#variant-guides-table thead th.last:last-child {
-    padding-right: 7px;
+    padding-right: 14px;
 }
 
 table#entry-table thead th.last div,
@@ -616,7 +688,7 @@ table#variant-guides-table tbody td.first {
 
 table#entry-table tbody td.first:first-child,
 table#variant-guides-table tbody td.first:first-child {
-    padding-left: 7px;
+    padding-left: 14px;
 }
 
 table#entry-table tbody td.last,
@@ -626,7 +698,7 @@ table#variant-guides-table tbody td.last {
 
 table#entry-table tbody td.last:last-child,
 table#variant-guides-table tbody td.last:last-child {
-    padding-right: 7px;
+    padding-right: 14px;
 }
 
 table#entry-table tbody td div,

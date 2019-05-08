@@ -167,6 +167,24 @@
         </div>
     </div>
 </div>
+<header id="main-header">
+    <div id="developed-by">
+        <span>Developed by</span>
+        <a href="http://www.cira.kyoto-u.ac.jp/e/" target="_blank" rel="noopener noreferrer">
+            <img src="/cira_logo.png" alt="CiRA">
+        </a>
+        <a href="http://www.computationalgenomics.ca/" target="_blank" rel="noopener noreferrer">
+            <img src="/c3g_logo_small.png" alt="C3G">
+        </a>
+    </div>
+    <div>
+        <h1>MHcut Browser</h1>
+    </div>
+    <div>
+        <button id="terms-of-use"><span class="material-icons">list_alt</span> Terms of Use</button>
+        <button id="report-bug"><span class="material-icons">bug_report</span> Report a Bug</button>
+    </div>
+</header>
 <main>
 <nav id="table-view-nav">
     <div>
@@ -238,7 +256,7 @@
 <aside id="filter-options">
     <!--<div id="app-logo-container">
         <img src="/logo.png" alt="MHcut Browser Logo" id="app-logo">
-    </div>-->
+    </div>
     <h1>MHcut Browser</h1>
     <div id="developed-by">
         <span>developed by</span>
@@ -249,7 +267,7 @@
             <img src="/c3g_logo_small.png" alt="C3G">
         </a>
     </div>
-    <hr>
+    <hr>-->
     <form id="filter-search-form">
         <h2><label for="search-query">SEARCH</label></h2>
         <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
@@ -286,9 +304,8 @@
         <button id="clear-filters" type="button" disabled>Clear Filters</button>
         <hr>
         <p>
-            <strong>Note:</strong> After applying a set of filters, it may take some time for the filter
-            controls to become available again. It takes a long time for the app to calculate the number of matches for
-            a particular query the first time. Once the result numbers are displayed, the controls should re-activate.
+            <strong>Note:</strong> After applying filters, it may take time for the filter
+            controls to become available again, due to calculating the number of matches.
         </p>
     </form>
 </aside>

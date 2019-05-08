@@ -483,10 +483,13 @@ function updateTableColumnHeaders() {
     // TODO: Don't hardcode ID...
     variantFieldsWithCartoon.splice(21, 0, {"column_name": "cartoon"});
 
-    const fields = (dataDisplay === "variants" ? variantFieldsWithCartoon : guideFields);
-    d3.selectAll("table#entry-table thead th").data(fields, f => f["column_name"])
+    const layout = dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
+    const headers = headersFromLayout(layout);
+
+    d3.selectAll("table#entry-table thead tr#header-row th").data(headers, h => h.column)
+        .select("div")
         .select("span.material-icons")
-        .text(f => (sortBy === f["column_name"] ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
+        .text(h => (sortBy === h.column ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
 }
 
 function getLoadingPagesText() {

@@ -26,7 +26,10 @@ let sortBy = "id";
 let sortOrder = "ASC";
 
 let showAdditionalColumns = true;
-let expandedGroups = new Set();
+let expandedGroups = {
+    variants: new Set(),
+    guides: new Set()
+};
 
 let selectedChromosome = null;
 
@@ -345,7 +348,7 @@ function headersFromLayout(layout) {
 
     layout.forEach((group, gi) => {
         let columns = [...group.default_columns];
-        if (expandedGroups.has(group.group_name)) {
+        if (expandedGroups[dataDisplay].has(group.group_name)) {
             columns.push(...group.optional_columns);
         }
 
@@ -375,7 +378,7 @@ function populateEntryTable() {
     const groupDiv = tableGroups.enter()
         .append("th")
         .attr("colspan", g =>
-            g.default_columns.length + (expandedGroups.has(g.group_name) ? g.optional_columns.length : 0))
+            g.default_columns.length + (expandedGroups[dataDisplay].has(g.group_name) ? g.optional_columns.length : 0))
         .append("div");
 
     groupDiv.append("span")
@@ -385,14 +388,14 @@ function populateEntryTable() {
     groupDiv.append("button")
         .classed("toggle-optional-columns", true)
         .classed("hidden", g => g.optional_columns.length === 0)
-        .html(g => expandedGroups.has(g.group_name)
+        .html(g => expandedGroups[dataDisplay].has(g.group_name)
             ? `<span class="material-icons">chevron_leftchevron_left</span>`
             : `<span class="material-icons">chevron_rightchevron_right</span>`)
         .on("click", g => {
-            if (expandedGroups.has(g.group_name)) {
-                expandedGroups.delete(g.group_name);
+            if (expandedGroups[dataDisplay].has(g.group_name)) {
+                expandedGroups[dataDisplay].delete(g.group_name);
             } else {
-                expandedGroups.add(g.group_name);
+                expandedGroups[dataDisplay].add(g.group_name);
             }
 
             // TODO: IS THIS RIGHT?

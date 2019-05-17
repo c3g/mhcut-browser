@@ -96,7 +96,7 @@ export const VARIANTS_LAYOUT = [
         optional_columns: ["guides_min_nmh", "max_2_cuts_dist"]
     },
     {
-        group_name: "Cartoon",
+        group_name: "Visualization",
         default_columns: ["cartoon"],
         optional_columns: []
     },

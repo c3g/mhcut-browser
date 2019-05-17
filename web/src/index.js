@@ -26,6 +26,7 @@ let sortBy = "id";
 let sortOrder = "ASC";
 
 let showAdditionalColumns = true;
+let expandedGroups = new Set();
 
 let selectedChromosome = null;
 
@@ -341,27 +342,26 @@ function selectTablePage(p) {
 
 function headersFromLayout(layout) {
     let headers = [];
-    layout.forEach(group => {
-        group.default_columns.forEach((column, i) => {
-            let classes = "";
-            if (i === 0) classes += " first";
-            if (i === group.default_columns.length - 1) classes += " last";
+
+    layout.forEach((group, gi) => {
+        let columns = [...group.default_columns];
+        if (expandedGroups.has(group.group_name)) {
+            columns.push(...group.optional_columns);
+        }
+
+        columns.forEach((column, ci) => {
+            let classes = gi % 2 === 0 ? "even" : "odd";
+            if (ci === 0) classes += " first";
+            if (ci === columns.length - 1) classes += " last";
             if (column === "cartoon") classes += " no-click";
             headers.push({column, classes: classes.trim()});
         });
     });
+
     return headers;
 }
 
 function populateEntryTable() {
-    let variantFieldsWithCartoon = [...variantFields];
-    if (!showAdditionalColumns) {
-        // TODO: Don't hardcode index
-        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 21);
-    }
-
-    // TODO: Don't hardcode ID...
-    variantFieldsWithCartoon.splice(21, 0, {"column_name": "cartoon"});
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
 
     // TODO: Optional Columns
@@ -372,17 +372,40 @@ function populateEntryTable() {
         .selectAll("th")
         .data(layout, () => Math.random().toString()); // TODO: Fix ID
 
-    tableGroups.enter()
+    const groupDiv = tableGroups.enter()
         .append("th")
-        .attr("colspan", g => g.default_columns.length)
-        .append("div")
+        .attr("colspan", g =>
+            g.default_columns.length + (expandedGroups.has(g.group_name) ? g.optional_columns.length : 0))
+        .append("div");
+
+    groupDiv.append("span")
+        .attr("class", "group-name")
         .text(g => g.group_name);
+
+    groupDiv.append("button")
+        .classed("toggle-optional-columns", true)
+        .classed("hidden", g => g.optional_columns.length === 0)
+        .html(g => expandedGroups.has(g.group_name)
+            ? `<span class="material-icons">chevron_leftchevron_left</span>`
+            : `<span class="material-icons">chevron_rightchevron_right</span>`)
+        .on("click", g => {
+            if (expandedGroups.has(g.group_name)) {
+                expandedGroups.delete(g.group_name);
+            } else {
+                expandedGroups.add(g.group_name);
+            }
+
+            // TODO: IS THIS RIGHT?
+            populateEntryTable();
+            updateTableColumnHeaders();
+        });
 
     tableGroups.exit().remove();
 
     const tableColumns = d3.select("table#entry-table thead tr#header-row")
         .selectAll("th")
         .data(headers, h => h.column);
+        // .data(headers, () => Math.random().toString());
 
     const column = tableColumns.enter()
         .append("th")
@@ -474,19 +497,11 @@ function formatTableCell(e, f) {
 }
 
 function updateTableColumnHeaders() {
-    let variantFieldsWithCartoon = [...variantFields];
-    if (!showAdditionalColumns) {
-        // TODO: Don't hardcode index
-        variantFieldsWithCartoon = variantFieldsWithCartoon.slice(0, 21);
-    }
-
-    // TODO: Don't hardcode ID...
-    variantFieldsWithCartoon.splice(21, 0, {"column_name": "cartoon"});
-
     const layout = dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
     const headers = headersFromLayout(layout);
 
     d3.selectAll("table#entry-table thead tr#header-row th").data(headers, h => h.column)
+        .attr("class", f => f.classes)
         .select("div")
         .select("span.material-icons")
         .text(h => (sortBy === h.column ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));

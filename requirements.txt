@@ -1,10 +1,9 @@
 Click==7.0
-Flask==1.0.2
+Flask==1.0.3
 itsdangerous==1.1.0
 Jinja2==2.10.1
 MarkupSafe==1.1.1
-pkg-resources==0.0.0
 psycopg2-binary==2.8.2
-tqdm==4.31.1
+tqdm==4.32.1
 uWSGI==2.0.18
-Werkzeug==0.15.2
+Werkzeug==0.15.4

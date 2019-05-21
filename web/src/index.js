@@ -599,8 +599,10 @@ async function reloadPage(reloadCounts) {
     }
 
     try {
-        loadedVariants = await fetchJSON(variantsURL.toString());
-        loadedGuides = await fetchJSON(guidesURL.toString());
+        [loadedVariants, loadedGuides] = await Promise.all([
+            fetchJSON(variantsURL.toString()),
+            fetchJSON(guidesURL.toString())
+        ]);
 
         if (loadedVariants.length === itemsPerPage && loadingEntryCounts) {
             // Re-enable next page button to let people do some basic exploration while counts are loading...

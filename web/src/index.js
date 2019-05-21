@@ -54,6 +54,8 @@ let loadingEntryCounts = false;
 let searchModal = null;
 let exportModal = null;
 let variantGuidesModal = null;
+let termsOfUseModal = null;
+let reportBugModal = null;
 
 const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs}`;
 const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
@@ -69,6 +71,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     searchModal = new Modal("#advanced-search-container");
     exportModal = new Modal("#export-options-container");
     variantGuidesModal = new Modal("#variant-guides-container");
+    termsOfUseModal = new Modal("#terms-of-use-container");
+    reportBugModal = new Modal("#report-bug-container");
 
 
     // Load various data.
@@ -335,6 +339,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         page = 1;
         await reloadPage(false);
     });
+
+    d3.select("#terms-of-use").on("click", () => termsOfUseModal.show());
+    d3.select("#report-bug").on("click", () => reportBugModal.show());
 
     d3.select("#table-display").classed("loading", false);
     transitioning = false;

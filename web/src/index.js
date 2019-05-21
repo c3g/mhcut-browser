@@ -385,7 +385,7 @@ function populateEntryTable() {
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
     const headers = headersFromLayout(layout, false);
 
-    const tableGroups = d3.select("table#entry-table thead tr#group-row")
+    const tableGroups = d3.select("table#entry-table thead tr.group-row")
         .selectAll("th")
         .data(layout, () => Math.random().toString()); // TODO: Fix ID
 
@@ -419,7 +419,7 @@ function populateEntryTable() {
 
     tableGroups.exit().remove();
 
-    const tableColumns = d3.select("table#entry-table thead tr#header-row")
+    const tableColumns = d3.select("table#entry-table thead tr.header-row")
         .selectAll("th")
         .data(headers, h => h.column);
         // .data(headers, () => Math.random().toString());
@@ -519,7 +519,7 @@ function updateTableColumnHeaders() {
     const layout = getLayout();
     const headers = headersFromLayout(layout, false);
 
-    d3.selectAll("table#entry-table thead tr#header-row th").data(headers, h => h.column)
+    d3.selectAll("table#entry-table thead tr.header-row th").data(headers, h => h.column)
         .attr("class", f => f.classes)
         .select("div")
         .select("span.material-icons")

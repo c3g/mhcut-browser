@@ -14,7 +14,13 @@ data.
 
 ## Overview
 
-TODO
+MHcut is a tool by Grajcarek *et al.* used to identify "11 million
+naturally-occurring deletion mutations flanked by microhomologies", which are
+candidates for precise deletions using microhomology-mediated end-joining\
+repair.
+
+The data from this project can be accessed using this browser, which is hosted
+online at [https://mhcut-browser.genap.ca/](https://mhcut-browser.genap.ca/).
 
 
 
@@ -292,13 +298,13 @@ Example configuration file, located in `/etc/apache2/sites-available/`:
 </VirtualHost>
 ```
 
-If a new virtual host configuration file (for example `mcgill-network.conf`)
+If a new virtual host configuration file (for example `mhcut.conf`)
 has been created, enable the virtual host by running the following commands,
-replacing `mcgill-network` with the name of the newly-created configuration
+replacing `mhcut` with the name of the newly-created configuration
 file, and restarting Apache:
 
 ```bash
-sudo a2ensite mcgill-network
+sudo a2ensite mhcut
 sudo systemctl restart apache2
 ```
 
@@ -347,7 +353,7 @@ any possible error messages.
 
 #### In Production
 
-In production, the McGill Network web application is designed to be deployed
+In production, the MHcut Browser web application is designed to be deployed
 with uWSGI and NGINX as a systemd service.
 
 ##### A. Perform Initial Setup and Configuration
@@ -431,13 +437,13 @@ Example configuration, located in `/etc/apache2/sites-available/`:
 </VirtualHost>
 ```
 
-If a new virtual host configuration file (for example `mcgill-network.conf`)
+If a new virtual host configuration file (for example `mhcut.conf`)
 has been created, enable the virtual host by running the following commands,
-replacing `mcgill-network` with the name of the newly-created configuration
+replacing `mhcut` with the name of the newly-created configuration
 file, and restarting Apache:
 
 ```bash
-sudo a2ensite mcgill-network
+sudo a2ensite mhcut
 sudo systemctl restart apache2
 ```
 

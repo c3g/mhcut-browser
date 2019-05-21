@@ -1038,7 +1038,7 @@ ul#advanced-search-conditions li button.remove-search-condition:hover span.mater
 
 div#export-options-modal {
     max-width: 600px;
-    min-height: 265px;
+    min-height: 275px;
     margin: auto;
     bottom: auto;
 }

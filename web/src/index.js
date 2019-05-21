@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import Modal from "./Modal";
 
 import {
     CONDITION_OPERATORS,
@@ -25,7 +26,6 @@ let metadata = {};
 let sortBy = "id";
 let sortOrder = "ASC";
 
-let showAdditionalColumns = true;
 let expandedGroups = {
     variants: new Set(),
     guides: new Set()
@@ -51,10 +51,9 @@ let advancedSearchFilters = [];
 let transitioning = true;
 let loadingEntryCounts = false;
 
-let searchContainer = null;
-let exportContainer = null;
-let variantGuidesContainer = null;
-let variantCartoonContainer = null;
+let searchModal = null;
+let exportModal = null;
+let variantGuidesModal = null;
 
 const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs}`;
 const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
@@ -65,19 +64,9 @@ const clinVarURL = cv => `https://www.ncbi.nlm.nih.gov/clinvar/variation/${cv}/`
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    searchContainer = d3.select("#advanced-search-container");
-    exportContainer = d3.select("#export-options-container");
-    variantGuidesContainer = d3.select("#variant-guides-container");
-    variantCartoonContainer = d3.select("#variant-cartoon-container");
-
-    document.addEventListener("keyup", e => {
-        if (e.key === "Escape" && searchContainer.classed("shown")) searchContainer.classed("shown", false);
-        else if (e.key === "Escape" && exportContainer.classed("shown")) exportContainer.classed("shown", false);
-        else if (e.key === "Escape" && variantGuidesContainer.classed("shown"))
-            variantGuidesContainer.classed("shown", false);
-        else if (e.key === "Escape" && variantCartoonContainer.classed("shown"))
-            variantCartoonContainer.classed("shown", false);
-    });
+    searchModal = new Modal("#advanced-search-container");
+    exportModal = new Modal("#export-options-container");
+    variantGuidesModal = new Modal("#variant-guides-container");
 
     // noinspection JSCheckFunctionSignatures
     Promise.all([
@@ -142,21 +131,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.location.hash === "#variants") selectTablePage("variants");
         if (window.location.hash === "#guides") selectTablePage("guides");
 
-        d3.select("#show-export").on("click", () => exportContainer.classed("shown", true));
-        d3.select("#hide-export").on("click", () => exportContainer.classed("shown", false));
+        d3.select("#show-export").on("click", () => exportModal.show());
 
         d3.select("#sidebar-toggle").on("click", () => {
             d3.select("body").classed("no-sidebar", !d3.select("body").classed("no-sidebar"));
             d3.select("#sidebar-toggle").classed("active", !d3.select("body").classed("no-sidebar"));
         });
 
-        d3.select("#hide-variant-guides").on("click", () => variantGuidesContainer.classed("shown", false));
-
         // TODO: FIX THIS (SHOULDN'T BE HERE)
         const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
             .selectAll("th").data(guideFields, f => f["column_name"]);
-
-        d3.select("#hide-variant-cartoon").on("click", () => variantCartoonContainer.classed("shown", false));
 
         variantGuideTableColumns.enter().append("th").text(f => f["column_name"])
             .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
@@ -276,19 +260,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
-        d3.select("#show-advanced-search").on("click", () => searchContainer.classed("shown", true));
-        d3.select("#hide-advanced-search").on("click", () => searchContainer.classed("shown", false));
+        d3.select("#show-advanced-search").on("click", () => searchModal.show());
         d3.select("#toggle-advanced-search-help").on("click", () => d3.select("#advanced-search-help").classed("shown",
             !d3.select("#advanced-search-help").classed("shown")));
         d3.select("#add-search-condition").on("click", () => addAdvancedSearchCondition());
         d3.select("#save-search-query").on("click", () => {
             if (advancedSearchFilters.length > 0)
                 d3.select("#search-query").property("value", JSON.stringify(advancedSearchFilters));
-            searchContainer.classed("shown", false);
+            searchModal.hide();
         });
-
-        d3.selectAll(".modal-container").on("click", function () { d3.select(this).classed("shown", false); });
-        d3.selectAll(".modal").on("click", () => d3.event.stopPropagation());
 
         d3.select("#filter-search-form").on("submit", () => {
             if (loadingEntryCounts) return;
@@ -469,7 +449,7 @@ function populateEntryTable() {
         .html(e => formatTableCell(e, f)));
 
     rowEntry.select(".show-guides-modal").on("mousedown", e => {
-        variantGuidesContainer.classed("shown", true);
+        variantGuidesModal.show();
         d3.select("#variant-for-guides").text(e["id"]);
         fetch(new Request(`/api/variants/${e["id"]}/guides`)).then(r => r.json()).then(guides => {
             // noinspection JSUnresolvedFunction

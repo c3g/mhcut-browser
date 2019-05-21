@@ -111,11 +111,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
         metadata = data[3];
 
-        showAdditionalColumns = d3.select("#show-additional-columns").property("checked");
-        d3.select("#show-additional-columns").on("click", () => {
-            showAdditionalColumns = d3.select("#show-additional-columns").property("checked");
+        // showAdditionalColumns = d3.select("#show-additional-columns").property("checked");
+        d3.select("#toggle-all-additional-columns").on("click", () => {
+            const set = dataDisplay === "variants" ? expandedGroups.variants : expandedGroups.guides;
+            const layout = getLayout();
 
-            // TODO: Could probably be optimized
+            if (set.size === layout.length) {
+                // All are expanded, so contract them
+                set.clear();
+            } else {
+                // Some are still contracted, so expand them
+                layout.forEach(g => set.add(g.group_name));
+            }
+
             populateEntryTable();
             updateTableColumnHeaders();
         });
@@ -343,6 +351,10 @@ function selectTablePage(p) {
     updateTableColumnHeaders();
 }
 
+function getLayout() {
+    return dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
+}
+
 function headersFromLayout(layout) {
     let headers = [];
 
@@ -365,10 +377,19 @@ function headersFromLayout(layout) {
 }
 
 function populateEntryTable() {
-    const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
+    const layout = getLayout();
 
-    // TODO: Optional Columns
-    const layout = dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
+
+    // Update Show/Hide Columns Button
+
+    const set = dataDisplay === "variants" ? expandedGroups.variants : expandedGroups.guides;
+    d3.select("#toggle-all-additional-columns")
+        .text(`${set.size === layout.length ? "Hide" : "Show"} All Additional Columns`);
+
+
+    // Update Table
+
+    const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
     const headers = headersFromLayout(layout);
 
     const tableGroups = d3.select("table#entry-table thead tr#group-row")
@@ -500,7 +521,7 @@ function formatTableCell(e, f) {
 }
 
 function updateTableColumnHeaders() {
-    const layout = dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
+    const layout = getLayout();
     const headers = headersFromLayout(layout);
 
     d3.selectAll("table#entry-table thead tr#header-row th").data(headers, h => h.column)

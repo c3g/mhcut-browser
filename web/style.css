@@ -590,6 +590,18 @@ table#variant-guides-table thead tr#group-row th button.toggle-optional-columns 
     box-shadow: none;
 
     text-align: right;
+
+    cursor: pointer;
+}
+
+table#entry-table thead tr#group-row th button.toggle-optional-columns span.material-icons,
+table#variant-guides-table thead tr#group-row th button.toggle-optional-columns span.material-icons {
+    transition: color 0.15s ease-in-out;
+}
+
+table#entry-table thead tr#group-row th button.toggle-optional-columns:hover span.material-icons,
+table#variant-guides-table thead tr#group-row th button.toggle-optional-columns:hover span.material-icons {
+    color: #777;
 }
 
 table#entry-table thead tr#group-row th button.toggle-optional-columns.hidden,

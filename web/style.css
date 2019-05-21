@@ -553,6 +553,7 @@ table#entry-table,
 table#variant-guides-table {
     border-collapse: collapse;
     min-width: 100%;
+    height: 1px; /* Needed for 100% height cells */
 }
 
 table#entry-table thead th,
@@ -706,10 +707,6 @@ table#entry-table.guides thead th {
 
 table#entry-table.guides thead tr#header-row th div span.material-icons {
     display: none;
-}
-
-table#entry-table tbody tr {
-    height: 1px;
 }
 
 table#entry-table tbody tr:nth-child(even) td div,

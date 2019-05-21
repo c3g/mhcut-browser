@@ -743,11 +743,12 @@ function updateSearchFilterDOM() {
             updateSearchFilterDOM();
         })
         .selectAll("option")
-        .data([{column_name: ""}, ...variantFields], f => f["column_name"])
+        .data([{column: ""}, ...headersFromLayout(VARIANTS_LAYOUT, true).filter(f => f.column !== "cartoon")],
+            f => f["column_name"])
         .enter()
         .append("option")
-        .attr("value", f => f["column_name"])
-        .text(f => f["column_name"]);
+        .attr("value", f => f.column)
+        .text(f => f.column);
     filterEntry.append("select")
         .attr("class", "select-operator")
         .on("change", function (f) {
@@ -779,11 +780,11 @@ function updateSearchFilterDOM() {
         .selectAll("option")
         .data(f => [
             ...CONDITION_OPERATORS.both,
-            ...(f.field === ""
-                ? []
-                : (CONDITION_OPERATORS[variantFields.find(f2 => f2["column_name"] === f.field)["data_type"]] || [])),
             ...(f.field !== ""
-                ? (variantFields.find(f2 => f2["column_name"] === f.field)["is_nullable"] === "YES"
+                ? (CONDITION_OPERATORS[variantFields[f.field]["data_type"]] || [])
+                : []),
+            ...(f.field !== ""
+                ? (variantFields[f.field]["is_nullable"] === "YES"
                     ? CONDITION_OPERATORS.nullable
                     : [])
                 : [])

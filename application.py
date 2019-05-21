@@ -496,8 +496,8 @@ def guides_entries():
 def fields():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
     return json.jsonify({
-        "variants": get_variants_columns(c),
-        "guides": get_guides_columns(c)
+        "variants": {col["column_name"]: col for col in get_variants_columns(c)},
+        "guides": {col["column_name"]: col for col in get_guides_columns(c)}
     })
 
 

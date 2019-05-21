@@ -162,7 +162,7 @@ def get_search_params_from_request(c):
         gene_locations = list(LOCATION_VALUES)
     location_fragment = "(" + ",".join(["'{}'::VARIANT_LOCATION".format(l) for l in gene_locations]) + ")"
 
-    min_mh_1l = int(verify_domain(request.args.get("min_mh_1l", "0"), NON_NEG_INT_DOMAIN))
+    min_mh_1l = int(verify_domain(request.args.get("min_mh_1l", "3"), NON_NEG_INT_DOMAIN))
 
     clinvar = verify_domain(request.args.get("clinvar", "false"), BOOLEAN_DOMAIN) == "true"
 

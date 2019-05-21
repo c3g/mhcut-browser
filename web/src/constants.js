@@ -124,9 +124,9 @@ export const GUIDES_LAYOUT = [
         default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq"],
         optional_columns: ["nmh_gc"]
     },
-    // {
-    //     group_name: "Scores",
-    //     default_columns: [],
-    //     optional_columns: []
-    // }
+    {
+        group_name: "Scores",
+        default_columns: ["nmh_score"], // TODO: BAE SCORE?
+        optional_columns: []
+    }
 ];

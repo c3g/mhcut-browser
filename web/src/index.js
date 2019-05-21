@@ -139,10 +139,23 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // TODO: FIX THIS (SHOULDN'T BE HERE)
-        const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
-            .selectAll("th").data(guideFields, f => f["column_name"]);
 
-        variantGuideTableColumns.enter().append("th").text(f => f["column_name"])
+        const variantGuideTableGroups = d3.select("table#variant-guides-table thead").append("tr")
+            .attr("class", "group-row")
+            .selectAll("th").data(GUIDES_LAYOUT, g => g.group_name);
+
+        variantGuideTableGroups.enter().append("th")
+            .attr("colspan", g => g.default_columns.length + g.optional_columns.length)
+            .append("div").append("span").attr("class", "group-name").text(g => g.group_name);
+
+        const variantGuideTableColumns = d3.select("table#variant-guides-table thead").append("tr")
+            .attr("class", "header-row")
+            .selectAll("th").data(headersFromLayout(GUIDES_LAYOUT, true), h => h.column);
+
+        variantGuideTableColumns.enter().append("th")
+            .attr("class", h => h.classes)
+            .append("div")
+            .text(h => h.column)
             .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
             .on("mousemove", () => updateColumnHelp(d3.event))
             .on("mouseout", () => hideColumnHelp())
@@ -335,12 +348,12 @@ function getLayout() {
     return dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
 }
 
-function headersFromLayout(layout) {
+function headersFromLayout(layout, forceAll) {
     let headers = [];
 
     layout.forEach((group, gi) => {
         let columns = [...group.default_columns];
-        if (expandedGroups[dataDisplay].has(group.group_name)) {
+        if (expandedGroups[dataDisplay].has(group.group_name) || forceAll) {
             columns.push(...group.optional_columns);
         }
 
@@ -370,7 +383,7 @@ function populateEntryTable() {
     // Update Table
 
     const entries = (dataDisplay === "variants" ? loadedVariants : loadedGuides);
-    const headers = headersFromLayout(layout);
+    const headers = headersFromLayout(layout, false);
 
     const tableGroups = d3.select("table#entry-table thead tr#group-row")
         .selectAll("th")
@@ -438,13 +451,7 @@ function populateEntryTable() {
     const rowEntry = tableRows.enter().append("tr");
 
     headers.forEach(f => rowEntry.append("td")
-        .attr("class", e => {
-            let classes = f.classes;
-            if (e[f.column] === null || e[f.column] === "NA" || e[f.column] === "-") {
-                classes += " lighter"
-            }
-            return classes;
-        })
+        .attr("class", e => tableCellClass(e, f))
         .append("div")
         .html(e => formatTableCell(e, f)));
 
@@ -455,10 +462,10 @@ function populateEntryTable() {
             // noinspection JSUnresolvedFunction
             const variantGuides = d3.select("#variant-guides-table tbody").selectAll("tr").data(guides, g => g["id"]);
             const variantGuideEntry = variantGuides.enter().append("tr");
-            guideFields.forEach(f => variantGuideEntry.append("td")
-                .classed("lighter", e => e[f["column_name"]] === null || e[f["column_name"]] === "NA"
-                    || e[f["column_name"]] === "-")
-                .html(e => formatTableCell(e, f)));
+            headersFromLayout(GUIDES_LAYOUT, true).forEach(h => variantGuideEntry.append("td")
+                .attr("class", e => tableCellClass(e, h))
+                .append("div")
+                .html(e => formatTableCell(e, h)));
             variantGuides.exit().remove();
             d3.select("#export-variant-guides").on("click", () => {
                 let downloadURL = new URL(`/api/variants/${e["id"]}/guides/tsv`, window.location.origin);
@@ -468,6 +475,14 @@ function populateEntryTable() {
     });
 
     tableRows.exit().remove();
+}
+
+function tableCellClass(e, f) {
+    let classes = f.classes;
+    if (e[f.column] === null || e[f.column] === "NA" || e[f.column] === "-") {
+        classes += " lighter"
+    }
+    return classes;
 }
 
 function formatTableCell(e, f) {
@@ -502,7 +517,7 @@ function formatTableCell(e, f) {
 
 function updateTableColumnHeaders() {
     const layout = getLayout();
-    const headers = headersFromLayout(layout);
+    const headers = headersFromLayout(layout, false);
 
     d3.selectAll("table#entry-table thead tr#header-row th").data(headers, h => h.column)
         .attr("class", f => f.classes)

@@ -566,23 +566,23 @@ table#variant-guides-table thead th {
 }
 
 table#entry-table thead tr#group-row th,
-table#variant-guides-table thead tr#group-row th {
+table#variant-guides-table thead tr.group-row th {
     padding-left: 2px;
     padding-right: 2px;
 }
 
 table#entry-table thead tr#group-row th:first-child,
-table#variant-guides-table thead tr#group-row th:first-child {
+table#variant-guides-table thead tr.group-row th:first-child {
     padding-left: 15px;
 }
 
 table#entry-table thead tr#group-row th:last-child,
-table#variant-guides-table thead tr#group-row th:last-child {
+table#variant-guides-table thead tr.group-row th:last-child {
     padding-right: 15px;
 }
 
 table#entry-table thead tr#group-row th button.toggle-optional-columns,
-table#variant-guides-table thead tr#group-row th button.toggle-optional-columns {
+table#variant-guides-table thead tr.group-row th button.toggle-optional-columns {
     position: absolute;
     right: 0;
 
@@ -595,23 +595,19 @@ table#variant-guides-table thead tr#group-row th button.toggle-optional-columns 
     cursor: pointer;
 }
 
-table#entry-table thead tr#group-row th button.toggle-optional-columns span.material-icons,
-table#variant-guides-table thead tr#group-row th button.toggle-optional-columns span.material-icons {
+table#entry-table thead tr#group-row th button.toggle-optional-columns span.material-icons {
     transition: color 0.15s ease-in-out;
 }
 
-table#entry-table thead tr#group-row th button.toggle-optional-columns:hover span.material-icons,
-table#variant-guides-table thead tr#group-row th button.toggle-optional-columns:hover span.material-icons {
+table#entry-table thead tr#group-row th button.toggle-optional-columns:hover span.material-icons {
     color: #777;
 }
 
-table#entry-table thead tr#group-row th button.toggle-optional-columns.hidden,
-table#variant-guides-table thead tr#group-row th button.toggle-optional-columns.hidden {
+table#entry-table thead tr#group-row th button.toggle-optional-columns.hidden {
     display: none;
 }
 
-table#entry-table thead tr#group-row th button.toggle-optional-columns span.material-icons,
-table#variant-guides-table thead tr#group-row th button.toggle-optional-columns span.material-icons {
+table#entry-table thead tr#group-row th button.toggle-optional-columns span.material-icons {
     letter-spacing: -0.7em;
     vertical-align: top;
 }
@@ -630,13 +626,13 @@ table#variant-guides-table thead th div {
 }
 
 table#entry-table thead tr#group-row th div,
-table#variant-guides-table thead tr#group-row th div {
+table#variant-guides-table thead tr.group-row th div {
     padding-left: 15px;
     padding-right: 15px;
 }
 
 table#entry-table thead tr#group-row th div,
-table#variant-guides-table thead tr#group-row th div {
+table#variant-guides-table thead tr.group-row th div {
     box-shadow: inset 0 -1px 0 #E9E9E9;
     background-color: #F4F4F4;
     color: #666;
@@ -656,7 +652,7 @@ table#entry-table thead tr#header-row th {
 }
 
 table#entry-table thead tr#header-row th.odd div,
-table#variant-guides-table thead tr#header-row th.odd div {
+table#variant-guides-table thead tr.header-row th.odd div {
     background-color: #f2f9fc;
 }
 

@@ -200,26 +200,26 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
         if sort_by is not None and sort_order is not None else ""
 
     return c.mogrify(
-        "{} (SELECT {} FROM variants WHERE {}{}{} "
+        "{outer_selection} (SELECT {inner_selection} FROM variants WHERE ({chr_in}{loc_in}{mh_1l} "
         "NOT (%(clinvar)s AND gene_info_clinvar IS NULL) "
         "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-        "AND ({}) AND ({}) {}{}{}) {}".format(
-            "SELECT {} FROM variants {} WHERE id IN ".format(
-                selection,
-                "LEFT JOIN cartoons ON id = variant_id" if cartoons else ""
+        "AND ({pos_filter})) AND ({flex_search}) {inner_order}{limit}{offset}) {outer_order}".format(
+            outer_selection="SELECT {selection} FROM variants {opt_join} WHERE id IN ".format(
+                selection=selection,
+                opt_join="LEFT JOIN cartoons ON id = variant_id" if cartoons else ""
             ) if outer_query else "",
-            selection if not outer_query else "id",
-            "(chr IN {}) AND ".format(search_params["chr_fragment"])
-            if len(search_params["chr"]) < len(CHR_VALUES) else "",
-            "(location IN {}) AND ".format(search_params["location_fragment"])
-            if len(search_params["location"]) < len(LOCATION_VALUES) else "",
-            "(mh_1l >= %(min_mh_1l)s) AND " if search_params["min_mh_1l"] > 0 else "",
-            search_params["position_filter_fragment"],
-            search_params["search_query_fragment"],
-            order_string,
-            "LIMIT %(items_per_page)s " if items_per_page is not None else "",
-            "OFFSET %(start)s" if page is not None else "",
-            order_string if outer_query else ""
+            inner_selection=selection if not outer_query else "id",
+            chr_in=("(chr IN {}) AND ".format(search_params["chr_fragment"])
+                    if len(search_params["chr"]) < len(CHR_VALUES) else ""),
+            loc_in=("(location IN {}) AND ".format(search_params["location_fragment"])
+                    if len(search_params["location"]) < len(LOCATION_VALUES) else ""),
+            mh_1l="(mh_1l >= %(min_mh_1l)s) AND " if search_params["min_mh_1l"] > 0 else "",
+            pos_filter=search_params["position_filter_fragment"],
+            flex_search=search_params["search_query_fragment"],
+            inner_order=order_string,
+            limit="LIMIT %(items_per_page)s " if items_per_page is not None else "",
+            offset="OFFSET %(start)s" if page is not None else "",
+            outer_order=order_string if outer_query else ""
         ),
         {
             "start": ((page if page is not None else 0) - 1) * (items_per_page if items_per_page is not None else 0),

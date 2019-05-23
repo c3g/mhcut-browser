@@ -208,6 +208,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         window.location.href = downloadURL.toString();
     });
 
+
+    d3.select("#search-query").on("change", () => {
+        try {
+            let filters = JSON.parse(d3.event.target.value);
+            if (validateAdvancedSearchFilters(filters)) {
+                advancedSearchFilters = filters;
+            }
+        } catch {
+            if (advancedSearchFilters.length > 0) {
+                advancedSearchFilters = [];
+            }
+        }
+        updateSearchFilterDOM();
+    });
+
+
     const onPositionQueryChange = () => {
         const positionData = d3.select("#position-query").property("value").replace(/[ ]/g, "").split(":");
         if (![1, 2].includes(positionData.length) || positionData[0] === "") {
@@ -292,8 +308,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         !d3.select("#advanced-search-help").classed("shown")));
     d3.select("#add-search-condition").on("click", () => addAdvancedSearchCondition());
     d3.select("#save-search-query").on("click", () => {
-        if (advancedSearchFilters.length > 0)
+        if (advancedSearchFilters.length > 0) {
             d3.select("#search-query").property("value", JSON.stringify(advancedSearchFilters));
+        }
+
         searchModal.hide();
     });
 
@@ -709,6 +727,21 @@ function addAdvancedSearchCondition() {
     });
 
     updateSearchFilterDOM();
+}
+
+function validateAdvancedSearchFilters(filters) {
+    let valid = true;
+
+    filters.forEach(f => {
+        valid = valid && f.hasOwnProperty("id");
+        valid = valid && f.hasOwnProperty("boolean");
+        valid = valid && f.hasOwnProperty("negated");
+        valid = valid && f.hasOwnProperty("field");
+        valid = valid && f.hasOwnProperty("operator");
+        valid = valid && f.hasOwnProperty("value");
+    });
+
+    return valid;
 }
 
 function updateSearchFilterDOM() {

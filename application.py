@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+import datetime
 import json as pyjson
 import os
 import os.path
-import re
 import psycopg2
 import psycopg2.extras
+import re
+import secrets
 
 from flask import Flask, g, json, request, Response
 from typing import Pattern
@@ -60,6 +62,8 @@ POSITION_OPERATOR_DOMAIN = re.compile(r"^(overlap|not_overlap|within)$")
 SORT_ORDER_DOMAIN = re.compile(r"^(ASC|DESC)$")
 
 app = Flask(__name__)
+
+email_tokens = {}
 
 
 class DomainError(Exception):
@@ -518,6 +522,38 @@ def metadata():
         "location": LOCATION_VALUES,
         "version": __version__
     })
+
+
+@app.route("/token", methods=["GET"])
+def email_token():
+    token = secrets.token_hex(24)
+    expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    email_tokens[token] = expiry
+    return json.jsonify({"token": token, "expiry": int(expiry.timestamp())})
+
+
+@app.route("/report", methods=["POST"])
+def bug_report():
+    data = request.get_json()
+    if "token" not in data:
+        return Response(status=400, content_type="application/json",
+                        response=json.jsonify({"success": False, "reason": "token passed incorrectly"}))
+
+    now = datetime.datetime.now()
+    for token in email_tokens:
+        if email_tokens[token] < now:
+            del email_tokens[token]
+
+    token = data["token"]
+    if token not in email_tokens.keys():
+        return Response(status=400, content_type="application/json",
+                        response=json.jsonify({"success": False, "reason": "invalid token"}))
+
+    # TODO: Email
+
+    del email_tokens[token]
+
+    return json.jsonify({"success": True})
 
 
 @app.teardown_appcontext

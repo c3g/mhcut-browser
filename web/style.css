@@ -1078,6 +1078,32 @@ div#variant-guides-modal h2 {
 
 
 
+div#report-bug-modal {
+    max-width: 600px;
+    max-height: 355px;
+    margin: auto;
+}
+
+div#report-bug-modal label {
+    display: block;
+    margin-bottom: 3px;
+
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.8rem;
+    color: #444;
+}
+
+div#report-bug-modal label:not(:first-of-type) {
+    margin-top: 10px;
+}
+
+div#report-bug-modal input[type="email"],
+div#report-bug-modal textarea {
+    width: 100%;
+}
+
+
+
 code {
     background-color: #FCFCFC;
     border: 1px solid #DFDFDF;
@@ -1103,7 +1129,9 @@ div.code-comparison code:last-child { margin-right: 0; }
 
 
 input[type="text"],
-input[type="number"] {
+input[type="email"],
+input[type="number"],
+textarea {
     box-sizing: border-box;
     padding: 5px 7px;
 
@@ -1119,17 +1147,23 @@ input[type="number"] {
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 input[type="text"]:hover,
-input[type="number"]:hover {
+input[type="email"]:hover,
+input[type="number"]:hover,
+textarea:hover {
     border-color: #CFCFCF;
     border-bottom-color: #C3C3C3;
 }
 input[type="text"]:focus,
-input[type="number"]:focus {
+input[type="email"]:focus,
+input[type="number"]:focus,
+textarea:focus {
     border-color: #AFAFAF;
     border-bottom-color: #A3A3A3;
 }
 input[type="text"][disabled],
-input[type="number"][disabled] {
+input[type="email"][disabled],
+input[type="number"][disabled],
+textarea[disabled] {
     opacity: 0.6;
     cursor: not-allowed;
 }

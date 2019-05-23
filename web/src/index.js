@@ -57,6 +57,8 @@ let variantGuidesModal = null;
 let termsOfUseModal = null;
 let reportBugModal = null;
 
+let emailToken = null;
+
 const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs}`;
 const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
 const bookshelfURL = nbk => `https://www.ncbi.nlm.nih.gov/books/${nbk}/`;
@@ -73,6 +75,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     variantGuidesModal = new Modal("#variant-guides-container");
     termsOfUseModal = new Modal("#terms-of-use-container");
     reportBugModal = new Modal("#report-bug-container");
+    reportBugModal.addListener("modalShow", async () => emailToken = await fetchJSON("/api/token"));
+    reportBugModal.addListener("modalHide", () => emailToken = null);
 
 
     // Load various data.

@@ -183,7 +183,15 @@
         <button class="close-modal"><span class="material-icons">close</span></button>
         <div class="modal-scroll-container">
             <h2>Report a Bug in the MHcut Browser</h2>
-            <!-- TODO -->
+            <label for="report-bug-email">Your Email</label>
+            <input type="email" id="report-bug-email" name="report-bug-email" required
+                   placeholder="name@example.com">
+            <label for="report-bug-text">Please Describe What Happened</label>
+            <textarea name="report-bug-text" id="report-bug-text" rows="5" required></textarea>
+        </div>
+         <div class="modal-options">
+            <div></div>
+            <div><button type="submit">Submit Report</button></div>
         </div>
     </div>
 </div>

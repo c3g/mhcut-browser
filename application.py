@@ -200,10 +200,10 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
         if sort_by is not None and sort_order is not None else ""
 
     return c.mogrify(
-        "{outer_selection} (SELECT {inner_selection} FROM variants WHERE ({chr_in}{loc_in}{mh_1l} "
+        "{outer_selection} (SELECT {inner_selection} FROM variants WHERE {chr_in}{loc_in}{mh_1l} "
         "NOT (%(clinvar)s AND gene_info_clinvar IS NULL) "
         "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-        "AND ({pos_filter})) AND ({flex_search}) {inner_order}{limit}{offset}) {outer_order}".format(
+        "AND ({pos_filter}) AND ({flex_search}) {inner_order}{limit}{offset}) {outer_order}".format(
             outer_selection="SELECT {selection} FROM variants {opt_join} WHERE id IN ".format(
                 selection=selection,
                 opt_join="LEFT JOIN cartoons ON id = variant_id" if cartoons else ""

@@ -136,3 +136,11 @@ CREATE TABLE entries_query_cache (
   e_query BYTEA PRIMARY KEY,
   e_value INTEGER NOT NULL
 );
+
+-- We don't drop and re-create bug_reports, because it should be preserved across imports.
+
+CREATE TABLE IF NOT EXISTS bug_reports (
+    id SERIAL,
+    email TEXT,
+    report TEXT
+);

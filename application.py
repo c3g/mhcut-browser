@@ -10,6 +10,8 @@ import re
 import secrets
 
 from flask import Flask, g, json, request, Response
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, From, To, ReplyTo, PlainTextContent
 from typing import Pattern
 
 
@@ -549,11 +551,32 @@ def bug_report():
         return Response(status=400, content_type="application/json",
                         response=json.jsonify({"success": False, "reason": "invalid token"}))
 
-    # TODO: Email
+    c = get_db().cursor()
+    c.execute("INSERT INTO bug_reports(email, report) VALUES(%s, %s) RETURNING id", (data["email"], data["text"]))
+    bug_report_id = c.fetchone()[0]
 
-    del email_tokens[token]
+    message = Mail(
+        from_email=From("no-reply@mhcut-browser.genap.ca"),
+        to_emails=To(os.environ.get("BUG_REPORT_EMAIL")),
+        subject="MHcut Bug Report (ID: {})".format(bug_report_id),
+        plain_text_content=PlainTextContent(
+            "{email} submitted the following bug report:\n"
+            "--------------------------------------------------------------------------------\n\n"
+            "{report}".format(email=data["email"], report=data["text"])
+        )
+    )
 
-    return json.jsonify({"success": True})
+    message.reply_to = ReplyTo(data["email"])
+
+    try:
+        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+        sg.send(message)
+        return json.jsonify({"success": True})
+    except Exception as e:
+        return Response(status=500, content_type="application/json",
+                        response=json.jsonify({"success": False, "reason": "sendgrid failure: {}".format(e)}))
+    finally:
+        del email_tokens[token]
 
 
 @app.teardown_appcontext

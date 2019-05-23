@@ -365,6 +365,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     d3.select("#terms-of-use").on("click", () => termsOfUseModal.show());
     d3.select("#report-bug").on("click", () => reportBugModal.show());
 
+    d3.select("#report-bug-submit").on("click", async () => {
+        const response = await fetch("/api/report", {
+            method: "POST",
+            mode: "cors",
+            cache: "no-cache",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                token: emailToken.token,
+                email: d3.select("#report-bug-email").property("value"),
+                text: d3.select("#report-bug-text").property("value")
+            })
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+            alert(`Something went wrong while submitting a bug report. Error message: ${result.reason}`);
+        }
+
+        reportBugModal.hide();
+
+        alert("Bug report submitted successfully!");
+    });
+
     d3.select("#table-display").classed("loading", false);
     transitioning = false;
 });

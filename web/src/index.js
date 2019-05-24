@@ -464,8 +464,8 @@ function populateEntryTable() {
         .classed("toggle-optional-columns", true)
         .classed("hidden", g => g.optional_columns.length === 0)
         .html(g => set.has(g.group_name)
-            ? `<span class="material-icons">chevron_leftchevron_left</span>`
-            : `<span class="material-icons">chevron_rightchevron_right</span>`)
+            ? '<span class="material-icons">chevron_left</span><span class="material-icons">chevron_left</span>'
+            : '<span class="material-icons">chevron_right</span><span class="material-icons">chevron_right</span>')
         .on("click", g => {
             if (set.has(g.group_name)) {
                 set.delete(g.group_name);

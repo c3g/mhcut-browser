@@ -589,6 +589,7 @@ table#entry-table thead tr.group-row th button.toggle-optional-columns,
 table#variant-guides-table thead tr.group-row th button.toggle-optional-columns {
     position: absolute;
     right: 0;
+    padding-right: 0;
 
     border: none;
     background: none;
@@ -600,7 +601,12 @@ table#variant-guides-table thead tr.group-row th button.toggle-optional-columns 
 }
 
 table#entry-table thead tr.group-row th button.toggle-optional-columns span.material-icons {
+    vertical-align: top;
     transition: color 0.15s ease-in-out;
+}
+
+table#entry-table thead tr.group-row th button.toggle-optional-columns span.material-icons:last-of-type {
+    margin-left: -0.7em;
 }
 
 table#entry-table thead tr.group-row th button.toggle-optional-columns:hover span.material-icons {
@@ -609,11 +615,6 @@ table#entry-table thead tr.group-row th button.toggle-optional-columns:hover spa
 
 table#entry-table thead tr.group-row th button.toggle-optional-columns.hidden {
     display: none;
-}
-
-table#entry-table thead tr.group-row th button.toggle-optional-columns span.material-icons {
-    letter-spacing: -0.7em;
-    vertical-align: top;
 }
 
 table#entry-table thead th div,

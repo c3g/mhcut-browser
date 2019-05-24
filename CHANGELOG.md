@@ -1,5 +1,43 @@
 # Changelog
 
+## Version 1.0.0 (TBD)
+
+Final release version for publication. Incorporates changes from initial
+submission as well (listed separately).
+
+### Since Initial Submission:
+
+#### Front End
+
+TODO
+
+#### Server and API
+
+  * Update dependencies
+  * TODO
+
+#### Database
+
+TODO
+
+
+### Prior to Initial Submission:
+
+#### Front End
+
+TODO
+
+#### Server and API
+
+  * Update dependencies
+  * TODO
+
+#### Database
+
+TODO
+
+
+
 ## Version 0.4.0 (2018-08-23)
 
 Renamed once again, this time to "MHcut Browser".
@@ -42,6 +80,7 @@ Renamed once again, this time to "MHcut Browser".
   * Made several schema changes to aid performance with the complete data-set.
 
 
+
 ## Version 0.3.1 (2018-08-02)
 
 ### Server and API
@@ -71,7 +110,8 @@ Renamed once again, this time to "MHcut Browser".
 
   * `tsv_to_sqlite.py` now accepts a mandatory argument for the TSV file
     instead of always using `variants-subset.tsv`.
-  * uWSGI ini file and example systemd service files are now available.
+  * uWSGI ini file and example `systemd` service files are now available.
+
 
 
 ## Version 0.2.0 (2018-07-31)
@@ -81,6 +121,7 @@ Renamed once again, this time to "MHcut Browser".
   * Name changed to "CRISPR Cut Browser".
   * Citations now link to their respective pages on NCBI PubMed / Bookshelf.
   * Entries in the `gene_info_clinvar` now also link to NCBI Gene entries.
+
 
 
 ## Version 0.1.0 (2018-07-30)

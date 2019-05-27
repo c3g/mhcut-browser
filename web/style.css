@@ -21,6 +21,10 @@ nav#table-view-nav {
     border-bottom: 1px solid #E9E9E9;
 }
 
+nav#table-view-nav div {
+    white-space: nowrap;
+}
+
 nav#table-view-nav div:not(:first-child):not(:last-child) {
     text-align: center;
     padding: 0 15px;
@@ -189,6 +193,7 @@ body.no-sidebar header#main-header {
 header#main-header div {
     flex: 1;
     text-align: center;
+    white-space: nowrap;
 }
 
 header#main-header div:last-child {
@@ -197,9 +202,10 @@ header#main-header div:last-child {
 
 
 header#main-header h1 {
-    margin: 0 1.5rem 0 0;
+    margin: 0 1.5rem;
 
     line-height: 36px;
+    white-space: nowrap;
 
     font-family: "Roboto Mono", monospace;
     font-size: 1.2rem;
@@ -211,6 +217,7 @@ header#main-header h1 {
 header#main-header div#developed-by {
     height: 40px;
     text-align: left;
+    white-space: nowrap;
 }
 
 header#main-header div#developed-by a {
@@ -293,6 +300,10 @@ section#table-display::after {
     animation-name: loading;
     animation-iteration-count: infinite;
     animation-direction: alternate;
+}
+
+body.no-sidebar section#table-display::after {
+    right: 16px;
 }
 
 @keyframes loading {
@@ -1200,6 +1211,7 @@ button {
 
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
+    white-space: nowrap;
     color: #555;
 
     transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
@@ -1273,10 +1285,20 @@ div#column-help-text.shown {
     }
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1175px) {
+    section#table-pagination > div {
+        font-size: 0.7rem;
+    }
+}
+
+@media screen and (max-width: 1080px) {
     div.modal {
         position: absolute;
         top: 40px; left: 80px; right: 80px; bottom: 40px;
+    }
+
+    div#developed-by span {
+        display: none;
     }
 
     section#table-pagination {
@@ -1285,5 +1307,13 @@ div#column-help-text.shown {
 
     section#table-pagination span#total-entries-text {
         display: none;
+    }
+
+    nav#table-view-nav button {
+        font-size: 0.7rem;
+    }
+
+    nav#table-view-nav ul li {
+        font-size: 0.7rem;
     }
 }

@@ -381,11 +381,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         const result = await response.json();
         if (!result.success) {
             alert(`Something went wrong while submitting a bug report. Error message: ${result.reason}`);
+        } else {
+            alert("Bug report submitted successfully!");
         }
 
         reportBugModal.hide();
-
-        alert("Bug report submitted successfully!");
     });
 
     d3.select("#table-display").classed("loading", false);

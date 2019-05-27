@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import datetime
-import json as pyjson
 import os
 import os.path
 import psycopg2
 import psycopg2.extras
 import re
 import secrets
+import simplejson
 
 from flask import Flask, g, json, request, Response
 from sendgrid import SendGridAPIClient
@@ -140,7 +140,7 @@ def build_search_query(raw_query, c):
 
             search_query_fragment += "))"
 
-    except (pyjson.decoder.JSONDecodeError, TypeError, AttributeError):
+    except (simplejson.errors.JSONDecodeError, TypeError, AttributeError):
         if raw_query.strip() == "":
             return "true", search_query_data
 
@@ -267,7 +267,6 @@ def index():
 
     results = c.fetchall()
     for r in results:
-        r["gc"] = str(r["gc"]) if r["gc"] is not None else None
         del r["full_row"]
     return json.jsonify(results)
 
@@ -574,7 +573,7 @@ def bug_report():
         return json.jsonify({"success": True})
     except Exception as e:
         return Response(status=500, content_type="application/json",
-                        response=json.jsonify({"success": False, "reason": "sendgrid failure: {}".format(e)}))
+                        response=simplejson.dumps({"success": False, "reason": "sendgrid failure: {}".format(e)}))
     finally:
         del email_tokens[token]
 

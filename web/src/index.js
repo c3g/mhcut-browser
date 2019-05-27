@@ -812,7 +812,7 @@ function updateSearchFilterDOM() {
             updateSearchFilterDOM();
         })
         .selectAll("option")
-        .data([{column: ""}, ...headersFromLayout(VARIANTS_LAYOUT, true).filter(f => f.column !== "cartoon")],
+        .data([{column_name: ""}, ...headersFromLayout(VARIANTS_LAYOUT, true).filter(f => f.column !== "cartoon")],
             f => f["column_name"])
         .enter()
         .append("option")

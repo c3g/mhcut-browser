@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         .attr("class", h => h.classes)
         .append("div")
         .text(h => h.column)
-        .on("mouseover", f => showColumnHelp(d3.event, f["column_name"]))
+        .on("mouseover", h => showColumnHelp(d3.event, h.column))
         .on("mousemove", () => updateColumnHelp(d3.event))
         .on("mouseout", () => hideColumnHelp())
         .append("span").attr("class", "material-icons");

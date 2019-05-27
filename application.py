@@ -497,13 +497,10 @@ def guides_entries():
     return json.jsonify(num_entries)
 
 
-@app.route("/fields", methods=["GET"])
-def fields():
+@app.route("/variants/fields", methods=["GET"])
+def variant_fields():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
-    return json.jsonify({
-        "variants": {col["column_name"]: col for col in get_variants_columns(c)},
-        "guides": {col["column_name"]: col for col in get_guides_columns(c)}
-    })
+    return json.jsonify({col["column_name"]: col for col in get_variants_columns(c)})
 
 
 @app.route("/metadata", methods=["GET"])

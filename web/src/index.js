@@ -19,8 +19,9 @@ let loadedGuides = [];
 let totalVariantsCount = 0;
 let totalGuidesCount = 0;
 
+// Used in advanced search (for now)
 let variantFields = [];
-let guideFields = [];
+
 let metadata = {};
 
 let sortBy = "id";
@@ -79,34 +80,37 @@ document.addEventListener("DOMContentLoaded", async function () {
     reportBugModal.addListener("modalHide", () => emailToken = null);
 
 
-    // Load various data.
-
-    let fields;
-
-    [loadedVariants, loadedGuides, fields, metadata] = await Promise.all([
-        fetchJSON(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`),
-        fetchJSON(`/api/guides?page=${page.toString(10)}&items_per_page=${itemsPerPage}`),
-        fetchJSON("/api/fields"),
-        fetchJSON("/api/metadata")
-    ]);
-
-    // TODO: Replace these
-    variantFields = fields["variants"];
-    guideFields = fields["guides"];
+    // Initialize items per page
 
     itemsPerPage = parseInt(d3.select("#items-per-page").property("value"), 10);
 
 
-    // Start loading variant / guide counts.
+    // Start parallel API calls to load data
 
     loadingEntryCounts = true;
 
     d3.select("#apply-filters").attr("disabled", "disabled");
     d3.select("#clear-filters").attr("disabled", "disabled");
 
-    [totalVariantsCount, totalGuidesCount] = await Promise.all([
-        fetchJSON("/api/variants/entries"),
-        fetchJSON("/api/guides/entries")
+    await Promise.all([
+        (async () => {
+            // Load various data
+
+            [loadedVariants, loadedGuides, variantFields, metadata] = await Promise.all([
+                fetchJSON(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`),
+                fetchJSON(`/api/guides?page=${page.toString(10)}&items_per_page=${itemsPerPage}`),
+                fetchJSON("/api/variants/fields"),
+                fetchJSON("/api/metadata")
+            ]);
+        })(),
+        (async () => {
+            // Start loading variant / guide counts
+
+            [totalVariantsCount, totalGuidesCount] = await Promise.all([
+                fetchJSON("/api/variants/entries"),
+                fetchJSON("/api/guides/entries")
+            ]);
+        })()
     ]);
 
     loadingEntryCounts = false;
@@ -116,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     updatePagination();
 
-    // Finish loading variant / guide counts.
+    // Finish loading all data
 
 
     d3.select("#toggle-all-additional-columns").on("click", () => {
@@ -183,7 +187,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     d3.select("#export-variants")
         .on("click", () => {
             let downloadURL = new URL("/api/tsv", window.location.origin);
-            let params = getSearchParams();
+            const params = getSearchParams();
             Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
             window.location.href = downloadURL.toString();
         })
@@ -215,14 +219,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     d3.select("#search-query").on("change", () => {
         try {
-            let filters = JSON.parse(d3.event.target.value);
+            const filters = JSON.parse(d3.event.target.value);
             if (validateAdvancedSearchFilters(filters)) {
                 advancedSearchFilters = filters;
             }
         } catch {
-            if (advancedSearchFilters.length > 0) {
-                advancedSearchFilters = [];
-            }
+            advancedSearchFilters = [];
         }
         updateSearchFilterDOM();
     });
@@ -379,11 +381,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
         const result = await response.json();
-        if (!result.success) {
-            alert(`Something went wrong while submitting a bug report. Error message: ${result.reason}`);
-        } else {
-            alert("Bug report submitted successfully!");
-        }
+        alert(result.success
+            ? "Bug report submitted successfully!"
+            : `Something went wrong while submitting a bug report. Error message: ${result.reason}`);
 
         reportBugModal.hide();
     });
@@ -520,7 +520,6 @@ function populateEntryTable() {
         d3.select("#variant-for-guides").text(e["id"]);
 
         const guides = await fetchJSON(`/api/variants/${e["id"]}/guides`);
-         // noinspection JSUnresolvedFunction
         const variantGuides = d3.select("#variant-guides-table tbody").selectAll("tr").data(guides, g => g["id"]);
         const variantGuideEntry = variantGuides.enter().append("tr");
         headersFromLayout(GUIDES_LAYOUT, true).forEach(h => variantGuideEntry.append("td")
@@ -529,7 +528,7 @@ function populateEntryTable() {
             .html(e => getTableCellContents(e, h)));
         variantGuides.exit().remove();
         d3.select("#export-variant-guides").on("click", () => {
-            let downloadURL = new URL(`/api/variants/${e["id"]}/guides/tsv`, window.location.origin);
+            const downloadURL = new URL(`/api/variants/${e["id"]}/guides/tsv`, window.location.origin);
             window.location.href = downloadURL.toString();
         });
     });
@@ -670,7 +669,6 @@ async function reloadPage(reloadCounts) {
         updatePagination();
 
         if (reloadCounts && loadingEntryCounts && loadedVariants.length !== 0) {
-            // noinspection JSCheckFunctionSignatures
             [totalVariantsCount, totalGuidesCount] = await Promise.all([
                 fetchJSON(variantCountURL.toString()),
                 fetchJSON(guideCountURL.toString())

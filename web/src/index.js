@@ -59,7 +59,7 @@ let reportBugModal = null;
 
 let emailToken = null;
 
-const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs}`;
+const dbSNPURL = rs => `https://www.ncbi.nlm.nih.gov/snp/rs${rs}/`;
 const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
 const bookshelfURL = nbk => `https://www.ncbi.nlm.nih.gov/books/${nbk}/`;
 const pubMedURL = pm => `https://www.ncbi.nlm.nih.gov/pubmed/${pm}/`;

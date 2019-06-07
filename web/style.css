@@ -44,7 +44,7 @@ nav#table-view-nav div:nth-child(2) input[type="checkbox"] {
 
 nav#table-view-nav div span.help-text {
     font-family: "Roboto Mono", monospace;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     line-height: 27px;
     color: rgba(38, 50, 56, 0.6);
 }
@@ -861,10 +861,28 @@ div.modal h2 {
     color: #555;
 }
 
-div.modal p {
+div.modal h3 {
+    margin: 15px 0 10px 0;
+    font-family: "Roboto Mono", monospace;
+    font-weight: normal;
+    color: #555;
+}
+
+div.modal p,
+div.modal li {
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
     color: #333;
+}
+
+div.modal a {
+    color: #1E88E5;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+}
+div.modal a:hover {
+    color: #42A5F5;
 }
 
 div.modal-options {

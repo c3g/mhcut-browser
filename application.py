@@ -8,10 +8,10 @@ import psycopg2.extras
 import re
 import secrets
 import simplejson
+import smtplib
 
+from email.message import EmailMessage
 from flask import Flask, g, json, request, Response
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, From, To, ReplyTo, PlainTextContent
 from typing import Pattern
 
 
@@ -551,26 +551,33 @@ def bug_report():
     c.execute("INSERT INTO bug_reports(email, report) VALUES(%s, %s) RETURNING id", (data["email"], data["text"]))
     bug_report_id = c.fetchone()[0]
 
-    message = Mail(
-        from_email=From("no-reply@mhcut-browser.genap.ca"),
-        to_emails=To(os.environ.get("BUG_REPORT_EMAIL")),
-        subject="MHcut Bug Report (ID: {})".format(bug_report_id),
-        plain_text_content=PlainTextContent(
-            "{email} submitted the following bug report:\n"
-            "--------------------------------------------------------------------------------\n\n"
-            "{report}".format(email=data["email"], report=data["text"])
-        )
+    message = EmailMessage()
+
+    # Email headers
+    message["From"] = "no-reply@mhcut-browser.genap.ca"
+    message["To"] = os.environ.get("BUG_REPORT_EMAIL").strip()
+    message["Subject"] = f"MHcut Bug Report (ID: {bug_report_id})"
+    message["Reply-To"] = data["email"]
+
+    # Email content
+    message.set_content(
+        f"{data['email']} submitted the following bug report:\n"
+        f"--------------------------------------------------------------------------------\n\n"
+        f"{data['text']}"
     )
 
-    message.reply_to = ReplyTo(data["email"])
-
     try:
-        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-        sg.send(message)
-        return json.jsonify({"success": True})
-    except Exception as e:
-        return Response(status=500, content_type="application/json",
-                        response=simplejson.dumps({"success": False, "reason": "sendgrid failure: {}".format(e)}))
+        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(os.environ.get("GMAIL_SENDER_EMAIL"), os.environ.get("GMAIL_SENDER_PASSWORD"))
+            smtp.send_message(message)
+            return json.jsonify({"success": True})
+    except ConnectionRefusedError:
+        return json.jsonify({"success": False, "reason": "could not connect to mail server"})
+    except smtplib.SMTPResponseException as e:
+        print(e)
+        return json.jsonify({"success": False, "reason": "smtp error"})
     finally:
         del email_tokens[token]
 

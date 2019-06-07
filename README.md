@@ -28,7 +28,7 @@ online at [https://mhcut-browser.genap.ca/](https://mhcut-browser.genap.ca/).
 
 ### Python 3
 
-Python 3.5 or later is needed to run the application server and database-
+Python 3.6 or later is needed to run the application server and database-
 generating script. See the `requirements.txt` file for required packages.
 
 
@@ -459,7 +459,8 @@ os.environ["DB_NAME"] = "your_production_db_name"
 os.environ["DB_USER"] = "your_production_db_user"
 os.environ["DB_PASSWORD"] = "your_production_db_password"
 
-os.environ["SENDGRID_API_KEY"] = "your_production_sendgrid_api_key"
+os.environ["GMAIL_SENDER_EMAIL"] = "your_production_gmail_sender_email"
+os.environ["GMAIL_SENDER_PASSWORD"] = "your_production_gmail_sender_password"
 os.environ["BUG_REPORT_EMAIL"] = "your_production_bug_report_email"
 ```
 

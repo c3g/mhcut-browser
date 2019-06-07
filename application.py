@@ -82,17 +82,15 @@ def verify_domain(value, domain: Pattern):
 
 
 def search_param(c):
-    return "search_cond_{}".format(str(c).strip())
+    return f"search_cond_{str(c).strip()}"
 
 
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = psycopg2.connect("dbname={} user={} password={}".format(
-            os.environ.get("DB_NAME"),
-            os.environ.get("DB_USER"),
-            os.environ.get("DB_PASSWORD")
-        ))
+        db = g._database = psycopg2.connect(f"dbname={os.environ.get('DB_NAME')} "
+                                            f"user={os.environ.get('DB_USER')} "
+                                            f"password={os.environ.get('DB_PASSWORD')}")
     return db
 
 
@@ -103,7 +101,7 @@ def get_variants_columns(c):
 
 
 def build_variants_columns_domain(c):
-    return re.compile("^({})$".format("|".join([i["column_name"] for i in get_variants_columns(c)])))
+    return re.compile(f"^({'|'.join([i['column_name'] for i in get_variants_columns(c)])})$")
 
 
 def get_guides_columns(c):
@@ -130,12 +128,12 @@ def build_search_query(raw_query, c):
             op_data = SEARCH_OPERATORS[c["operator"]]
 
             if search_query_fragment != "":
-                search_query_fragment += " {} ".format(c["boolean"])
+                search_query_fragment += f" {c['boolean']} "
 
-            search_query_fragment += "({}({} {}".format("NOT " if c["negated"] else "", c["field"], op_data[0])
+            search_query_fragment += f"({'NOT ' if c['negated'] else ''}({c['field']} {op_data[0]}"
 
             if op_data[1] != "":
-                search_query_fragment += " %({})s".format(search_param(c["id"]))
+                search_query_fragment += f" %({search_param(c['id'])})s"
                 search_query_data[search_param(c["id"])] = op_data[1].format(c["value"])
 
             search_query_fragment += "))"
@@ -145,7 +143,7 @@ def build_search_query(raw_query, c):
             return "true", search_query_data
 
         search_query_fragment = "full_row LIKE %(full_row_cond)s "
-        search_query_data = {"full_row_cond": "%{}%".format(raw_query.strip().lower())}
+        search_query_data = {"full_row_cond": f"%{raw_query.strip().lower()}%"}
 
     return search_query_fragment, search_query_data
 
@@ -154,9 +152,9 @@ def get_search_params_from_request(c):
     # Ensure chromosomes match spec. Make chrx/chry into chrX/chrY.
     chromosomes = [ch.upper().replace("CHR", "chr") for ch in request.args.get("chr", ",".join(CHR_VALUES)).split(",")
                    if re.match(CHR_DOMAIN, ch.upper().replace("CHR", "chr"))]
-    chr_fragment = "(" + ",".join(["'{}'::CHROMOSOME".format(ch) for ch in chromosomes]) + ")"
+    chr_fragment = "(" + ",".join([f"'{ch}'::CHROMOSOME" for ch in chromosomes]) + ")"
     if len(chromosomes) == 0:
-        chr_fragment = "(" + ",".join(["'{}'::CHROMOSOME".format(ch) for ch in CHR_VALUES]) + ")"
+        chr_fragment = "(" + ",".join([f"'{ch}'::CHROMOSOME" for ch in CHR_VALUES]) + ")"
 
     start_pos = int(verify_domain(request.args.get("start", "0"), NON_NEG_INT_DOMAIN))
     end_pos = int(verify_domain(request.args.get("end", "1000000000000"), POS_INT_DOMAIN))
@@ -166,7 +164,7 @@ def get_search_params_from_request(c):
     gene_locations = [l.strip() for l in request.args.get("location", "").split(",") if l.strip() in LOCATION_VALUES]
     if len(gene_locations) == 0:
         gene_locations = list(LOCATION_VALUES)
-    location_fragment = "(" + ",".join(["'{}'::VARIANT_LOCATION".format(l) for l in gene_locations]) + ")"
+    location_fragment = "(" + ",".join([f"'{l}'::VARIANT_LOCATION" for l in gene_locations]) + ")"
 
     min_mh_1l = int(verify_domain(request.args.get("min_mh_1l", "3"), NON_NEG_INT_DOMAIN))
 
@@ -202,31 +200,26 @@ def get_search_params_from_request(c):
 
 def build_variants_query(c, selection, search_params, cartoons=False, sort_by=None, sort_order=None, page=None,
                          items_per_page=None, outer_query=True):
-    order_string = "ORDER BY {} {} ".format(sort_by, sort_order) \
-        if sort_by is not None and sort_order is not None else ""
+    outer_selection = (f"SELECT {selection} FROM variants "
+                       f"{'LEFT JOIN cartoons ON id = variant_id' if cartoons else ''} "
+                       f"WHERE id IN ") if outer_query else ""
+
+    chr_in = f"(chr IN {search_params['chr_fragment']}) AND " if len(search_params["chr"]) < len(CHR_VALUES) else ""
+    loc_in = (f"(location IN {search_params['location_fragment']}) AND "
+              if len(search_params["location"]) < len(LOCATION_VALUES) else "")
+    mh_1l = "(mh_1l >= %(min_mh_1l)s) AND " if search_params["min_mh_1l"] > 0 else ""
+
+    limit = "LIMIT %(items_per_page)s " if items_per_page is not None else ""
+    offset = "OFFSET %(start)s" if page is not None else ""
+
+    order_string = f"ORDER BY {sort_by} {sort_order} " if sort_by is not None and sort_order is not None else ""
 
     return c.mogrify(
-        "{outer_selection} (SELECT {inner_selection} FROM variants WHERE {chr_in}{loc_in}{mh_1l} "
-        "NOT (%(clinvar)s AND gene_info_clinvar IS NULL) "
-        "AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
-        "AND ({pos_filter}) AND ({flex_search}) {inner_order}{limit}{offset}) {outer_order}".format(
-            outer_selection="SELECT {selection} FROM variants {opt_join} WHERE id IN ".format(
-                selection=selection,
-                opt_join="LEFT JOIN cartoons ON id = variant_id" if cartoons else ""
-            ) if outer_query else "",
-            inner_selection=selection if not outer_query else "id",
-            chr_in=("(chr IN {}) AND ".format(search_params["chr_fragment"])
-                    if len(search_params["chr"]) < len(CHR_VALUES) else ""),
-            loc_in=("(location IN {}) AND ".format(search_params["location_fragment"])
-                    if len(search_params["location"]) < len(LOCATION_VALUES) else ""),
-            mh_1l="(mh_1l >= %(min_mh_1l)s) AND " if search_params["min_mh_1l"] > 0 else "",
-            pos_filter=search_params["position_filter_fragment"],
-            flex_search=search_params["search_query_fragment"],
-            inner_order=order_string,
-            limit="LIMIT %(items_per_page)s " if items_per_page is not None else "",
-            offset="OFFSET %(start)s" if page is not None else "",
-            outer_order=order_string if outer_query else ""
-        ),
+        f"{outer_selection} (SELECT {selection if not outer_query else 'id'} FROM variants "
+        f"WHERE {chr_in}{loc_in}{mh_1l} NOT (%(clinvar)s AND gene_info_clinvar IS NULL) "
+        f"AND (pam_mot > 0 OR NOT %(ngg_pam_avail)s) AND (pam_uniq > 0 OR NOT %(unique_guide_avail)s) "
+        f"AND ({search_params['position_filter_fragment']}) AND ({search_params['search_query_fragment']}) "
+        f"{order_string}{limit}{offset}) {order_string if outer_query else ''}",
         {
             "start": ((page if page is not None else 0) - 1) * (items_per_page if items_per_page is not None else 0),
             "items_per_page": items_per_page,
@@ -241,19 +234,28 @@ def build_variants_query(c, selection, search_params, cartoons=False, sort_by=No
     )
 
 
+def build_variants_query_str(*args, **kwargs):
+    return build_variants_query(*args, **kwargs).decode("utf-8")
+
+
+def get_entries_with_cache(c, query):
+    c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (query,))
+    cache_value = c.fetchone()
+
+    if cache_value is not None:
+        return cache_value[1]
+
+    c.execute(query)
+    num_entries = c.fetchone()[0]
+    c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s) ON CONFLICT DO NOTHING ", (query, num_entries))
+    get_db().commit()
+
+    return num_entries
+
+
 @app.route("/", methods=["GET"])
 def index():
     c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    print(build_variants_query(
-        c,
-        "variants.*, cartoon_text AS cartoon",
-        get_search_params_from_request(c),
-        cartoons=True,
-        sort_by=verify_domain(request.args.get("sort_by", "id"), build_variants_columns_domain(c)),
-        sort_order=verify_domain(request.args.get("sort_order", "ASC").upper(), SORT_ORDER_DOMAIN),
-        page=int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN)),
-        items_per_page=int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
-    ))
     c.execute(build_variants_query(
         c,
         "variants.*, cartoon_text AS cartoon",
@@ -302,12 +304,7 @@ def variants_tsv():
 def variant_guides(variant_id):
     c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
-
-    results = c.fetchall()
-    for r in results:
-        r["nmh_gc"] = str(r["nmh_gc"]) if r["nmh_gc"] is not None else None
-
-    return json.jsonify(results)
+    return json.jsonify(c.fetchall())
 
 
 @app.route("/variants/<int:variant_id>/guides/tsv", methods=["GET"])
@@ -327,8 +324,8 @@ def variant_guides_tsv(variant_id):
                 row = c2.fetchone()
 
     return Response(generate(), mimetype="text/tab-separated-values",
-                    headers={"Content-Disposition": "Content-Disposition: attachment; "
-                                                    "filename=\"variant_{}_guides.tsv\"".format(variant_id)})
+                    headers={"Content-Disposition": f"Content-Disposition: attachment; "
+                                                    f"filename=\"variant_{variant_id}_guides.tsv\""})
 
 
 @app.route("/guides", methods=["GET"])
@@ -345,7 +342,7 @@ def guides():
 
     # TODO: ALLOW SORTING GUIDES AS WELL?
 
-    c.execute("SELECT * FROM guides WHERE variant_id IN ({}) ORDER BY id".format(build_variants_query(
+    query_str = build_variants_query_str(
         c,
         "id",
         search_params,
@@ -357,13 +354,10 @@ def guides():
         items_per_page=items_per_page,
 
         outer_query=False
-    ).decode("utf-8")))
+    )
 
-    results = c.fetchall()
-    for r in results:
-        r["nmh_gc"] = str(r["nmh_gc"]) if r["nmh_gc"] is not None else None
-
-    return json.jsonify(results)
+    c.execute(f"SELECT * FROM guides WHERE variant_id IN ({query_str}) ORDER BY id")
+    return json.jsonify(c.fetchall())
 
 
 @app.route("/guides/tsv", methods=["GET"])
@@ -380,19 +374,14 @@ def guides_tsv():
             c2 = get_db().cursor("guides-tsv-cursor")
 
             if guides_with_variant_info:
-                c2.execute(
-                    "SELECT {}, guides.* FROM variants RIGHT JOIN guides ON variants.id = guides.variant_id "
-                    "WHERE variant_id IN "
-                    "({})".format(
-                        ", ".join(["variants.{}".format(col) for col in variant_column_names[1:]]),
-                        build_variants_query(c, "id", search_params).decode("utf-8")
-                    )
-                )
+                c2.execute(f"SELECT {', '.join([f'variants.{col}' for col in variant_column_names[1:]])}, "
+                           f"guides.* FROM variants RIGHT JOIN guides ON variants.id = guides.variant_id "
+                           f"WHERE variant_id IN ({build_variants_query_str(c, 'id', search_params)})")
                 yield "\t".join(variant_column_names[1:] + column_names) + "\n"
 
             else:
-                c2.execute("SELECT * FROM guides WHERE variant_id IN "
-                           "({})".format(build_variants_query(c, "id", search_params).decode("utf-8")))
+                c2.execute(f"SELECT * FROM guides WHERE variant_id IN "
+                           f"({build_variants_query_str(c, 'id', search_params)})")
                 yield "\t".join(column_names) + "\n"
 
             row = c2.fetchone()
@@ -455,46 +444,18 @@ def combined_tsv():
 @app.route("/variants/entries", methods=["GET"])
 def variants_entries():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c), outer_query=False)
-
-    c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
-    cache_value = c.fetchone()
-
-    if cache_value is None:
-        c.execute(entries_query)
-        num_entries = c.fetchone()[0]
-        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s) ON CONFLICT DO NOTHING ",
-                  (entries_query, num_entries))
-        get_db().commit()
-    else:
-        num_entries = cache_value[1]
-
-    return json.jsonify(num_entries)
+    return json.jsonify(get_entries_with_cache(c, entries_query))
 
 
 @app.route("/guides/entries", methods=["GET"])
 def guides_entries():
     c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
-    search_params = get_search_params_from_request(c)
-
-    entries_query = c.mogrify("SELECT COUNT(*) FROM guides WHERE variant_id IN "
-                              "({})".format(build_variants_query(c, "id", search_params,
-                                                                 outer_query=False).decode("utf-8")))
-
-    c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (entries_query,))
-    cache_value = c.fetchone()
-
-    if cache_value is None:
-        c.execute(entries_query)
-        num_entries = c.fetchone()[0]
-        c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s) ON CONFLICT DO NOTHING ",
-                  (entries_query, num_entries))
-        get_db().commit()
-    else:
-        num_entries = cache_value[1]
-
-    return json.jsonify(num_entries)
+    entries_query = c.mogrify(
+        f"SELECT COUNT(*) FROM guides WHERE variant_id IN "
+        f"({build_variants_query_str(c, 'id', get_search_params_from_request(c), outer_query=False)})"
+    )
+    return json.jsonify(get_entries_with_cache(c, entries_query))
 
 
 @app.route("/variants/fields", methods=["GET"])

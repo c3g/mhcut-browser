@@ -599,7 +599,7 @@ table#variant-guides-table thead tr.group-row th:last-child {
 table#entry-table thead tr.group-row th button.toggle-optional-columns,
 table#variant-guides-table thead tr.group-row th button.toggle-optional-columns {
     position: absolute;
-    right: 0;
+    right: -4px;
     padding-right: 0;
 
     border: none;
@@ -686,8 +686,8 @@ table#variant-guides-table thead th.first:first-child {
     padding-left: 14px;
 }
 
-table#entry-table thead th.first div,
-table#variant-guides-table thead th.first div {
+table#entry-table thead th.first > div,
+table#variant-guides-table thead th.first > div {
     border-left: 1px solid #E6E6E6;
 }
 
@@ -701,8 +701,8 @@ table#variant-guides-table thead th.last:last-child {
     padding-right: 14px;
 }
 
-table#entry-table thead th.last div,
-table#variant-guides-table thead th.last div {
+table#entry-table thead th.last > div,
+table#variant-guides-table thead th.last > div {
     border-right: 1px solid #E6E6E6;
 }
 
@@ -725,13 +725,13 @@ table#entry-table.guides thead tr.header-row th div span.material-icons {
     display: none;
 }
 
-table#entry-table tbody tr:nth-child(even) td div,
-table#variant-guides-table tbody tr:nth-child(even) td div {
+table#entry-table tbody tr:nth-child(even) td > div,
+table#variant-guides-table tbody tr:nth-child(even) td > div {
     background-color: #F8F8F8;
 }
 
-table#entry-table tbody tr:nth-child(odd) td div,
-table#variant-guides-table tbody tr:nth-child(odd) td div {
+table#entry-table tbody tr:nth-child(odd) td > div,
+table#variant-guides-table tbody tr:nth-child(odd) td > div {
     background-color: #FEFEFE;
 }
 
@@ -766,8 +766,8 @@ table#variant-guides-table tbody td.last:last-child {
     padding-right: 14px;
 }
 
-table#entry-table tbody td div,
-table#variant-guides-table tbody td div {
+table#entry-table tbody td > div,
+table#variant-guides-table tbody td > div {
     height: 100%;
     padding: 4px 10px;
     box-sizing: border-box;
@@ -781,23 +781,23 @@ table#variant-guides-table tbody td div {
     transition: background-color 0.1s ease-in-out;
 }
 
-table#entry-table tbody td.first div,
-table#variant-guides-table tbody td.first div {
+table#entry-table tbody td.first > div,
+table#variant-guides-table tbody td.first > div {
     border-left: 1px solid #E9E9E9;
 }
 
-table#entry-table tbody td.last div,
-table#variant-guides-table tbody td.last div {
+table#entry-table tbody td.last > div,
+table#variant-guides-table tbody td.last > div {
     border-right: 1px solid #E9E9E9;
 }
 
-table#entry-table tbody td.lighter div,
-table#variant-guides-table tbody td.lighter div {
+table#entry-table tbody td.lighter > div,
+table#variant-guides-table tbody td.lighter > div {
     color: #B0B0B0;
 }
 
-table#entry-table tbody td div pre,
-table#variant-guides-table tbody td div pre {
+table#entry-table tbody td > div pre,
+table#variant-guides-table tbody td > div pre {
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
     color: #333;
@@ -811,6 +811,41 @@ table#entry-table tbody td a {
 }
 table#entry-table tbody td a:hover {
     color: #42A5F5;
+}
+
+
+
+div.progress-bar-container {
+    display: flex;
+    height: 22px;
+}
+
+div.progress-bar-outer {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    overflow: hidden;
+}
+
+div.progress-bar-inner {
+    background-color: #9ccc65;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    height: 22px;
+}
+
+div.progress-bar-scalar {
+    padding: 0 8px;
+    box-sizing: border-box;
+    min-width: 60px;
+
+    border-left: 1px solid #DDD;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.02);
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
+    line-height: 22px;
 }
 
 

@@ -569,6 +569,13 @@ function getTableCellContents(e, f) {
         return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
     } else if (f.column === "cartoon" && e["cartoon"] !== null) {
         return `<pre>${e["cartoon"]}</pre>`;
+    } else if (f.column.includes("max_indelphi") && e[f.column] !== null) {
+        return `<div class="progress-bar-container">
+                    <div class="progress-bar-outer">
+                        <div class="progress-bar-inner" style="width: ${e[f.column]}%;"></div>
+                    </div>
+                    <div class="progress-bar-scalar">${e[f.column]}</div>
+                </div>`
     }
 
     return e[f.column] === null ? "NA" : e[f.column]; // TODO: Maybe shouldn't always be NA

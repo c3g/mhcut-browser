@@ -28,6 +28,8 @@ DROP INDEX IF EXISTS variants_mc_clinvar_idx;
 DROP INDEX IF EXISTS variants_citation_idx;
 DROP INDEX IF EXISTS variants_location_idx;
 DROP INDEX IF EXISTS variants_var_l_idx;
+DROP INDEX IF EXISTS variants_flank_idx;
+DROP INDEX IF EXISTS variants_mh_score_idx;
 DROP INDEX IF EXISTS variants_mh_max_cons_idx;
 DROP INDEX IF EXISTS variants_mh_l_idx;
 DROP INDEX IF EXISTS variants_mh_1l_idx;
@@ -44,6 +46,12 @@ DROP INDEX IF EXISTS variants_guides_no_nmh_idx;
 DROP INDEX IF EXISTS variants_guides_min_nmh_idx;
 DROP INDEX IF EXISTS variants_max_2_cuts_dist_idx;
 DROP INDEX IF EXISTS variants_full_row_trgm_idx;
+DROP INDEX IF EXISTS variants_max_indelphi_freq_mesc_idx;
+DROP INDEX IF EXISTS variants_max_indelphi_freq_mean_idx;
+DROP INDEX IF EXISTS variants_max_indelphi_freq_u2os_idx;
+DROP INDEX IF EXISTS variants_max_indelphi_freq_hek293_idx;
+DROP INDEX IF EXISTS variants_max_indelphi_freq_hct116_idx;
+DROP INDEX IF EXISTS variants_max_indelphi_freq_k562_idx;
 
 -- TODO: REMOVE
 DROP INDEX IF EXISTS variants_guides_no_ot_idx;
@@ -71,6 +79,8 @@ CREATE TABLE variants (
   clndn TEXT,
   clnsig TEXT,
   var_l INTEGER NOT NULL CHECK (var_l >= 0), -- Variant Size
+  flank INTEGER NOT NULL CHECK (flank >= 0),
+  mh_score INTEGER NOT NULL CHECK (mh_score >= 0),
   mh_l INTEGER NOT NULL CHECK (mh_l >= 0), -- Micro-Homology Length
   mh_1l INTEGER NOT NULL CHECK (mh_1l >= 0), -- Number of First Consecutive Matches
   hom TEXT, -- Decimal field with precision 1 or 2
@@ -99,6 +109,13 @@ CREATE TABLE variants (
   gc NUMERIC CHECK (gc >= 0 AND gc <= 1),
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
 
+  max_indelphi_freq_mesc NUMERIC CHECK (max_indelphi_freq_mesc >= 0), -- NULL means NA
+  max_indelphi_freq_mean NUMERIC CHECK (max_indelphi_freq_mean >= 0), -- NULL means NA
+  max_indelphi_freq_u2os NUMERIC CHECK (max_indelphi_freq_u2os >= 0), -- NULL means NA
+  max_indelphi_freq_hek293 NUMERIC CHECK (max_indelphi_freq_hek293 >= 0), -- NULL means NA
+  max_indelphi_freq_hct116 NUMERIC CHECK (max_indelphi_freq_hct116 >= 0), -- NULL means NA
+  max_indelphi_freq_k562 NUMERIC CHECK (max_indelphi_freq_k562 >= 0), -- NULL means NA
+
   full_row TEXT NOT NULL
 );
 
@@ -107,8 +124,8 @@ CREATE TABLE guides (
   variant_id INTEGER NOT NULL REFERENCES variants ON DELETE CASCADE,
   protospacer TEXT,
   mm0 INTEGER, -- NULL means NA
-  mm1 INTEGER, -- NULL means NA
-  mm2 INTEGER, -- NULL means NA
+  -- mm1 INTEGER, -- NULL means NA
+  -- mm2 INTEGER, -- NULL means NA
   m1_dist_1 INTEGER NOT NULL,
   m1_dist_2 INTEGER NOT NULL,
   mh_dist_1 INTEGER NOT NULL,
@@ -119,7 +136,14 @@ CREATE TABLE guides (
   nmh_size TEXT,
   nmh_var_l INTEGER, -- NULL means NA
   nmh_gc NUMERIC CHECK (nmh_gc >= 0 AND nmh_gc <= 1), -- NULL means NA
-  nmh_seq TEXT -- NULL means NA
+  nmh_seq TEXT, -- NULL means NA
+
+  indelphi_freq_mesc NUMERIC CHECK (indelphi_freq_mesc >= 0), -- NULL means NA
+  indelphi_freq_mean NUMERIC CHECK (indelphi_freq_mean >= 0), -- NULL means NA
+  indelphi_freq_u2os NUMERIC CHECK (indelphi_freq_u2os >= 0), -- NULL means NA
+  indelphi_freq_hek293 NUMERIC CHECK (indelphi_freq_hek293 >= 0), -- NULL means NA
+  indelphi_freq_hct116 NUMERIC CHECK (indelphi_freq_hct116 >= 0), -- NULL means NA
+  indelphi_freq_k562 NUMERIC CHECK (indelphi_freq_k562 >= 0) -- NULL means NA
 );
 
 CREATE TABLE cartoons (

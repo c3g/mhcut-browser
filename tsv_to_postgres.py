@@ -40,6 +40,10 @@ def int_or_none_cast(x):
         return None
 
 
+def str_or_null(x: str):
+    return x.strip() if x != "NA" else "\\N"
+
+
 def main():
     """
     Main method, runs when the script is ran directly.
@@ -79,37 +83,34 @@ def main():
     with open(sys.argv[1], "r", newline="") as vs_file:
         reader = csv.DictReader(vs_file, delimiter="\t")
         i = 1
+
         for variant in tqdm(reader, total=n_variants, desc="variants"):
             rs = int_or_null_cast(variant["RS"].strip())
+            af_exac = str_or_null(variant["AF_EXAC"])
 
-            af_exac = variant["AF_EXAC"].strip()
-            if af_exac == "NA":
-                # Treat NA as null
-                af_exac = "\\N"
+            # Treat NA, but not -, as null
+            gene_info_clinvar = str_or_null(variant["GENEINFO.ClinVar"])
 
-            gene_info_clinvar = variant["GENEINFO.ClinVar"].strip()
-            if gene_info_clinvar == "NA":
-                # Treat NA, but not -, as null
-                gene_info_clinvar = "\\N"
-
-            gc = variant["GC"].strip()
-            if gc == "NA":
-                # Treat NA as null
-                gc = "\\N"
+            gc = str_or_null(variant["GC"])
 
             main_rows = (str(i), variant["chr"], variant["start"], variant["end"], variant["geneloc"].lower(), rs,
-                         variant["GENEINFO"], variant["CLNDN"], variant["CLNSIG"], variant["varL"], variant["mhL"],
-                         variant["mh1L"], variant["hom"], int_or_null_cast(variant["mhMaxCons"]),
-                         int_or_null_cast(variant["mhDist"]), int_or_null_cast(variant["mh1Dist"]),
-                         variant["MHseq1"], variant["MHseq2"], int_or_null_cast(variant["pamMot"]),
-                         int_or_null_cast(variant["pamUniq"]), int_or_null_cast(variant["guidesNoNMH"]),
+                         variant["GENEINFO"], variant["CLNDN"], variant["CLNSIG"], variant["varL"], variant["flank"],
+                         variant["mhScore"], variant["mhL"], variant["mh1L"], variant["hom"],
+                         int_or_null_cast(variant["mhMaxCons"]), int_or_null_cast(variant["mhDist"]),
+                         int_or_null_cast(variant["mh1Dist"]), variant["MHseq1"], variant["MHseq2"],
+                         int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
+                         int_or_null_cast(variant["guidesNoNMH"]),
                          # cartoon goes here...
 
                          int_or_null_cast(variant["guidesMinNMH"]),
                          variant["CAF"], variant["TOPMED"], variant["PM"], variant["MC"], af_exac, variant["AF_TGP"],
                          int_or_null_cast(variant["ALLELEID"]), variant["DBVARID"], gene_info_clinvar,
                          variant["MC.ClinVar"], variant["citation"], variant["nbMM"],
-                         gc, int_or_null_cast(variant["max2cutsDist"]) if "max2cutsDist" in variant else "\\N")
+                         gc, int_or_null_cast(variant["max2cutsDist"]) if "max2cutsDist" in variant else "\\N",
+
+                         str_or_null(variant["maxInDelphiFreqmESC"]), str_or_null(variant["maxInDelphiFreqMean"]),
+                         str_or_null(variant["maxInDelphiFreqU2OS"]), str_or_null(variant["maxInDelphiFreqHEK293"]),
+                         str_or_null(variant["maxInDelphiFreqHCT116"]), str_or_null(variant["maxInDelphiFreqK562"]))
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
 
@@ -161,12 +162,17 @@ def main():
                 nmh_gc = "\\N"
 
             guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null_cast(guide["mm0"]),
-                                        int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
+                                        # int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
                                         guide["m1Dist1"], guide["m1Dist2"], guide["mhDist1"],
                                         guide["mhDist2"], int_or_null_cast(guide["nbNMH"]),
                                         int_or_null_cast(guide["largestNMH"]), guide["nmhScore"],
                                         int_or_null_cast(guide["nmhSize"]), int_or_null_cast(guide["nmhVarL"]),
-                                        nmh_gc, guide["nmhSeq"])) + "\n")
+                                        nmh_gc, guide["nmhSeq"], str_or_null(guide["inDelphiFreqMean"]),
+                                        str_or_null(guide["inDelphiFreqmESC"]),
+                                        str_or_null(guide["inDelphiFreqU2OS"]),
+                                        str_or_null(guide["inDelphiFreqHEK293"]),
+                                        str_or_null(guide["inDelphiFreqHCT116"]),
+                                        str_or_null(guide["inDelphiFreqK562"]))) + "\n")
 
             j += 1
 

@@ -94,6 +94,12 @@ export const VARIANTS_LAYOUT = [
         group_name: "Guide RNA Features",
         default_columns: ["pam_mot", "pam_uniq", "guides_no_nmh"],
         optional_columns: ["guides_min_nmh", "max_2_cuts_dist"]
+    }, // TODO Where does flank go
+    {
+        group_name: "Predicted Prevalence of Target Deletion",
+        default_columns: ["mh_score", "max_indelphi_freq_mean"],
+        optional_columns: ["max_indelphi_freq_mesc", "max_indelphi_freq_u2os", "max_indelphi_freq_hek293",
+            "max_indelphi_freq_hct116", "max_indelphi_freq_k562"]
     },
     {
         group_name: "Visualization",
@@ -116,7 +122,7 @@ export const GUIDES_LAYOUT = [
     },
     {
         group_name: "Guide RNA Features",
-        default_columns: ["protospacer", "mm0", "mm1", "mm2", "m1_dist_1", "m1_dist_2", "mh_dist_1", "mh_dist_2"],
+        default_columns: ["protospacer", "mm0", /*"mm1", "mm2",*/ "m1_dist_1", "m1_dist_2", "mh_dist_1", "mh_dist_2"],
         optional_columns: []
     },
     {

@@ -574,7 +574,7 @@ function getTableCellContents(e, f) {
                     <div class="progress-bar-outer">
                         <div class="progress-bar-inner" style="width: ${e[f.column]}%;"></div>
                     </div>
-                    <div class="progress-bar-scalar">${e[f.column]}</div>
+                    <div class="progress-bar-scalar">${e[f.column]}%</div>
                 </div>`
     }
 

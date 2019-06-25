@@ -721,7 +721,7 @@ table#entry-table.guides thead th {
     cursor: auto;
 }
 
-table#entry-table.guides thead tr.header-row th div span.material-icons {
+table#entry-table.guides thead tr.header-row th > div span.material-icons {
     display: none;
 }
 

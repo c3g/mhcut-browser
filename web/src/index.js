@@ -686,6 +686,11 @@ function updatePagination() {
         ? "disabled" : null);
 }
 
+/**
+ * Reloads data and updates the data table, possibly reloading data counts as well.
+ * @param {boolean} reloadCounts
+ * @returns {Promise<void>}
+ */
 async function reloadPage(reloadCounts) {
     transitioning = true;
 
@@ -808,7 +813,7 @@ function resetFilters() {
 }
 
 /**
- * Updates the filter DOM with the programmatic values stored.
+ * Updates the quick search filter DOM with the programmatic values stored.
  */
 function updateFilterDOM() {
     d3.select("#start").property("value", startPos);
@@ -822,6 +827,9 @@ function updateFilterDOM() {
     d3.select("#unique-guide-available").property("checked", mustHaveUniqueGuide);
 }
 
+/**
+ * Adds an advanced search filter with default values to the collection.
+ */
 function addAdvancedSearchCondition() {
     advancedSearchFilters.push({
         id: getFilterID(),
@@ -835,6 +843,21 @@ function addAdvancedSearchCondition() {
     updateSearchFilterDOM();
 }
 
+/**
+ * @typedef {Object} AdvancedFilter
+ * @property {number} id
+ * @property {string} boolean
+ * @property {boolean} negated
+ * @property {string} field
+ * @property {string} operator
+ * @property {string} value
+ */
+
+/**
+ * Validates a list of advanced search filter objects (i.e. confirms that they have the correct properties).
+ * @param {AdvancedFilter[]} filters
+ * @returns {boolean}
+ */
 function validateAdvancedSearchFilters(filters) {
     let valid = true;
 
@@ -850,6 +873,9 @@ function validateAdvancedSearchFilters(filters) {
     return valid;
 }
 
+/**
+ * Updates the advanced search DOM based on current search filters.
+ */
 function updateSearchFilterDOM() {
     const filters = d3.select("ul#advanced-search-conditions")
         .selectAll("li.advanced-search-filter")
@@ -990,6 +1016,11 @@ function getSearchParams() {
 }
 
 
+/**
+ * Shows the help tooltip for a particular column.
+ * @param {MouseEvent} event
+ * @param {string} columnName
+ */
 function showColumnHelp(event, columnName) {
     d3.select("#column-help-text")
         .classed("shown", true)
@@ -998,17 +1029,29 @@ function showColumnHelp(event, columnName) {
         .text(COLUMN_HELP_TEXT[columnName]);
 }
 
+/**
+ * Updates the position of the help tooltip.
+ * @param {MouseEvent} event
+ */
 function updateColumnHelp(event) {
     d3.select("#column-help-text")
         .style("top", `${(event.clientY + 10).toString(10)}px`)
         .style("left", `${(event.clientX + 15).toString(10)}px`);
 }
 
+/**
+ * Hides the help tooltip.
+ */
 function hideColumnHelp() {
     d3.select("#column-help-text").classed("shown", false);
 }
 
 
+/**
+ * Fetches a URL and decodes the JSON content returns.
+ * @param {string} url
+ * @returns {Promise<*>}
+ */
 async function fetchJSON(url) {
     return (await fetch(url)).json();
 }

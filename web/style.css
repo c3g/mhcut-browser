@@ -434,6 +434,7 @@ aside#filter-options h2 {
 aside#filter-options h2 label {
     margin: 0;
     color: #777;
+    font-size: 0.725rem;
 }
 
 aside#filter-options h3 {
@@ -1335,6 +1336,12 @@ div#column-help-text.shown {
     div.modal {
         position: absolute;
         top: 60px; left: 120px; right: 120px; bottom: 60px;
+    }
+}
+
+@media screen and (max-width: 1300px) {
+    nav#table-view-nav div span.help-text {
+        display: none;
     }
 }
 

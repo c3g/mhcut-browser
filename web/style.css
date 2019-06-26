@@ -838,7 +838,7 @@ div.progress-bar-inner {
 div.progress-bar-scalar {
     padding: 0 8px;
     box-sizing: border-box;
-    min-width: 60px;
+    min-width: 75px;
 
     border-left: 1px solid #DDD;
     border-top-right-radius: 4px;

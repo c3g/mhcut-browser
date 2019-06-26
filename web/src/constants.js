@@ -126,13 +126,19 @@ export const GUIDES_LAYOUT = [
         optional_columns: []
     },
     {
-        group_name: "Nested Microhomologies",
-        default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq"],
-        optional_columns: ["nmh_gc"]
-    },
-    {
         group_name: "Scores",
         default_columns: ["nmh_score"], // TODO: BAE SCORE?
         optional_columns: []
+    },
+    {
+        group_name: "Predicted Prevalence of Target Deletion",
+        default_columns: ["indelphi_freq_mean"],
+        optional_columns: ["indelphi_freq_mesc", "indelphi_freq_u2os", "indelphi_freq_hek293",
+            "indelphi_freq_hct116", "indelphi_freq_k562"]
+    },
+    {
+        group_name: "Nested Microhomologies",
+        default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq"],
+        optional_columns: ["nmh_gc"]
     }
 ];

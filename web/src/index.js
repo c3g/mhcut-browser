@@ -569,7 +569,7 @@ function getTableCellContents(e, f) {
         return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
     } else if (f.column === "cartoon" && e["cartoon"] !== null) {
         return `<pre>${e["cartoon"]}</pre>`;
-    } else if (f.column.includes("max_indelphi") && e[f.column] !== null) {
+    } else if (f.column.includes("indelphi") && e[f.column] !== null) {
         return `<div class="progress-bar-container">
                     <div class="progress-bar-outer">
                         <div class="progress-bar-inner" style="width: ${e[f.column]}%;"></div>

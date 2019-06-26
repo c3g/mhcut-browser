@@ -409,6 +409,29 @@ function getLayout() {
     return dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
 }
 
+/**
+ * @typedef {Object} ColumnGroup
+ * @property {string} group_name
+ * @property {string[]} default_columns
+ * @property {string[]} optional_columns
+ */
+
+/**
+ * @typedef {ColumnGroup[]} Layout
+ */
+
+/**
+ * @typedef {Object} ColumnHeader
+ * @property {string} column
+ * @property {string} classes
+ */
+
+/**
+ *
+ * @param {Layout} layout
+ * @param {boolean} forceAll
+ * @returns {ColumnHeader[]}
+ */
 function headersFromLayout(layout, forceAll) {
     let headers = [];
 

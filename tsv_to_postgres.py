@@ -16,16 +16,18 @@ import sys
 NUM_PROCESSES = 8
 
 
-def int_or_null_cast(x):
+def int_or_null(x):
     """
-    Casts a provided value to an integer string, and returns backslash-N if the cast fails.
-    :param x: The value to attempt to cast to an integer.
+    Checks if a provided value is an integer string, and returns backslash-N if the cast fails.
+    :param x: The value to test.
     :return: The cast value, or None if the cast fails.
     """
-    try:
-        return str(int(x))
-    except ValueError:
-        return "\\N"
+
+    return x if x.isdigit() or (x.startswith("-") and x[1:].isdigit()) else "\\N"
+
+
+def pos_int_or_null(x):
+    return x if x.isdigit() else "\\N"
 
 
 def int_or_none_cast(x):
@@ -85,28 +87,26 @@ def main():
         i = 1
 
         for variant in tqdm(reader, total=n_variants, desc="variants"):
-            rs = int_or_null_cast(variant["RS"].strip())
+            rs = int_or_null(variant["RS"].strip())
             af_exac = str_or_null(variant["AF_EXAC"])
 
             # Treat NA, but not -, as null
             gene_info_clinvar = str_or_null(variant["GENEINFO.ClinVar"])
 
-            gc = str_or_null(variant["GC"])
-
             main_rows = (str(i), variant["chr"], variant["start"], variant["end"], variant["geneloc"].lower(), rs,
                          variant["GENEINFO"], variant["CLNDN"], variant["CLNSIG"], variant["varL"], variant["flank"],
                          variant["mhScore"], variant["mhL"], variant["mh1L"], variant["hom"],
-                         int_or_null_cast(variant["mhMaxCons"]), int_or_null_cast(variant["mhDist"]),
-                         int_or_null_cast(variant["mh1Dist"]), variant["MHseq1"], variant["MHseq2"],
-                         int_or_null_cast(variant["pamMot"]), int_or_null_cast(variant["pamUniq"]),
-                         int_or_null_cast(variant["guidesNoNMH"]),
+                         int_or_null(variant["mhMaxCons"]), int_or_null(variant["mhDist"]),
+                         int_or_null(variant["mh1Dist"]), variant["MHseq1"], variant["MHseq2"],
+                         pos_int_or_null(variant["pamMot"]), pos_int_or_null(variant["pamUniq"]),
+                         pos_int_or_null(variant["guidesNoNMH"]),
                          # cartoon goes here...
 
-                         int_or_null_cast(variant["guidesMinNMH"]),
+                         pos_int_or_null(variant["guidesMinNMH"]),
                          variant["CAF"], variant["TOPMED"], variant["PM"], variant["MC"], af_exac, variant["AF_TGP"],
-                         int_or_null_cast(variant["ALLELEID"]), variant["DBVARID"], gene_info_clinvar,
+                         pos_int_or_null(variant["ALLELEID"]), variant["DBVARID"], gene_info_clinvar,
                          variant["MC.ClinVar"], variant["citation"], variant["nbMM"],
-                         gc, int_or_null_cast(variant["max2cutsDist"]) if "max2cutsDist" in variant else "\\N",
+                         str_or_null(variant["GC"]), int_or_null(variant["max2cutsDist"]),
 
                          str_or_null(variant["maxInDelphiFreqmESC"]), str_or_null(variant["maxInDelphiFreqMean"]),
                          str_or_null(variant["maxInDelphiFreqU2OS"]), str_or_null(variant["maxInDelphiFreqHEK293"]),
@@ -161,12 +161,12 @@ def main():
                 # Treat NA as null
                 nmh_gc = "\\N"
 
-            guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null_cast(guide["mm0"]),
+            guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null(guide["mm0"]),
                                         # int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
                                         guide["m1Dist1"], guide["m1Dist2"], guide["mhDist1"],
-                                        guide["mhDist2"], int_or_null_cast(guide["nbNMH"]),
-                                        int_or_null_cast(guide["largestNMH"]), guide["nmhScore"],
-                                        int_or_null_cast(guide["nmhSize"]), int_or_null_cast(guide["nmhVarL"]),
+                                        guide["mhDist2"], int_or_null(guide["nbNMH"]),
+                                        int_or_null(guide["largestNMH"]), guide["nmhScore"],
+                                        int_or_null(guide["nmhSize"]), int_or_null(guide["nmhVarL"]),
                                         nmh_gc, guide["nmhSeq"], str_or_null(guide["inDelphiFreqMean"]),
                                         str_or_null(guide["inDelphiFreqmESC"]),
                                         str_or_null(guide["inDelphiFreqU2OS"]),
@@ -196,8 +196,6 @@ def main():
         conn2 = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
         c2 = conn2.cursor()
 
-        cc = 1
-
         with tqdm(desc="{}".format(s2), position=s2) as pr:
             while not (q.empty() and dc.value == 1):
                 try:
@@ -213,7 +211,6 @@ def main():
                     c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING", (v_id,
                                                                                               next_cartoon["cartoon"]))
 
-                    cc += 1
                     pr.update(1)
 
                 except Empty:

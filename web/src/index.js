@@ -392,6 +392,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     transitioning = false;
 });
 
+/**
+ * Selects a table display mode (either variants or guides).
+ * @param {string} p
+ */
 function selectTablePage(p) {
     dataDisplay = p;
     window.location.hash = p;
@@ -403,10 +407,6 @@ function selectTablePage(p) {
 
     populateEntryTable();
     updateTableColumnHeaders();
-}
-
-function getLayout() {
-    return dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
 }
 
 /**
@@ -427,7 +427,15 @@ function getLayout() {
  */
 
 /**
- *
+ * Gets the current table layout based on the selected display mode.
+ * @returns {Layout}
+ */
+function getLayout() {
+    return dataDisplay === "variants" ? VARIANTS_LAYOUT : GUIDES_LAYOUT;
+}
+
+/**
+ * Gets a list of column headers from the provided layout, with the option of forcing all hidden columns to be included.
  * @param {Layout} layout
  * @param {boolean} forceAll
  * @returns {ColumnHeader[]}
@@ -453,6 +461,9 @@ function headersFromLayout(layout, forceAll) {
     return headers;
 }
 
+/**
+ * Populates the main table with data according to the current display mode, using any loaded data.
+ */
 function populateEntryTable() {
     const layout = getLayout();
     const set = expandedGroups[dataDisplay];
@@ -559,6 +570,12 @@ function populateEntryTable() {
     tableRows.exit().remove();
 }
 
+/**
+ * Gets classes for a table cell based on content.
+ * @param {Object} e
+ * @param {ColumnHeader} f
+ * @returns {string}
+ */
 function getTableCellClasses(e, f) {
     let classes = f.classes;
     if (e[f.column] === null || e[f.column] === "NA" || e[f.column] === "-") {
@@ -567,6 +584,12 @@ function getTableCellClasses(e, f) {
     return classes;
 }
 
+/**
+ * Formats the contents of a table cell based on column name and content.
+ * @param {Object} e
+ * @param {ColumnHeader} f
+ * @returns {string}
+ */
 function getTableCellContents(e, f) {
     if (f.column === "rs") {
         if (e["rs"] === null) return "-";
@@ -604,6 +627,9 @@ function getTableCellContents(e, f) {
     return e[f.column] === null ? "NA" : e[f.column]; // TODO: Maybe shouldn't always be NA
 }
 
+/**
+ * Updates table header cells to match the current layout.
+ */
 function updateTableColumnHeaders() {
     const layout = getLayout();
     const headers = headersFromLayout(layout, false);
@@ -615,18 +641,33 @@ function updateTableColumnHeaders() {
         .text(h => (sortBy === h.column ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
 }
 
+/**
+ * Get the loading text for the number of pages (which is not specific if there's more than one).
+ * @returns {string}
+ */
 function getLoadingPagesText() {
     return loadedVariants.length >= itemsPerPage ? "multiple" : "1";
 }
 
+/**
+ * Get the loading text for the number of variants (which is not specific if there's more than one page's worth).
+ * @returns {string}
+ */
 function getLoadingVariantsText() {
     return loadedVariants.length >= itemsPerPage ? "many" : loadedVariants.length.toString(10);
 }
 
+/**
+ * Get the loading text for the number of guides (which is not specific if there's more than one page of variants).
+ * @returns {string}
+ */
 function getLoadingGuidesText() {
     return loadedVariants.length >= itemsPerPage ? "many" : loadedGuides.length.toString(10);
 }
 
+/**
+ * Updates the pagination display based on loading status and page.
+ */
 function updatePagination() {
     const totalPages = getTotalPages();
 
@@ -733,10 +774,17 @@ async function reloadPage(reloadCounts) {
     }
 }
 
+/**
+ * Gets the total number of pages based on items per page and total loaded variants count.
+ * @returns {string}
+ */
 function getTotalPages() {
     return Math.max(Math.ceil(totalVariantsCount / itemsPerPage), 1).toFixed(0);
 }
 
+/**
+ * Resets search filter values to their default values (does not update the DOM).
+ */
 function resetFilters() {
     selectedChromosome = null;
 
@@ -759,6 +807,9 @@ function resetFilters() {
     advancedSearchFilters = [];
 }
 
+/**
+ * Updates the filter DOM with the programmatic values stored.
+ */
 function updateFilterDOM() {
     d3.select("#start").property("value", startPos);
     d3.select("#end").property("value", endPos);
@@ -890,11 +941,34 @@ function updateSearchFilterDOM() {
     filterOperators.exit().remove();
 }
 
+/**
+ * Gets a new unique filter ID by increasing the global counter.
+ * @returns {number}
+ */
 function getFilterID() {
     currentFilterID++;
     return currentFilterID - 1;
 }
 
+/**
+ * @typedef {Object} SearchParams
+ * @property {string} sort_by
+ * @property {string} sort_order
+ * @property {string} chr
+ * @property {number} start
+ * @property {number} end
+ * @property {string[]} location
+ * @property {number} min_mh_1l
+ * @property {boolean} clinvar
+ * @property {boolean} ngg_pam_avail
+ * @property {boolean} unique_guide_avail
+ * @property {string} search_query
+ */
+
+/**
+ * Gets a search parameter object from current search filters.
+ * @returns {SearchParams}
+ */
 function getSearchParams() {
     return {
         sort_by: sortBy,

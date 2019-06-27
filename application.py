@@ -48,7 +48,7 @@ COLUMN_ORDER = ("id", "chr", "pos_start", "pos_end", "location", "rs", "gene_inf
                 "flank", "mh_score", "mh_l", "mh_1l", "hom", "mh_max_cons", "mh_dist", "mh_1dist", "mh_seq_1",
                 "mh_seq_2", "pam_mot", "pam_uniq", "guides_no_nmh", "cartoon", "caf", "topmed", "pm", "mc", "af_exac",
                 "af_tgp", "allele_id", "dbvarid", "gene_info_clinvar", "mc_clinvar", "citation", "nbmm",
-                "guides_min_nmh", "gc", "max_2_cuts_dist", "max_indelphi_freq_mesc", "max_indelphi_freq_mean",
+                "guides_min_nmh", "gc", "max_2_cuts_dist", "max_indelphi_freq_mean", "max_indelphi_freq_mesc",
                 "max_indelphi_freq_u2os", "max_indelphi_freq_hek293", "max_indelphi_freq_hct116",
                 "max_indelphi_freq_k562")
 

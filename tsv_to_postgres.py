@@ -126,7 +126,7 @@ def main():
                          variant["MC.ClinVar"], variant["citation"], variant["nbMM"],
                          str_or_null(variant["GC"]), int_or_null(variant["max2cutsDist"]),
 
-                         str_or_null(variant["maxInDelphiFreqmESC"]), str_or_null(variant["maxInDelphiFreqMean"]),
+                         str_or_null(variant["maxInDelphiFreqMean"]), str_or_null(variant["maxInDelphiFreqmESC"]),
                          str_or_null(variant["maxInDelphiFreqU2OS"]), str_or_null(variant["maxInDelphiFreqHEK293"]),
                          str_or_null(variant["maxInDelphiFreqHCT116"]), str_or_null(variant["maxInDelphiFreqK562"]))
 

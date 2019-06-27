@@ -51,6 +51,9 @@ export const COLUMN_HELP_TEXT = {
     location: "The location of the variant relative to genes (Gencode v28).", // TODO
     var_l: "The variant size (bp).", // TODO
 
+    mh_score: "The MH score used to pick the flank configuration (# matches + # consecutive first matches.)",
+    flank: "The flank configuration (1: outer-inner, 2: inner-outer.)",
+
     // TODO: FLANK HELP TEXT
 
     mh_l: "MH length.",
@@ -123,7 +126,7 @@ export const VARIANTS_LAYOUT = [
     {
         group_name: "Microhomology Features",
         default_columns: ["mh_l", "mh_1l", "hom", "mh_dist", "mh_1dist", "mh_seq_1", "mh_seq_2"],
-        optional_columns: ["nbmm", "mh_max_cons", "gc", "flank"]
+        optional_columns: ["nbmm", "mh_max_cons", "gc", "mh_score", "flank"]
     },
     {
         group_name: "Guide RNA Features",
@@ -132,7 +135,7 @@ export const VARIANTS_LAYOUT = [
     },
     {
         group_name: "Predicted Prevalence of Target Deletion",
-        default_columns: ["mh_score", "max_indelphi_freq_mean"],
+        default_columns: ["max_indelphi_freq_mean"],
         optional_columns: ["max_indelphi_freq_mesc", "max_indelphi_freq_u2os", "max_indelphi_freq_hek293",
             "max_indelphi_freq_hct116", "max_indelphi_freq_k562"]
     },

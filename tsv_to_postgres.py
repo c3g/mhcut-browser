@@ -224,7 +224,12 @@ def main():
                                "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
                                next_cartoon)
 
-                    v_id = c2.fetchone()[0]
+                    var = c2.fetchone()
+
+                    if var is None:
+                        tqdm.write(str(next_cartoon))
+
+                    v_id = var[0]
 
                     c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING", (v_id,
                                                                                               next_cartoon["cartoon"]))

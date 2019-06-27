@@ -32,6 +32,8 @@ export const COLUMN_HELP_TEXT = {
     location: "The location of the variant relative to genes (Gencode v28).", // TODO
     var_l: "The variant size (bp).", // TODO
 
+    // TODO: FLANK HELP TEXT
+
     mh_l: "MH length.",
     mh_1l: "Number of first consecutive matches.",
     hom: "Proportion of matches.",
@@ -50,6 +52,13 @@ export const COLUMN_HELP_TEXT = {
 
     cartoon: "Cartoon showing the variant region, annotated with the microhomology (top) and the positions of valid cuts (bottom).", // TODO
 
+    max_indelphi_freq_mean: "The maximum average frequency predicted by inDelphi for this exact deletion (mean across all 5 cell types available in inDelphi.)",
+    max_indelphi_freq_mesc: "The maximum frequency predicted by inDelphi for this exact deletion in mESC cells.",
+    max_indelphi_freq_u2os: "The maximum frequency predicted by inDelphi for this exact deletion in U2OS cells.",
+    max_indelphi_freq_hek293: "The maximum frequency predicted by inDelphi for this exact deletion in HEK293 cells.",
+    max_indelphi_freq_hct116: "The maximum frequency predicted by inDelphi for this exact deletion in HCT116 cells.",
+    max_indelphi_freq_k562: "The maximum frequency predicted by inDelphi for this exact deletion in K562 cells.",
+
     variant_id: "Corresponding variant database ID.",
 
     protospacer: "The sequence of the protospacer.",
@@ -67,6 +76,13 @@ export const COLUMN_HELP_TEXT = {
     nmh_var_l: "The length of the variant created by the best nested MH (\"best\" defined as the highest MMEJ score).",
     nmh_gc: "The GC content of the best nested MH (\"best\" defined as the highest MMEJ score).",
     nmh_seq: "The sequence of the best nested MH (\"best\" defined as the highest MMEJ score).",
+
+    indelphi_freq_mean: "The average frequency predicted by inDelphi for this exact deletion (mean across all 5 cell types available in inDelphi.)",
+    indelphi_freq_mesc: "The frequency predicted by inDelphi for this exact deletion in mESC cells.",
+    indelphi_freq_u2os: "The frequency predicted by inDelphi for this exact deletion in U2OS cells.",
+    indelphi_freq_hek293: "The frequency predicted by inDelphi for this exact deletion in HEK293 cells.",
+    indelphi_freq_hct116: "The frequency predicted by inDelphi for this exact deletion in HCT116 cells.",
+    indelphi_freq_k562: "The frequency predicted by inDelphi for this exact deletion in K562 cells.",
 };
 
 export const VARIANTS_LAYOUT = [
@@ -88,13 +104,13 @@ export const VARIANTS_LAYOUT = [
     {
         group_name: "Microhomology Features",
         default_columns: ["mh_l", "mh_1l", "hom", "mh_dist", "mh_1dist", "mh_seq_1", "mh_seq_2"],
-        optional_columns: ["nbmm", "mh_max_cons", "gc"]
+        optional_columns: ["nbmm", "mh_max_cons", "gc", "flank"]
     },
     {
         group_name: "Guide RNA Features",
         default_columns: ["pam_mot", "pam_uniq", "guides_no_nmh"],
         optional_columns: ["guides_min_nmh", "max_2_cuts_dist"]
-    }, // TODO Where does flank go
+    },
     {
         group_name: "Predicted Prevalence of Target Deletion",
         default_columns: ["mh_score", "max_indelphi_freq_mean"],

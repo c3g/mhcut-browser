@@ -12,6 +12,14 @@ data.
 
 
 
+## License
+
+The MHcut browser, like the MHcut tool, is licensed under the GPLv3 license.
+Additional terms of use apply (see [the website](https://mhcut-browser.ca)),
+particularly with regards to data access and usage.
+
+
+
 ## Overview
 
 MHcut is a tool by Grajcarek *et al.* used to identify "11 million

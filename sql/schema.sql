@@ -126,8 +126,8 @@ CREATE TABLE variants (
   gc NUMERIC CHECK (gc >= 0 AND gc <= 1),
   max_2_cuts_dist INTEGER, -- NULL means NA TODO: WHAT IS THIS?
 
-  max_indelphi_freq_mesc NUMERIC CHECK (max_indelphi_freq_mesc >= 0), -- NULL means NA
   max_indelphi_freq_mean NUMERIC CHECK (max_indelphi_freq_mean >= 0), -- NULL means NA
+  max_indelphi_freq_mesc NUMERIC CHECK (max_indelphi_freq_mesc >= 0), -- NULL means NA
   max_indelphi_freq_u2os NUMERIC CHECK (max_indelphi_freq_u2os >= 0), -- NULL means NA
   max_indelphi_freq_hek293 NUMERIC CHECK (max_indelphi_freq_hek293 >= 0), -- NULL means NA
   max_indelphi_freq_hct116 NUMERIC CHECK (max_indelphi_freq_hct116 >= 0), -- NULL means NA
@@ -155,8 +155,8 @@ CREATE TABLE guides (
   nmh_gc NUMERIC CHECK (nmh_gc >= 0 AND nmh_gc <= 1), -- NULL means NA
   nmh_seq TEXT, -- NULL means NA
 
-  indelphi_freq_mesc NUMERIC CHECK (indelphi_freq_mesc >= 0), -- NULL means NA
   indelphi_freq_mean NUMERIC CHECK (indelphi_freq_mean >= 0), -- NULL means NA
+  indelphi_freq_mesc NUMERIC CHECK (indelphi_freq_mesc >= 0), -- NULL means NA
   indelphi_freq_u2os NUMERIC CHECK (indelphi_freq_u2os >= 0), -- NULL means NA
   indelphi_freq_hek293 NUMERIC CHECK (indelphi_freq_hek293 >= 0), -- NULL means NA
   indelphi_freq_hct116 NUMERIC CHECK (indelphi_freq_hct116 >= 0), -- NULL means NA

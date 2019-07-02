@@ -265,8 +265,6 @@ def main():
         current_variant = []
         current_cartoon = ""
 
-        sys.stdout.write("0            \r")
-
         k = 1
         while True:
             try:

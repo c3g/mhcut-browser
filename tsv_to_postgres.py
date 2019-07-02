@@ -31,7 +31,7 @@ from tqdm import tqdm
 
 import sys
 
-NUM_PROCESSES = 8
+NUM_PROCESSES = len(os.sched_getaffinity(0))
 
 
 def int_or_null(x):

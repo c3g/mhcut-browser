@@ -24,8 +24,6 @@ DROP TABLE IF EXISTS entries_query_cache CASCADE;
 DROP INDEX IF EXISTS variants_start_idx;
 DROP INDEX IF EXISTS variants_end_idx;
 DROP INDEX IF EXISTS variants_chr_start_end_rs_idx;
-DROP INDEX IF EXISTS variants_mh_l_start_end_idx;
-DROP INDEX IF EXISTS variants_mh_1l_start_end_idx;
 DROP INDEX IF EXISTS variants_rs_idx;
 DROP INDEX IF EXISTS variants_caf_idx;
 DROP INDEX IF EXISTS variants_topmed_idx;
@@ -48,8 +46,9 @@ DROP INDEX IF EXISTS variants_var_l_idx;
 DROP INDEX IF EXISTS variants_flank_idx;
 DROP INDEX IF EXISTS variants_mh_score_idx;
 DROP INDEX IF EXISTS variants_mh_max_cons_idx;
-DROP INDEX IF EXISTS variants_mh_l_idx;
 DROP INDEX IF EXISTS variants_mh_1l_idx;
+DROP INDEX IF EXISTS variants_mh_l_start_end_idx;
+DROP INDEX IF EXISTS variants_mh_1l_start_end_idx;
 DROP INDEX IF EXISTS variants_hom_idx;
 DROP INDEX IF EXISTS variants_nbmm_idx;
 DROP INDEX IF EXISTS variants_mh_dist_idx;
@@ -62,17 +61,13 @@ DROP INDEX IF EXISTS variants_pam_uniq_idx;
 DROP INDEX IF EXISTS variants_guides_no_nmh_idx;
 DROP INDEX IF EXISTS variants_guides_min_nmh_idx;
 DROP INDEX IF EXISTS variants_max_2_cuts_dist_idx;
-DROP INDEX IF EXISTS variants_full_row_trgm_idx;
 DROP INDEX IF EXISTS variants_max_indelphi_freq_mean_idx;
 DROP INDEX IF EXISTS variants_max_indelphi_freq_mesc_idx;
 DROP INDEX IF EXISTS variants_max_indelphi_freq_u2os_idx;
 DROP INDEX IF EXISTS variants_max_indelphi_freq_hek293_idx;
 DROP INDEX IF EXISTS variants_max_indelphi_freq_hct116_idx;
 DROP INDEX IF EXISTS variants_max_indelphi_freq_k562_idx;
-
--- TODO: REMOVE
-DROP INDEX IF EXISTS variants_guides_no_ot_idx;
-DROP INDEX IF EXISTS variants_guides_min_ot_idx;
+DROP INDEX IF EXISTS variants_full_row_trgm_idx;
 
 DROP INDEX IF EXISTS guides_variant_id_idx;
 

@@ -230,11 +230,12 @@ def main():
 
                     if var is None:
                         tqdm.write(str(next_cartoon))
+                        tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
 
-                    v_id = var[0]
-
-                    c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING", (v_id,
-                                                                                              next_cartoon["cartoon"]))
+                    else:
+                        v_id = var[0]
+                        c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
+                                   (v_id, next_cartoon["cartoon"]))
 
                     pr.update(1)
 

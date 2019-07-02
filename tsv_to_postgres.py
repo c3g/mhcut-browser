@@ -84,6 +84,8 @@ def main():
     with open("./sql/schema.sql", "r") as s:
         c.execute(s.read())
 
+    conn.commit()
+
     # Get number of lines for progress bars.
     n_variants = 0
     n_guides = 0

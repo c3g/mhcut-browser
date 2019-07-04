@@ -630,8 +630,8 @@ function getTableCellContents(e, f) {
             .join(";");
     } else if (f.column === "allele_id" && e["allele_id"] !== null) {
         return `<a href="${clinVarURL(e["allele_id"])}/" target="_blank" rel="noopener">${e["allele_id"]}</a>`;
-    } else if (f.column === "pam_uniq" && e["pam_uniq"] !== null && e["pam_uniq"] > 0) {
-        return `<strong><a class="show-guides-modal">${e["pam_uniq"]}</a></strong>`;
+    } else if (f.column === "pam_mot" && e["pam_mot"] !== null && e["pam_mot"] > 0) {
+        return `<strong><a class="show-guides-modal">${e["pam_mot"]}</a></strong>`;
     } else if (f.column === "cartoon" && e["cartoon"] !== null) {
         return `<pre>${e["cartoon"]}</pre>`;
     } else if (f.column.includes("indelphi") && e[f.column] !== null) {

@@ -2,7 +2,7 @@
 
 
 # MHcut browser is a web application for browsing data from the MHcut tool.
-# Copyright (C) 2018-2019  David Lougheed
+# Copyright (C) 2018-2019  the Canadian Centre for Computational Genomics
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

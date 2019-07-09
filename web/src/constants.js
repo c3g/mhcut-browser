@@ -110,43 +110,51 @@ export const COLUMN_HELP_TEXT = {
 export const VARIANTS_LAYOUT = [
     {
         group_name: "IDs",
+        frozen: true,
         default_columns: ["id", "rs"],
         optional_columns: ["allele_id", "dbvarid"]
     },
     {
         group_name: "Variant Features",
+        frozen: false,
         default_columns: ["gene_info", "chr", "pos_start", "pos_end", "location", "var_l"],
         optional_columns: ["gene_info_clinvar"]
     },
     {
         group_name: "Clinical Significance",
+        frozen: false,
         default_columns: ["clndn", "clnsig", "mc"],
         optional_columns: ["mc_clinvar", "pm", "citation"]
     },
     {
         group_name: "Microhomology Features",
+        frozen: false,
         default_columns: ["mh_l", "mh_1l", "hom", "mh_dist", "mh_1dist", "mh_seq_1", "mh_seq_2"],
         optional_columns: ["nbmm", "mh_max_cons", "gc", "mh_score", "flank"]
     },
     {
         group_name: "Guide RNA Features",
+        frozen: false,
         default_columns: ["pam_mot", "pam_uniq", "guides_no_nmh"],
         optional_columns: ["guides_min_nmh", "max_2_cuts_dist"]
     },
     {
         group_name: "Predicted Prevalence of Target Deletion",
+        frozen: false,
         default_columns: ["max_indelphi_freq_mean"],
         optional_columns: ["max_indelphi_freq_mesc", "max_indelphi_freq_u2os", "max_indelphi_freq_hek293",
             "max_indelphi_freq_hct116", "max_indelphi_freq_k562"]
     },
     {
         group_name: "Visualization",
+        frozen: false,
         default_columns: ["cartoon"],
         optional_columns: []
     },
     {
         // TODO: OPTIONAL GROUP
         group_name: "Allele Frequency",
+        frozen: false,
         default_columns: ["caf", "topmed", "af_exac", "af_tgp"],
         optional_columns: []
     }
@@ -155,22 +163,26 @@ export const VARIANTS_LAYOUT = [
 export const GUIDES_LAYOUT = [
     {
         group_name: "IDs",
+        frozen: true,
         default_columns: ["id", "variant_id"],
         optional_columns: []
     },
     {
         group_name: "Guide RNA Features",
+        frozen: false,
         default_columns: ["protospacer", "mm0", /*"mm1", "mm2",*/ "m1_dist_1", "m1_dist_2", "mh_dist_1", "mh_dist_2"],
         optional_columns: []
     },
     {
         group_name: "Predicted Prevalence of Target Deletion",
+        frozen: false,
         default_columns: ["nmh_score", "indelphi_freq_mean"],
         optional_columns: ["indelphi_freq_mesc", "indelphi_freq_u2os", "indelphi_freq_hek293",
             "indelphi_freq_hct116", "indelphi_freq_k562"]
     },
     {
         group_name: "Nested Microhomologies",
+        frozen: false,
         default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq"],
         optional_columns: ["nmh_gc"]
     }

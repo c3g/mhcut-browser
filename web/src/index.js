@@ -431,6 +431,7 @@ function selectTablePage(p) {
 /**
  * @typedef {Object} ColumnGroup
  * @property {string} group_name
+ * @property {boolean} frozen
  * @property {string[]} default_columns
  * @property {string[]} optional_columns
  */
@@ -443,6 +444,7 @@ function selectTablePage(p) {
  * @typedef {Object} ColumnHeader
  * @property {string} column
  * @property {string} classes
+ * @property {boolean} frozen
  */
 
 /**
@@ -470,10 +472,11 @@ function headersFromLayout(layout, forceAll) {
 
         columns.forEach((column, ci) => {
             let classes = gi % 2 === 0 ? "even" : "odd";
+            if (group.frozen) classes += " frozen";
             if (ci === 0) classes += " first";
             if (ci === columns.length - 1) classes += " last";
             if (column === "cartoon") classes += " no-click";
-            headers.push({column, classes: classes.trim()});
+            headers.push({column, classes: classes.trim(), frozen: group.frozen});
         });
     });
 
@@ -505,6 +508,7 @@ function populateEntryTable() {
 
     const groupDiv = tableGroups.enter()
         .append("th")
+        .classed("frozen", g => g.frozen)
         .attr("colspan", g =>
             g.default_columns.length + (set.has(g.group_name) ? g.optional_columns.length : 0))
         .append("div");
@@ -587,6 +591,30 @@ function populateEntryTable() {
     });
 
     tableRows.exit().remove();
+
+
+    // Fix frozen columns
+
+    updateFrozenColumnOffsets();
+}
+
+/**
+ * Updates the left-offsets for sticky column headers/cells according to the previous sticky columns' widths.
+ */
+function updateFrozenColumnOffsets() {
+    const layout = getLayout();
+    const headers = headersFromLayout(layout, false);
+
+    let lastOffset = 0;
+
+    headers.forEach(header => {
+        if (!header.frozen) return;
+        d3.select(`#${dataDisplay}-column-header__${header.column}`)
+            .style("left", `${lastOffset}px`);
+        d3.selectAll(`.${dataDisplay}-column__${header.column}`).style("left", `${lastOffset}px`);
+        lastOffset += d3.select(`.${dataDisplay}-column__${header.column}`).node()
+            .getBoundingClientRect().width;
+    });
 }
 
 /**
@@ -596,7 +624,8 @@ function populateEntryTable() {
  * @returns {string}
  */
 function getTableCellClasses(e, f) {
-    let classes = f.classes;
+    let classes = f.classes + ` ${dataDisplay}-column__${f.column}`;
+
     if (e[f.column] === null || e[f.column] === "NA" || e[f.column] === "-") {
         classes += " lighter"
     }
@@ -656,10 +685,14 @@ function updateTableColumnHeaders() {
     const headers = headersFromLayout(layout, false);
 
     d3.selectAll("table#entry-table thead tr.header-row th").data(headers, h => h.column)
+        .attr("id", f => `${dataDisplay}-column-header__${f.column}`)
         .attr("class", f => f.classes)
         .select("div")
         .select("span.material-icons")
         .text(h => (sortBy === h.column ? (sortOrder === "ASC" ? "expand_less" : "expand_more") : ""));
+
+    // Fix frozen columns
+    updateFrozenColumnOffsets();
 }
 
 /**

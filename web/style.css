@@ -663,13 +663,25 @@ table#variant-guides-table thead tr.group-row th div {
 table#entry-table thead tr.group-row th {
     position: sticky;
     top: 0;
+    z-index: 10;
+}
+
+table#entry-table thead tr.group-row th.frozen {
+    left: 0;
+    z-index: 11;
 }
 
 table#entry-table thead tr.header-row th {
     position: sticky;
     top: 25px;
+    z-index: 10;
 
     cursor: pointer;
+}
+
+table#entry-table thead tr.header-row th.frozen {
+    left: 0;
+    z-index: 11;
 }
 
 table#entry-table thead tr.header-row th.odd div,
@@ -802,6 +814,12 @@ table#variant-guides-table tbody td > div pre {
     font-family: "Roboto Mono", monospace;
     font-size: 0.8rem;
     color: #333;
+}
+
+table#entry-table tbody td.frozen {
+    position: sticky;
+    left: 0;
+    z-index: 9;
 }
 
 table#entry-table tbody td a {

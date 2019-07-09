@@ -619,7 +619,9 @@ function getTableCellContents(e, f) {
         || (f["column_name"] === "gene_info_clinvar" && e["gene_info_clinvar"] !== null)) {
         return e[f.column].split("|")
             .map(og => `<a href="${geneURL(og.split(":")[1])}" target="_blank" rel="noopener">${og}</a>`)
-            .join("|");
+            .join("&nbsp;| ");
+    } else if (["clndn", "mc_clinvar"].includes(f.column) && !["-", "NA"].includes(e[f.column])) {
+        return e[f.column].split(";").join("; ").split("|").join("&nbsp;| ");
     } else if (f.column === "citation" && e["citation"] !== "NA" && e["citation"] !== "-") {
         return e["citation"].split(";")
             .map(id => id.substring(0, 2) === "NB"
@@ -627,7 +629,7 @@ function getTableCellContents(e, f) {
                 : (id.substring(0, 3) === "PMC"
                     ? `<a href="${pmcURL(id)}" target="_blank" rel="noopener">${id}</a>`
                     : `<a href="${pubMedURL(id.replace("PM", ""))}" target="_blank" rel="noopener">${id}</a>`))
-            .join(";");
+            .join("; ");
     } else if (f.column === "allele_id" && e["allele_id"] !== null) {
         return `<a href="${clinVarURL(e["allele_id"])}/" target="_blank" rel="noopener">${e["allele_id"]}</a>`;
     } else if (f.column === "pam_mot" && e["pam_mot"] !== null && e["pam_mot"] > 0) {

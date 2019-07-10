@@ -662,6 +662,7 @@ table#variant-guides-table thead tr.group-row th div {
 
 table#entry-table thead tr.group-row th {
     position: sticky;
+    position: -webkit-sticky;
     top: 0;
     z-index: 10;
 }
@@ -673,6 +674,7 @@ table#entry-table thead tr.group-row th.frozen {
 
 table#entry-table thead tr.header-row th {
     position: sticky;
+    position: -webkit-sticky;
     top: 25px;
     z-index: 10;
 
@@ -818,6 +820,7 @@ table#variant-guides-table tbody td > div pre {
 
 table#entry-table tbody td.frozen {
     position: sticky;
+    position: -webkit-sticky;
     left: 0;
     z-index: 9;
 }

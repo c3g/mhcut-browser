@@ -407,6 +407,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         reportBugModal.hide();
     });
 
+
+    window.addEventListener("resize", () => {
+        updateFrozenColumnOffsets();
+    });
+
+
     d3.select("#table-display").classed("loading", false);
     transitioning = false;
 });

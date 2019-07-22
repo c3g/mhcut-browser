@@ -39,10 +39,6 @@ BASE_DIR = os.path.dirname(__file__)
 __version__ = json.load(open(os.path.join(BASE_DIR, "web/package.json"), "r"))["version"]
 
 
-# Database Setup
-DATABASE_PATH = os.path.join(BASE_DIR, "db.sqlite")
-
-
 # Preferred Column Order
 COLUMN_ORDER = ("id", "chr", "pos_start", "pos_end", "location", "rs", "gene_info", "clndn", "clnsig", "var_l",
                 "flank", "mh_score", "mh_l", "mh_1l", "hom", "mh_max_cons", "mh_dist", "mh_1dist", "mh_seq_1",

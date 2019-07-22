@@ -288,7 +288,7 @@ def get_entries_with_cache(c, query):
 
 @app.route("/datasets/", methods=["GET"])
 def datasets() -> Response:
-    return json.jsonify([{"id": k, **v} for k, v in DATASETS.items()])
+    return json.jsonify(sorted([{"id": k, **v} for k, v in DATASETS.items()], key=lambda x: x["id"]))
 
 
 @app.route("/datasets/<string:dataset>/", methods=["GET"])

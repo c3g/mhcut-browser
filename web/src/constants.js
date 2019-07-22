@@ -176,14 +176,14 @@ export const GUIDES_LAYOUT = [
     {
         group_name: "Predicted Prevalence of Target Deletion",
         frozen: false,
-        default_columns: ["nmh_score", "indelphi_freq_mean"],
+        default_columns: ["indelphi_freq_mean"],
         optional_columns: ["indelphi_freq_mesc", "indelphi_freq_u2os", "indelphi_freq_hek293",
             "indelphi_freq_hct116", "indelphi_freq_k562"]
     },
     {
         group_name: "Nested Microhomologies",
         frozen: false,
-        default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq"],
+        default_columns: ["nb_nmh", "largest_nmh", "nmh_size", "nmh_var_l", "nmh_seq", "nmh_score"],
         optional_columns: ["nmh_gc"]
     }
 ];

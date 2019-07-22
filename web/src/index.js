@@ -28,6 +28,7 @@ import {
     GUIDES_LAYOUT
 } from "./constants";
 
+let datasets = [];
 let selectedDataset = "cas"; // TODO
 
 let dataDisplay = "variants";
@@ -111,6 +112,29 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     d3.select("#apply-filters").attr("disabled", "disabled");
     d3.select("#clear-filters").attr("disabled", "disabled");
+
+    datasets = await fetchJSON("/api/datasets");
+    selectedDataset = datasets[0]["id"];
+
+    const datasetLabel = d3.select("#dataset-options").selectAll("label").data(datasets, d => d.id)
+        .enter()
+        .append("label")
+        .classed("checkbox-label", true);
+
+    datasetLabel.append("input")
+        .attr("type", "radio")
+        .attr("name", "dataset")
+        .attr("value", d => d.id)
+        .property("checked", d => d.id === selectedDataset)
+        .on("change", async () => {
+            if (transitioning) return;
+            selectedDataset = d3.event.target.value;
+            page = 1;
+            await reloadPage(true);
+        });
+
+    datasetLabel.append("span").text(d => d.name);
+
 
     await Promise.all([
         (async () => {

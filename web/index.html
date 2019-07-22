@@ -384,6 +384,11 @@
     </div>
     <hr>-->
     <form id="filter-search-form">
+        <h2><label for="dataset-options">DATASET</label></h2>
+        <div id="dataset-options"></div>
+
+        <hr>
+
         <h2><label for="search-query">SEARCH</label></h2>
         <input type="text" name="search-query" id="search-query" placeholder="Query all fields...">
         <span class="input-help-text">e.g. gene name, RS ID</span>
@@ -392,7 +397,9 @@
             <button id="show-advanced-search" type="button" class="col"
                     style="margin: 5px 0;">Advanced Search</button>
         </div>
+
         <hr>
+
         <h2><label for="position-query">POSITION SEARCH</label></h2>
         <input type="text" name="position-query" id="position-query" placeholder="chr#:start-end">
         <span class="input-help-text">e.g. chr1:10109-10245</span>

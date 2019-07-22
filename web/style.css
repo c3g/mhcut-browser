@@ -482,7 +482,8 @@ aside#filter-options select {
     width: 100%;
 }
 
-aside#filter-options input[type="checkbox"] {
+aside#filter-options input[type="checkbox"],
+aside#filter-options input[type="radio"] {
     vertical-align: top;
 }
 
@@ -501,6 +502,11 @@ aside#filter-options button {
     font-weight: normal;
 
     cursor: pointer;
+}
+
+aside#filter-options div#dataset-options label {
+    display: inline-block;
+    width: 50%;
 }
 
 aside#filter-options div#chromosome-checkboxes label {

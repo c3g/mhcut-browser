@@ -39,6 +39,21 @@ BASE_DIR = os.path.dirname(__file__)
 __version__ = json.load(open(os.path.join(BASE_DIR, "web/package.json"), "r"))["version"]
 
 
+DATASETS = {
+    "cas": {
+        "name": "Cas9",
+        "database": os.environ.get("DB_NAME_CAS")
+    },
+    "xcas": {
+        "name": "xCas9",
+        "database": os.environ.get("DB_NAME_XCAS")
+    }
+}
+
+DEFAULT_DATASET = "cas"
+BUG_REPORT_DATASET = DEFAULT_DATASET
+
+
 # Preferred Column Order
 COLUMN_ORDER = ("id", "chr", "pos_start", "pos_end", "location", "rs", "gene_info", "clndn", "clnsig", "var_l",
                 "flank", "mh_score", "mh_l", "mh_1l", "hom", "mh_max_cons", "mh_dist", "mh_1dist", "mh_seq_1",
@@ -102,13 +117,14 @@ def search_param(c):
     return f"search_cond_{str(c).strip()}"
 
 
-def get_db():
-    db = getattr(g, "_database", None)
-    if db is None:
-        db = g._database = psycopg2.connect(f"dbname={os.environ.get('DB_NAME')} "
-                                            f"user={os.environ.get('DB_USER')} "
-                                            f"password={os.environ.get('DB_PASSWORD')}")
-    return db
+def get_db(dataset="cas"):
+    dbs = getattr(g, "databases", dict())
+    if dataset not in dbs:
+        g.databases = dict()
+        dbs[dataset] = g.databases[dataset] = psycopg2.connect(f"dbname={DATASETS[dataset]['database']} "
+                                                               f"user={os.environ.get('DB_USER')} "
+                                                               f"password={os.environ.get('DB_PASSWORD')}")
+    return dbs[dataset]
 
 
 def get_variants_columns(c):
@@ -270,9 +286,14 @@ def get_entries_with_cache(c, query):
     return num_entries
 
 
-@app.route("/", methods=["GET"])
-def index():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+@app.route("/datasets/", methods=["GET"])
+def datasets() -> Response:
+    return json.jsonify([{"id": k, **v} for k, v in DATASETS.items()])
+
+
+@app.route("/datasets/<string:dataset>/", methods=["GET"])
+def dataset_index(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute(build_variants_query(
         c,
         "variants.*, cartoon_text AS cartoon",
@@ -290,9 +311,9 @@ def index():
     return json.jsonify(results)
 
 
-@app.route("/tsv", methods=["GET"])
-def variants_tsv():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+@app.route("/datasets/<string:dataset>/tsv", methods=["GET"])
+def variants_tsv(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     search_params = get_search_params_from_request(c)
 
@@ -317,16 +338,16 @@ def variants_tsv():
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"variants.tsv\""})
 
 
-@app.route("/variants/<int:variant_id>/guides", methods=["GET"])
-def variant_guides(variant_id):
-    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+@app.route("/datasets/<string:dataset>/variants/<int:variant_id>/guides", methods=["GET"])
+def variant_guides(dataset: str, variant_id: int):
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
     return json.jsonify(c.fetchall())
 
 
-@app.route("/variants/<int:variant_id>/guides/tsv", methods=["GET"])
-def variant_guides_tsv(variant_id):
-    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+@app.route("/datasets/<string:dataset>/variants/<int:variant_id>/guides/tsv", methods=["GET"])
+def variant_guides_tsv(dataset: str, variant_id: int) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     column_names = [i["column_name"] for i in get_guides_columns(c)]
 
     def generate():
@@ -345,12 +366,12 @@ def variant_guides_tsv(variant_id):
                                                     f"filename=\"variant_{variant_id}_guides.tsv\""})
 
 
-@app.route("/guides", methods=["GET"])
-def guides():
+@app.route("/datasets/<string:dataset>/guides", methods=["GET"])
+def guides(dataset: str) -> Response:
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
     items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
 
-    c = get_db().cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     search_params = get_search_params_from_request(c)
 
@@ -377,9 +398,9 @@ def guides():
     return json.jsonify(c.fetchall())
 
 
-@app.route("/guides/tsv", methods=["GET"])
-def guides_tsv():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+@app.route("/datasets/<string:dataset>/guides/tsv", methods=["GET"])
+def guides_tsv(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
     variant_column_names = [i["column_name"] for i in get_variants_columns(c)]
     column_names = [i["column_name"] for i in get_guides_columns(c)]
@@ -410,9 +431,9 @@ def guides_tsv():
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"guides.tsv\""})
 
 
-@app.route("/combined/tsv", methods=["GET"])
-def combined_tsv():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+@app.route("/datasets/<string:dataset>/combined/tsv", methods=["GET"])
+def combined_tsv(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     search_params = get_search_params_from_request(c)
 
@@ -458,16 +479,16 @@ def combined_tsv():
                                                     "filename=\"variants_with_guides.tsv\""})
 
 
-@app.route("/variants/entries", methods=["GET"])
-def variants_entries():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+@app.route("/datasets/<string:dataset>/variants/entries", methods=["GET"])
+def variants_entries(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c), outer_query=False)
     return json.jsonify(get_entries_with_cache(c, entries_query))
 
 
-@app.route("/guides/entries", methods=["GET"])
-def guides_entries():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+@app.route("/datasets/<string:dataset>/guides/entries", methods=["GET"])
+def guides_entries(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     entries_query = c.mogrify(
         f"SELECT COUNT(*) FROM guides WHERE variant_id IN "
         f"({build_variants_query_str(c, 'id', get_search_params_from_request(c), outer_query=False)})"
@@ -475,20 +496,21 @@ def guides_entries():
     return json.jsonify(get_entries_with_cache(c, entries_query))
 
 
-@app.route("/variants/fields", methods=["GET"])
-def variant_fields():
-    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+@app.route("/datasets/<string:dataset>/variants/fields", methods=["GET"])
+def variant_fields(dataset: str) -> Response:
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     return json.jsonify({col["column_name"]: col for col in get_variants_columns(c)})
 
 
-@app.route("/metadata", methods=["GET"])
-def metadata():
+@app.route("/datasets/<string:dataset>/metadata", methods=["GET"])
+def metadata(dataset: str) -> Response:
     """
     Returns various metadata and summary statistics about the entries in the database. Does not respect filtering
     parameters.
     :return: A JSON response with metadata and summary statistics.
     """
-    c = get_db().cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     c.execute("SELECT (SELECT CAST(s_value AS INTEGER) FROM summary_statistics WHERE s_key = 'min_pos') AS min_pos, "
               "  (SELECT CAST(s_value AS INTEGER) FROM summary_statistics WHERE s_key = 'max_pos') AS max_pos, "
               "  MAX(mh_l) AS max_mh_l, MAX(mh_1l) AS max_mh_1l FROM variants")
@@ -501,7 +523,7 @@ def metadata():
 
 
 @app.route("/token", methods=["GET"])
-def email_token():
+def email_token() -> Response:
     token = secrets.token_hex(24)
     expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
     email_tokens[token] = expiry
@@ -509,7 +531,7 @@ def email_token():
 
 
 @app.route("/report", methods=["POST"])
-def bug_report():
+def bug_report() -> Response:
     data = request.get_json()
     if "token" not in data:
         return Response(status=400, content_type="application/json",
@@ -525,7 +547,7 @@ def bug_report():
         return Response(status=400, content_type="application/json",
                         response=json.jsonify({"success": False, "reason": "invalid token"}))
 
-    c = get_db().cursor()
+    c = get_db(BUG_REPORT_DATASET).cursor()
     c.execute("INSERT INTO bug_reports(email, report) VALUES(%s, %s) RETURNING id", (data["email"], data["text"]))
     bug_report_id = c.fetchone()[0]
 
@@ -562,9 +584,9 @@ def bug_report():
 
 @app.teardown_appcontext
 def close_connection(_exception):
-    db = getattr(g, "_database", None)
-    if db is not None:
-        db.close()
+    dbs = getattr(g, "databases", dict())
+    for ds in dbs:
+        dbs[ds].close()
 
 
 if __name__ == "__main__":

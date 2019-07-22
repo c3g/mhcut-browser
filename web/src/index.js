@@ -28,6 +28,7 @@ import {
     GUIDES_LAYOUT
 } from "./constants";
 
+let selectedDataset = "cas"; // TODO
 
 let dataDisplay = "variants";
 
@@ -115,19 +116,21 @@ document.addEventListener("DOMContentLoaded", async function () {
         (async () => {
             // Load various data
 
+            const pageString = page.toString(10);
+
             [loadedVariants, loadedGuides, variantFields, metadata] = await Promise.all([
-                fetchJSON(`/api/?page=${page.toString(10)}&items_per_page=${itemsPerPage}`),
-                fetchJSON(`/api/guides?page=${page.toString(10)}&items_per_page=${itemsPerPage}`),
-                fetchJSON("/api/variants/fields"),
-                fetchJSON("/api/metadata")
+                fetchJSON(`/api/datasets/${selectedDataset}/?page=${pageString}&items_per_page=${itemsPerPage}`),
+                fetchJSON(`/api/datasets/${selectedDataset}/guides?page=${pageString}&items_per_page=${itemsPerPage}`),
+                fetchJSON(`/api/datasets/${selectedDataset}/variants/fields`),
+                fetchJSON(`/api/datasets/${selectedDataset}/metadata`)
             ]);
         })(),
         (async () => {
             // Start loading variant / guide counts
 
             [totalVariantsCount, totalGuidesCount] = await Promise.all([
-                fetchJSON("/api/variants/entries"),
-                fetchJSON("/api/guides/entries")
+                fetchJSON(`/api/datasets/${selectedDataset}/variants/entries`),
+                fetchJSON(`/api/datasets/${selectedDataset}/guides/entries`)
             ]);
         })()
     ]);
@@ -205,7 +208,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     d3.select("#export-variants")
         .on("click", () => {
-            let downloadURL = new URL("/api/tsv", window.location.origin);
+            let downloadURL = new URL(`/api/datasets/${selectedDataset}/tsv`, window.location.origin);
             const params = getSearchParams();
             Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
             window.location.href = downloadURL.toString();
@@ -218,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
     d3.select("#export-guides").on("click", () => {
-        let downloadURL = new URL("/api/guides/tsv", window.location.origin);
+        let downloadURL = new URL(`/api/datasets/${selectedDataset}/guides/tsv`, window.location.origin);
         let params = getSearchParams();
         Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
         downloadURL.searchParams.append("guides_with_variant_info",
@@ -227,7 +230,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     d3.select("#export-combined").on("click", () => {
-        let downloadURL = new URL("/api/combined/tsv", window.location.origin);
+        let downloadURL = new URL(`/api/datasets/${selectedDataset}/combined/tsv`, window.location.origin);
         let params = getSearchParams();
         Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
         downloadURL.searchParams.append("guides_with_variant_info",
@@ -582,7 +585,7 @@ function populateEntryTable() {
         variantGuidesModal.show();
         d3.select("#variant-for-guides").text(e["id"]);
 
-        const guides = await fetchJSON(`/api/variants/${e["id"]}/guides`);
+        const guides = await fetchJSON(`/api/datasets/${selectedDataset}/variants/${e["id"]}/guides`);
         const variantGuides = d3.select("#variant-guides-table tbody").selectAll("tr").data(guides, g => g["id"]);
         const variantGuideEntry = variantGuides.enter().append("tr");
         headersFromLayout(GUIDES_LAYOUT, true).forEach(h => variantGuideEntry.append("td")
@@ -591,7 +594,8 @@ function populateEntryTable() {
             .html(e => getTableCellContents(e, h)));
         variantGuides.exit().remove();
         d3.select("#export-variant-guides").on("click", () => {
-            const downloadURL = new URL(`/api/variants/${e["id"]}/guides/tsv`, window.location.origin);
+            const downloadURL = new URL(`/api/datasets/${selectedDataset}/variants/${e["id"]}/guides/tsv`,
+                window.location.origin);
             window.location.href = downloadURL.toString();
         });
     });
@@ -757,10 +761,10 @@ async function reloadPage(reloadCounts) {
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
         .on("transitionend", () => transitioning = false);
 
-    let variantsURL = new URL("/api/", window.location.origin);
-    let guidesURL = new URL("/api/guides", window.location.origin);
-    let variantCountURL = new URL("/api/variants/entries", window.location.origin);
-    let guideCountURL = new URL("/api/guides/entries", window.location.origin);
+    let variantsURL = new URL(`/api/datasets/${selectedDataset}`, window.location.origin);
+    let guidesURL = new URL(`/api/datasets/${selectedDataset}/guides`, window.location.origin);
+    let variantCountURL = new URL(`/api/datasets/${selectedDataset}/variants/entries`, window.location.origin);
+    let guideCountURL = new URL(`/api/datasets/${selectedDataset}/guides/entries`, window.location.origin);
     let params = {
         page: page.toString(10),
         items_per_page: itemsPerPage,

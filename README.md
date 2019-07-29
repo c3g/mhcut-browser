@@ -104,8 +104,8 @@ sudo systemctl restart apache2
 
 ##### Postgres
 
-MHcut Browser uses Postgres as a database in order to efficiently perform
-complex queries on the data.
+MHcut Browser uses Postgres as a database software in order to efficiently
+perform complex queries on the data.
 
 To install Postgres, use the following command:
 
@@ -153,7 +153,7 @@ cd ..
 ```
 
 
-### Step 1: Create the Database and Postgres User
+### Step 1: Create the Databases and Postgres User
 
 First, create a Postgres user for the application to use in order to access the
 data by opening a new `psql` session and issuing a `CREATE ROLE` command,
@@ -167,21 +167,23 @@ sudo -u postgres psql
 CREATE ROLE mhcut LOGIN PASSWORD 'some_password';
 ```
 
-This will prompt the user for a username (for example, one could enter `mhcut`)
-and whether the new user should be a super user (it should **not**).
+This will prompt the user for a username (for example, one could enter
+`mhcut`) and whether the new user should be a super user (it should **not**).
 
-Then, create a database in the `psql` session and enable the trigram extension
-on the database for indexing purposes (`\q` exits the session):
+Then, create two databases (one for the Cas dataset, and one for the xCas
+dataset) in the `psql` session and enable the trigram extension on both, for
+indexing purposes (`\q` exits the session):
 
 ```postgresql
-CREATE DATABASE mhcut_db WITH OWNER mhcut;
+CREATE DATABASE mhcut_db WITH OWNER mhcut; -- For the Cas dataset
+CREATE DATABASE mhcut_db_2 WITH OWNER mhcut; -- For the xCas dataset
 \c mhcut_db
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 \q
 ```
 
 Finally, edit the `pg_hba.conf` file (usually found in the
-`/etc/postgresql/10/main/` directory), adding the following line, and
+`/etc/postgresql/11/main/` directory), adding the following line, and
 restart the database:
 
 Before:
@@ -205,22 +207,23 @@ sudo systemctl restart postgresql
 ```
 
 
-### Step 2: Build the Database
+### Step 2: Build the Databases
 
-To build the database, run the `tsv_to_postgres.py` script as follows to
-generate the `db.sqlite` relational database file, passing in the desired TSV
-files to convert as arguments, as well as the name of the created database and
-database user:
+To build the databases, run the `tsv_to_postgres.py` script twice as follows,
+passing in the desired TSV files to convert as arguments, as well as the name
+of the created databases and database user:
 
 ```bash
 python ./tsv_to_postgres.py variants.tsv guides.tsv cartoons.tsv mhcut_db mhcut
+python ./tsv_to_postgres.py variants_xCas.tsv guides_xCas.tsv cartoons_xCas.tsv mhcut_db_2 mhcut
 ```
 
 This will prompt the user for the database user's password before building the
-MHcut Browser database.
+MHcut Browser databases.
 
 **Warning:** The database construction process will take quite a while
-(~30 minutes). The resulting database is typically around **20-60 gigabytes**.
+(~30 minutes per database). The resulting databases are typically around
+**20-60 gigabytes each**.
 
 
 ### Step 3: Running the Web Application

@@ -60,8 +60,8 @@ def int_or_none_cast(x):
         return None
 
 
-def str_or_null(x: str):
-    return x.strip() if x != "NA" else "\\N"
+def str_or_null(x: str, null_values=("NA",)):
+    return x.strip() if x not in null_values else "\\N"
 
 
 def main():
@@ -130,7 +130,8 @@ def main():
 
                          str_or_null(variant["maxInDelphiFreqMean"]), str_or_null(variant["maxInDelphiFreqmESC"]),
                          str_or_null(variant["maxInDelphiFreqU2OS"]), str_or_null(variant["maxInDelphiFreqHEK293"]),
-                         str_or_null(variant["maxInDelphiFreqHCT116"]), str_or_null(variant["maxInDelphiFreqK562"]))
+                         str_or_null(variant["maxInDelphiFreqHCT116"]),
+                         str_or_null(variant["maxInDelphiFreqK562"], null_values=("N", "NA")))
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
 

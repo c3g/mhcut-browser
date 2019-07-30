@@ -18,7 +18,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import csv
 import getpass
 import os
 import psycopg2
@@ -32,6 +31,9 @@ from tqdm import tqdm
 import sys
 
 NUM_PROCESSES = len(os.sched_getaffinity(0))
+CHROMOSOMES = ("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
+               "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
+               "chr20", "chr21", "chr22", "chrX", "chrY")
 
 
 def int_or_null(x):
@@ -100,38 +102,90 @@ def main():
         for _ in gs_file:
             n_guides += 1
 
+    id_cache = {}  # Cache for IDs to avoid repeated query lookups
     variant_copy = StringIO()
 
     with open(sys.argv[1], "r", newline="") as vs_file:
-        reader = csv.DictReader(vs_file, delimiter="\t")
+        # reader = csv.DictReader(vs_file, delimiter="\t")
         i = 1
 
-        for variant in tqdm(reader, total=n_variants, desc="variants"):
-            rs = int_or_null(variant["RS"].strip())
-            af_exac = str_or_null(variant["AF_EXAC"])
+        headers = next(vs_file)[:-1].split("\t")
+        h_chr = headers.index("chr")
+        h_start = headers.index("start")
+        h_end = headers.index("end")
+        h_geneloc = headers.index("geneloc")
+        h_rs = headers.index("RS")
+        h_geneinfo = headers.index("GENEINFO")
+        h_clndn = headers.index("CLNDN")
+        h_clnsig = headers.index("CLNSIG")
+        h_var_l = headers.index("varL")
+        h_flank = headers.index("flank")
+        h_mh_score = headers.index("mhScore")
+        h_mh_l = headers.index("mhL")
+        h_mh1_l = headers.index("mh1L")
+        h_hom = headers.index("hom")
+        h_mh_max_cons = headers.index("mhMaxCons")
+        h_mh_dist = headers.index("mhDist")
+        h_mh1_dist = headers.index("mh1Dist")
+        h_mh_seq_1 = headers.index("MHseq1")
+        h_mh_seq_2 = headers.index("MHseq2")
+        h_pam_mot = headers.index("pamMot")
+        h_pam_uniq = headers.index("pamUniq")
+        h_guides_no_nmh = headers.index("guidesNoNMH")
 
-            # Treat NA, but not -, as null
-            gene_info_clinvar = str_or_null(variant["GENEINFO.ClinVar"])
+        h_guides_min_nmh = headers.index("guidesMinNMH")
+        h_caf = headers.index("CAF")
+        h_topmed = headers.index("TOPMED")
+        h_pm = headers.index("PM")
+        h_mc = headers.index("MC")
+        h_af_exac = headers.index("AF_EXAC")
+        h_af_tgp = headers.index("AF_TGP")
+        h_alleleid = headers.index("ALLELEID")
+        h_dbvarid = headers.index("DBVARID")
+        h_geneinfo_clinvar = headers.index("GENEINFO.ClinVar")
+        h_mc_clinvar = headers.index("MC.ClinVar")
+        h_citation = headers.index("citation")
+        h_nb_mm = headers.index("nbMM")
+        h_gc = headers.index("GC")
+        h_max2cuts_dist = headers.index("max2cutsDist")
 
-            main_rows = (str(i), variant["chr"], variant["start"], variant["end"], variant["geneloc"].lower(), rs,
-                         variant["GENEINFO"], variant["CLNDN"], variant["CLNSIG"], variant["varL"], variant["flank"],
-                         variant["mhScore"], variant["mhL"], variant["mh1L"], variant["hom"],
-                         int_or_null(variant["mhMaxCons"]), int_or_null(variant["mhDist"]),
-                         int_or_null(variant["mh1Dist"]), variant["MHseq1"], variant["MHseq2"],
-                         pos_int_or_null(variant["pamMot"]), pos_int_or_null(variant["pamUniq"]),
-                         pos_int_or_null(variant["guidesNoNMH"]),
+        h_max_in_delphi_freq_mean = headers.index("maxInDelphiFreqMean")
+        h_max_in_delphi_freq_mesc = headers.index("maxInDelphiFreqmESC")
+        h_max_in_delphi_freq_u2os = headers.index("maxInDelphiFreqU2OS")
+        h_max_in_delphi_freq_hek293 = headers.index("maxInDelphiFreqHEK293")
+        h_max_in_delphi_freq_hct116 = headers.index("maxInDelphiFreqHCT116")
+        h_max_in_delphi_freq_k562 = headers.index("maxInDelphiFreqK562")
+
+        for variant in tqdm(vs_file, total=n_variants, desc="variants"):
+            variant = variant[:-1].split("\t")
+
+            id_cache[CHROMOSOMES.index(variant[h_chr]), int(variant[h_start]), int(variant[h_end]),
+                     int_or_none_cast(variant[h_rs])] = i
+
+            main_rows = (str(i), variant[h_chr], variant[h_start], variant[h_end], variant[h_geneloc].lower(),
+                         int_or_null(variant[h_rs].strip()),
+                         variant[h_geneinfo], variant[h_clndn], variant[h_clnsig], variant[h_var_l], variant[h_flank],
+                         variant[h_mh_score], variant[h_mh_l], variant[h_mh1_l], variant[h_hom],
+                         int_or_null(variant[h_mh_max_cons]), int_or_null(variant[h_mh_dist]),
+                         int_or_null(variant[h_mh1_dist]), variant[h_mh_seq_1], variant[h_mh_seq_2],
+                         pos_int_or_null(variant[h_pam_mot]), pos_int_or_null(variant[h_pam_uniq]),
+                         pos_int_or_null(variant[h_guides_no_nmh]),
                          # cartoon goes here...
 
-                         pos_int_or_null(variant["guidesMinNMH"]),
-                         variant["CAF"], variant["TOPMED"], variant["PM"], variant["MC"], af_exac, variant["AF_TGP"],
-                         pos_int_or_null(variant["ALLELEID"]), variant["DBVARID"], gene_info_clinvar,
-                         variant["MC.ClinVar"], variant["citation"], variant["nbMM"],
-                         str_or_null(variant["GC"]), int_or_null(variant["max2cutsDist"]),
+                         pos_int_or_null(variant[h_guides_min_nmh]),
+                         variant[h_caf], variant[h_topmed], variant[h_pm], variant[h_mc],
+                         str_or_null(variant[h_af_exac]), variant[h_af_tgp],
+                         pos_int_or_null(variant[h_alleleid]), variant[h_dbvarid],
+                         str_or_null(variant[h_geneinfo_clinvar]),
+                         variant[h_mc_clinvar], variant[h_citation], variant[h_nb_mm],
+                         str_or_null(variant[h_gc]), int_or_null(variant[h_max2cuts_dist]),
 
-                         str_or_null(variant["maxInDelphiFreqMean"]), str_or_null(variant["maxInDelphiFreqmESC"]),
-                         str_or_null(variant["maxInDelphiFreqU2OS"]), str_or_null(variant["maxInDelphiFreqHEK293"]),
-                         str_or_null(variant["maxInDelphiFreqHCT116"]),
-                         str_or_null(variant["maxInDelphiFreqK562"], null_values=("N", "NA")))
+                         str_or_null(variant[h_max_in_delphi_freq_mean]),
+                         str_or_null(variant[h_max_in_delphi_freq_mesc]),
+                         str_or_null(variant[h_max_in_delphi_freq_u2os]),
+                         str_or_null(variant[h_max_in_delphi_freq_hek293]),
+                         str_or_null(variant[h_max_in_delphi_freq_hct116]),
+                         str_or_null(variant[h_max_in_delphi_freq_k562], null_values=("N", "NA")))
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
 
@@ -162,42 +216,62 @@ def main():
     conn.commit()
 
     with open(sys.argv[2], "r", newline="") as gs_file:
-        reader = csv.DictReader(gs_file, delimiter="\t")
+        # reader = csv.DictReader(gs_file, delimiter="\t")
+
+        headers = next(gs_file)[:-1].split("\t")
+
+        h_chr = headers.index("chr")
+        h_start = headers.index("start")
+        h_end = headers.index("end")
+        h_rs = headers.index("RS")
+        h_nmh_gc = headers.index("nmhGC")
+        h_protospacer = headers.index("protospacer")
+        h_mm0 = headers.index("mm0")
+        h_m1_dist1 = headers.index("m1Dist1")
+        h_m1_dist2 = headers.index("m1Dist2")
+        h_mh_dist1 = headers.index("mhDist1")
+        h_mh_dist2 = headers.index("mhDist2")
+        h_nb_nmh = headers.index("nbNMH")
+        h_largest_nmh = headers.index("largestNMH")
+        h_nmh_score = headers.index("nmhScore")
+        h_nmh_size = headers.index("nmhSize")
+        h_nmh_var_l = headers.index("nmhVarL")
+        h_nmh_seq = headers.index("nmhSeq")
+        h_in_delphi_freq_mean = headers.index("inDelphiFreqMean")
+        h_in_delphi_freq_mesc = headers.index("inDelphiFreqmESC")
+        h_in_delphi_freq_u2os = headers.index("inDelphiFreqU2OS")
+        h_in_delphi_freq_hek293 = headers.index("inDelphiFreqHEK293")
+        h_in_delphi_freq_hct116 = headers.index("inDelphiFreqHCT116")
+        h_in_delphi_freq_k562 = headers.index("inDelphiFreqK562")
+
         guide_copy = StringIO()
         j = 1
-        for guide in tqdm(reader, total=n_guides, desc="guides"):
-            c.execute("SELECT id FROM variants WHERE chr = %s AND pos_start = %s AND pos_end = %s "
-                      "AND rs {}".format("IS NULL -- %s" if guide["RS"] == "-" else "= %s"),
-                      (guide["chr"], int(guide["start"]), int(guide["end"]), guide["RS"]))
+        for guide in tqdm(gs_file, total=n_guides, desc="guides"):
+            guide = guide[:-1].split("\t")
 
-            variant = c.fetchone()
-            if variant is None:
-                tqdm.write("Could not find associated variant for guide:")
-                tqdm.write(str(guide))
+            variant_id = id_cache[CHROMOSOMES.index(guide[h_chr]), int(guide[h_start]), int(guide[h_end]),
+                                  int_or_none_cast(guide[h_rs])]
 
-            variant_id = variant[0]
-
-            nmh_gc = guide["nmhGC"].strip()
+            nmh_gc = guide[h_nmh_gc].strip()
             if nmh_gc == "NA":
                 # Treat NA as null
                 nmh_gc = "\\N"
 
-            guide_copy.write("\t".join((str(j), str(variant_id), guide["protospacer"], int_or_null(guide["mm0"]),
-                                        # int_or_null_cast(guide["mm1"]), int_or_null_cast(guide["mm2"]),
-                                        guide["m1Dist1"], guide["m1Dist2"], guide["mhDist1"],
-                                        guide["mhDist2"], int_or_null(guide["nbNMH"]),
-                                        int_or_null(guide["largestNMH"]), guide["nmhScore"],
-                                        int_or_null(guide["nmhSize"]), int_or_null(guide["nmhVarL"]),
-                                        nmh_gc, guide["nmhSeq"], str_or_null(guide["inDelphiFreqMean"]),
-                                        str_or_null(guide["inDelphiFreqmESC"]),
-                                        str_or_null(guide["inDelphiFreqU2OS"]),
-                                        str_or_null(guide["inDelphiFreqHEK293"]),
-                                        str_or_null(guide["inDelphiFreqHCT116"]),
-                                        str_or_null(guide["inDelphiFreqK562"]))) + "\n")
+            guide_copy.write("\t".join((str(j), str(variant_id), guide[h_protospacer], int_or_null(guide[h_mm0]),
+                                        guide[h_m1_dist1], guide[h_m1_dist2], guide[h_mh_dist1],
+                                        guide[h_mh_dist2], int_or_null(guide[h_nb_nmh]),
+                                        int_or_null(guide[h_largest_nmh]), guide[h_nmh_score],
+                                        int_or_null(guide[h_nmh_size]), int_or_null(guide[h_nmh_var_l]),
+                                        nmh_gc, guide[h_nmh_seq], str_or_null(guide[h_in_delphi_freq_mean]),
+                                        str_or_null(guide[h_in_delphi_freq_mesc]),
+                                        str_or_null(guide[h_in_delphi_freq_u2os]),
+                                        str_or_null(guide[h_in_delphi_freq_hek293]),
+                                        str_or_null(guide[h_in_delphi_freq_hct116]),
+                                        str_or_null(guide[h_in_delphi_freq_k562]))) + "\n")
 
             j += 1
 
-            if j % 50000 == 0:
+            if j % 250000 == 0:
                 guide_copy.seek(0)
                 c.copy_from(guide_copy, "guides")
                 guide_copy = StringIO()
@@ -222,28 +296,43 @@ def main():
                 try:
                     next_cartoon = q.get(False)
 
-                    c2.execute("SELECT id FROM variants WHERE chr = %(chr)s "
-                               "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
-                               "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
-                               next_cartoon)
+                    # c2.execute("SELECT id FROM variants WHERE chr = %(chr)s "
+                    #            "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
+                    #            "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
+                    #            next_cartoon)
+                    #
+                    # var = c2.fetchone()
+                    #
+                    # if var is None:
+                    #     tqdm.write(str(next_cartoon))
+                    #     tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
+                    #
+                    # else:
+                    #     v_id = var[0]
+                    #
+                    #     c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
+                    #                (v_id, next_cartoon["cartoon"]))
+                    #
+                    #     conn2.commit()
 
-                    var = c2.fetchone()
+                    try:
+                        v_id = id_cache[CHROMOSOMES.index(next_cartoon["chr"]), next_cartoon["pos_start"],
+                                        next_cartoon["pos_end"], int_or_none_cast(next_cartoon["rs"])]
 
-                    if var is None:
-                        tqdm.write(str(next_cartoon))
-                        tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
-
-                    else:
-                        v_id = var[0]
                         c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
                                    (v_id, next_cartoon["cartoon"]))
+
+                        conn2.commit()
+
+                    except IndexError:
+                        tqdm.write(str(next_cartoon))
+                        tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
 
                     pr.update(1)
 
                 except Empty:
                     continue
 
-        conn2.commit()
         conn2.close()
 
     print("Saving cartoons...")  # TODO: TQDM with real progress

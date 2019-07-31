@@ -62,8 +62,8 @@ def int_or_none_cast(x):
         return None
 
 
-def str_or_null(x: str, null_values=("NA",)):
-    return x.strip() if x not in null_values else "\\N"
+def str_or_null(x: str):
+    return x.strip() if x != "NA" else "\\N"
 
 
 def main():
@@ -185,7 +185,7 @@ def main():
                          str_or_null(variant[h_max_in_delphi_freq_u2os]),
                          str_or_null(variant[h_max_in_delphi_freq_hek293]),
                          str_or_null(variant[h_max_in_delphi_freq_hct116]),
-                         str_or_null(variant[h_max_in_delphi_freq_k562], null_values=("N", "NA")))
+                         str_or_null(variant[h_max_in_delphi_freq_k562]))
 
             variant_copy.write("\t".join((*main_rows, " ".join(main_rows).lower())) + "\n")
 
@@ -287,63 +287,7 @@ def main():
 
     conn.commit()
 
-    def cartoon_saver(q, dc, s2):
-        conn2 = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
-        c2 = conn2.cursor()
-
-        with tqdm(desc="{}".format(s2), position=s2) as pr:
-            while not (q.empty() and dc.value == 1):
-                try:
-                    next_cartoon = q.get(False)
-
-                    # c2.execute("SELECT id FROM variants WHERE chr = %(chr)s "
-                    #            "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
-                    #            "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
-                    #            next_cartoon)
-                    #
-                    # var = c2.fetchone()
-                    #
-                    # if var is None:
-                    #     tqdm.write(str(next_cartoon))
-                    #     tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
-                    #
-                    # else:
-                    #     v_id = var[0]
-                    #
-                    #     c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
-                    #                (v_id, next_cartoon["cartoon"]))
-                    #
-                    #     conn2.commit()
-
-                    try:
-                        v_id = id_cache[CHROMOSOMES.index(next_cartoon["chr"]), next_cartoon["pos_start"],
-                                        next_cartoon["pos_end"], int_or_none_cast(next_cartoon["rs"])]
-
-                        c2.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
-                                   (v_id, next_cartoon["cartoon"]))
-
-                        conn2.commit()
-
-                    except IndexError:
-                        tqdm.write(str(next_cartoon))
-                        tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
-
-                    pr.update(1)
-
-                except Empty:
-                    continue
-
-        conn2.close()
-
     print("Saving cartoons...")  # TODO: TQDM with real progress
-
-    done_cartoons = Value("i", 0)
-    cartoon_queue = Queue()
-
-    processes = []
-    for s in range(NUM_PROCESSES):
-        processes.append(Process(target=cartoon_saver, args=(cartoon_queue, done_cartoons, s)))
-        processes[-1].start()
 
     with open(sys.argv[3], "r", newline="") as cs_file:
         # Skip variant header row
@@ -356,63 +300,88 @@ def main():
         current_cartoon = ""
 
         k = 1
-        while True:
-            try:
-                if line == "\n":
-                    if len(current_variant) > 0:
-                        cartoon_queue.put({
-                            "cartoon": current_cartoon,
-                            "chr": current_variant[0],
-                            "pos_start": int(current_variant[1]),
-                            "pos_end": int(current_variant[2]),
-                            "rs": current_variant[3]
-                        })
+        with tqdm(desc="cartoons") as pr:
+            while True:
+                try:
+                    if line == "\n":
+                        if len(current_variant) > 0:
+                            next_cartoon = {
+                                "cartoon": current_cartoon,
+                                "chr": current_variant[0],
+                                "pos_start": int(current_variant[1]),
+                                "pos_end": int(current_variant[2]),
+                                "rs": current_variant[3]
+                            }
 
-                        if cartoon_queue.qsize() > 1000000:
-                            time.sleep(0.1)
+                            # c.execute(
+                            #     "SELECT id FROM variants WHERE chr = %(chr)s "
+                            #     "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
+                            #     "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
+                            #     next_cartoon
+                            # )
+                            #
+                            # var = c.fetchone()
+                            #
+                            # if var is None:
+                            #     tqdm.write(str(next_cartoon))
+                            #     tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
+                            #
+                            # else:
+                            #     v_id = var[0]
+                            #
+                            #     c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
+                            #               (v_id, next_cartoon["cartoon"]))
 
-                        current_stage = 0
-                        current_variant = []
-                        current_cartoon = ""
+                            try:
+                                v_id = id_cache[CHROMOSOMES.index(next_cartoon["chr"]), next_cartoon["pos_start"],
+                                                next_cartoon["pos_end"], int_or_none_cast(next_cartoon["rs"])]
 
-                        k += 1
+                                c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
+                                           (v_id, next_cartoon["cartoon"]))
 
-                    while line == "\n":
+                                conn.commit()
+
+                            except IndexError:
+                                tqdm.write(str(next_cartoon))
+                                tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
+
+                            current_stage = 0
+                            current_variant = []
+                            current_cartoon = ""
+
+                            pr.update(1)
+                            k += 1
+
+                            if k % 50000 == 0:
+                                conn.commit()
+
+                        while line == "\n":
+                            line = next(cs_file)
+
+                        continue
+
+                    if current_stage == 0:
+                        current_variant = line.split("\t")
+                        current_stage = 1
                         line = next(cs_file)
+                        continue
 
-                    continue
-
-                if current_stage == 0:
-                    current_variant = line.split("\t")
-                    current_stage = 1
-                    line = next(cs_file)
-                    continue
-
-                elif current_stage == 1:
-                    current_cartoon = line + next(cs_file) + next(cs_file).strip()
-                    current_stage = 2
-                    line = next(cs_file)
-                    continue
-
-                elif current_stage == 2:
-                    # Optional stage where other non-blank lines are skipped.
-                    while line != "\n":
+                    elif current_stage == 1:
+                        current_cartoon = line + next(cs_file) + next(cs_file).strip()
+                        current_stage = 2
                         line = next(cs_file)
+                        continue
 
-            except StopIteration:
-                break
+                    elif current_stage == 2:
+                        # Optional stage where other non-blank lines are skipped.
+                        while line != "\n":
+                            line = next(cs_file)
 
-    cartoon_queue.close()
-    cartoon_queue.join_thread()
+                except StopIteration:
+                    break
 
-    done_cartoons.value = 1
-
-    for p in processes:
-        p.join()
-
-    for _ in range(NUM_PROCESSES):
-        # Clear the TQDM bars
-        print()
+    # Clear the TQDM bar
+    print()
 
     conn.commit()
 

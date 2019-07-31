@@ -271,7 +271,7 @@ def build_variants_query_str(*args, **kwargs):
     return build_variants_query(*args, **kwargs).decode("utf-8")
 
 
-def get_entries_with_cache(c, query):
+def get_entries_with_cache(dataset: str, c, query):
     c.execute("SELECT * FROM entries_query_cache WHERE e_query = %s::bytea", (query,))
     cache_value = c.fetchone()
 
@@ -281,7 +281,7 @@ def get_entries_with_cache(c, query):
     c.execute(query)
     num_entries = c.fetchone()[0]
     c.execute("INSERT INTO entries_query_cache VALUES(%s::bytea, %s) ON CONFLICT DO NOTHING ", (query, num_entries))
-    get_db().commit()
+    get_db(dataset).commit()
 
     return num_entries
 
@@ -324,7 +324,7 @@ def variants_tsv(dataset: str) -> Response:
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor("variants-tsv-cursor")
+            c2 = get_db(dataset).cursor("variants-tsv-cursor")
             c2.execute(build_variants_query(c2, ",".join(column_names), search_params, sort_by=sort_by,
                                             sort_order=sort_order))
 
@@ -352,7 +352,7 @@ def variant_guides_tsv(dataset: str, variant_id: int) -> Response:
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor("variant-guides-tsv-cursor")
+            c2 = get_db(dataset).cursor("variant-guides-tsv-cursor")
             c2.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
 
             yield "\t".join(column_names) + "\n"
@@ -409,7 +409,7 @@ def guides_tsv(dataset: str) -> Response:
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor("guides-tsv-cursor")
+            c2 = get_db(dataset).cursor("guides-tsv-cursor")
 
             if guides_with_variant_info:
                 c2.execute(f"SELECT {', '.join([f'variants.{col}' for col in variant_column_names[1:]])}, "
@@ -447,12 +447,12 @@ def combined_tsv(dataset: str) -> Response:
 
     def generate():
         with app.app_context():
-            c2 = get_db().cursor("combined-tsv-cursor")
+            c2 = get_db(dataset).cursor("combined-tsv-cursor")
             c2.execute(build_variants_query(c, ",".join(variants_column_names), search_params, sort_by, sort_order))
 
             yield "\t".join(variants_column_names + [col if col != "id" else "guide_id"
                                                      for col in guides_column_names]) + "\n"
-            c3 = get_db().cursor()
+            c3 = get_db(dataset).cursor()
             row = c2.fetchone()
             while row is not None:
                 row_to_return = [str(col) if col is not None else "NA" for col in row]
@@ -483,7 +483,7 @@ def combined_tsv(dataset: str) -> Response:
 def variants_entries(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c), outer_query=False)
-    return json.jsonify(get_entries_with_cache(c, entries_query))
+    return json.jsonify(get_entries_with_cache(dataset, c, entries_query))
 
 
 @app.route("/datasets/<string:dataset>/guides/entries", methods=["GET"])
@@ -493,7 +493,7 @@ def guides_entries(dataset: str) -> Response:
         f"SELECT COUNT(*) FROM guides WHERE variant_id IN "
         f"({build_variants_query_str(c, 'id', get_search_params_from_request(c), outer_query=False)})"
     )
-    return json.jsonify(get_entries_with_cache(c, entries_query))
+    return json.jsonify(get_entries_with_cache(dataset, c, entries_query))
 
 
 @app.route("/datasets/<string:dataset>/variants/fields", methods=["GET"])

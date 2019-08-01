@@ -282,6 +282,8 @@ def main():
 
     conn.commit()
 
+    print("Creating guide index...")
+
     c.execute("CREATE INDEX guides_variant_id_idx ON guides(variant_id)")
     c.execute("CLUSTER guides USING guides_variant_id_idx")
 
@@ -313,37 +315,37 @@ def main():
                                 "rs": current_variant[3]
                             }
 
-                            # c.execute(
-                            #     "SELECT id FROM variants WHERE chr = %(chr)s "
-                            #     "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
-                            #     "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
-                            #     next_cartoon
-                            # )
-                            #
-                            # var = c.fetchone()
-                            #
-                            # if var is None:
-                            #     tqdm.write(str(next_cartoon))
-                            #     tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
-                            #
-                            # else:
-                            #     v_id = var[0]
+                            c.execute(
+                                "SELECT id FROM variants WHERE chr = %(chr)s "
+                                "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
+                                "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
+                                next_cartoon
+                            )
+
+                            var = c.fetchone()
+
+                            if var is None:
+                                tqdm.write(str(next_cartoon))
+                                tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
+
+                            else:
+                                v_id = var[0]
+
+                                c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
+                                          (v_id, next_cartoon["cartoon"]))
+
+                            # try:
+                            #     v_id = id_cache[CHROMOSOMES.index(next_cartoon["chr"]), next_cartoon["pos_start"],
+                            #                     next_cartoon["pos_end"], int_or_none_cast(next_cartoon["rs"])]
                             #
                             #     c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
                             #               (v_id, next_cartoon["cartoon"]))
-
-                            try:
-                                v_id = id_cache[CHROMOSOMES.index(next_cartoon["chr"]), next_cartoon["pos_start"],
-                                                next_cartoon["pos_end"], int_or_none_cast(next_cartoon["rs"])]
-
-                                c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
-                                           (v_id, next_cartoon["cartoon"]))
-
-                                conn.commit()
-
-                            except IndexError:
-                                tqdm.write(str(next_cartoon))
-                                tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
+                            #
+                            #     conn.commit()
+                            #
+                            # except KeyError:
+                            #     tqdm.write(str(next_cartoon))
+                            #     tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
 
                             current_stage = 0
                             current_variant = []

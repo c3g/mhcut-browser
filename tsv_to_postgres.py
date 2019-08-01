@@ -297,6 +297,8 @@ def main():
         next(cs_file)
 
         line = next(cs_file)
+        line_no = 3
+
         current_stage = 0
         current_variant = []
         current_cartoon = ""
@@ -307,6 +309,16 @@ def main():
                 try:
                     if line == "\n":
                         if len(current_variant) > 0:
+                            if k < 14903120:
+                                current_stage = 0
+                                current_variant = []
+                                current_cartoon = ""
+
+                                pr.update(1)
+                                k += 1
+
+                                continue
+
                             next_cartoon = {
                                 "cartoon": current_cartoon,
                                 "chr": current_variant[0],
@@ -315,24 +327,31 @@ def main():
                                 "rs": current_variant[3]
                             }
 
-                            c.execute(
-                                "SELECT id FROM variants WHERE chr = %(chr)s "
-                                "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
-                                "AND rs {}".format("IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
-                                next_cartoon
-                            )
+                            try:
+                                c.execute(
+                                    "SELECT id FROM variants WHERE chr = %(chr)s "
+                                    "AND pos_start = %(pos_start)s AND pos_end = %(pos_end)s "
+                                    "AND rs {}".format(
+                                        "IS NULL" if next_cartoon["rs"] == "-" else "= CAST(%(rs)s AS INT)"),
+                                    next_cartoon
+                                )
 
-                            var = c.fetchone()
+                                var = c.fetchone()
 
-                            if var is None:
-                                tqdm.write(str(next_cartoon))
-                                tqdm.write("COULD NOT SAVE THE ABOVE CARTOON.")
+                                if var is None:
+                                    tqdm.write(str(next_cartoon))
+                                    tqdm.write("COULD NOT SAVE THE ABOVE CARTOON (LINE {}).".format(line_no))
 
-                            else:
-                                v_id = var[0]
+                                else:
+                                    v_id = var[0]
 
-                                c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
-                                          (v_id, next_cartoon["cartoon"]))
+                                    c.execute("INSERT INTO cartoons VALUES(%s, %s) ON CONFLICT DO NOTHING",
+                                              (v_id, next_cartoon["cartoon"]))
+
+                            except psycopg2.DataError as e:
+                                conn.commit()
+                                tqdm.write(str(e))
+                                tqdm.write(str(line_no))
 
                             # try:
                             #     v_id = id_cache[CHROMOSOMES.index(next_cartoon["chr"]), next_cartoon["pos_start"],
@@ -359,6 +378,7 @@ def main():
 
                         while line == "\n":
                             line = next(cs_file)
+                            line_no += 1
 
                         continue
 
@@ -366,18 +386,21 @@ def main():
                         current_variant = line.split("\t")
                         current_stage = 1
                         line = next(cs_file)
+                        line_no += 1
                         continue
 
                     elif current_stage == 1:
                         current_cartoon = line + next(cs_file) + next(cs_file).strip()
                         current_stage = 2
                         line = next(cs_file)
+                        line_no += 3
                         continue
 
                     elif current_stage == 2:
                         # Optional stage where other non-blank lines are skipped.
                         while line != "\n":
                             line = next(cs_file)
+                            line_no += 1
 
                 except StopIteration:
                     break

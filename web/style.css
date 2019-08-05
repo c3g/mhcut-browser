@@ -1328,13 +1328,15 @@ div.row .col {
 
 
 
-div#column-help-text {
+div#help-text {
     position: fixed;
     z-index: 175;
 
     /*top: 200px; left: 400px;*/
 
+    box-sizing: border-box;
     padding: 6px 10px;
+    min-width: 125px;
     max-width: 250px;
 
     background-color: rgba(250, 250, 250, 0.95);
@@ -1354,7 +1356,7 @@ div#column-help-text {
     transition: opacity 0.15s ease-in-out;
 }
 
-div#column-help-text.shown {
+div#help-text.shown {
     opacity: 1;
 }
 

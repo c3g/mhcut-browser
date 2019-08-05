@@ -24,6 +24,7 @@ import {
     CONDITION_OPERATORS,
     DEFAULT_CONDITION_BOOLEAN,
     COLUMN_HELP_TEXT,
+    DATASET_HELP_TEXT,
     VARIANTS_LAYOUT,
     GUIDES_LAYOUT
 } from "./constants";
@@ -116,10 +117,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     datasets = await fetchJSON("/api/datasets");
     selectedDataset = datasets[0]["id"];
 
-    const datasetLabel = d3.select("#dataset-options").selectAll("label").data(datasets, d => d.id)
+    const datasetLabel = d3.select("#dataset-options")
+        .selectAll("label")
+        .data(datasets, d => d.id)
         .enter()
         .append("label")
-        .classed("checkbox-label", true);
+        .classed("checkbox-label", true)
+        .on("mouseover", d => {showGenericHelp(d3.event, DATASET_HELP_TEXT[d.id]);})
+        .on("mousemove", () => {updateHelp(d3.event);})
+        .on("mouseout", () => {hideHelp();});
 
     datasetLabel.append("input")
         .attr("type", "radio")
@@ -225,17 +231,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         .append("div")
         .text(h => h.column)
         .on("mouseover", h => showColumnHelp(d3.event, h.column))
-        .on("mousemove", () => updateColumnHelp(d3.event))
-        .on("mouseout", () => hideColumnHelp())
+        .on("mousemove", () => updateHelp(d3.event))
+        .on("mouseout", () => hideHelp())
         .append("span").attr("class", "material-icons");
     variantGuideTableColumns.exit().remove();
 
     d3.select("#export-variants")
         .on("click", () => {
-            let downloadURL = new URL(`/api/datasets/${selectedDataset}/tsv`, window.location.origin);
-            const params = getSearchParams();
-            Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
-            window.location.href = downloadURL.toString();
+            window.location.href = getURLWithSearchParams(`/api/datasets/${selectedDataset}/tsv`).toString();
         })
         .on("mouseover", () => {
             d3.select("#label-guides-with-variants-info").transition().style("opacity", 0.5);
@@ -245,18 +248,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
 
     d3.select("#export-guides").on("click", () => {
-        let downloadURL = new URL(`/api/datasets/${selectedDataset}/guides/tsv`, window.location.origin);
-        let params = getSearchParams();
-        Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+        let downloadURL = getURLWithSearchParams(`/api/datasets/${selectedDataset}/guides/tsv`);
         downloadURL.searchParams.append("guides_with_variant_info",
             d3.select("#guides-with-variant-info").property("checked"));
         window.location.href = downloadURL.toString();
     });
 
     d3.select("#export-combined").on("click", () => {
-        let downloadURL = new URL(`/api/datasets/${selectedDataset}/combined/tsv`, window.location.origin);
-        let params = getSearchParams();
-        Object.keys(params).forEach(key => downloadURL.searchParams.append(key, params[key]));
+        let downloadURL = getURLWithSearchParams(`/api/datasets/${selectedDataset}/combined/tsv`);
         downloadURL.searchParams.append("guides_with_variant_info",
             d3.select("#guides-with-variant-info").property("checked"));
         window.location.href = downloadURL.toString();
@@ -308,7 +307,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     onPositionQueryChange();
 
 
-    const geneLocationLabels = d3.select("#gene-location-checkboxes").selectAll("label").data(metadata["location"])
+    const geneLocationLabels = d3.select("#gene-location-checkboxes")
+        .selectAll("label")
+        .data(metadata["location"])
         .enter()
         .append("label")
         .attr("class", "checkbox-label")
@@ -445,6 +446,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 /**
+ * Gets a site-specific URL with search parameters attached.
+ * @param {string} urlString - The URL string to attach search params to.
+ */
+function getURLWithSearchParams(urlString) {
+    let url = new URL(urlString, window.location.origin);
+    let params = getSearchParams();
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    return url;
+}
+
+/**
  * Selects a table display mode (either variants or guides).
  * @param {string} p
  */
@@ -578,8 +590,8 @@ function populateEntryTable() {
         .append("th")
         .attr("class", f => f.classes)
         .on("mouseover", f => showColumnHelp(d3.event, f.column))
-        .on("mousemove", () => updateColumnHelp(d3.event))
-        .on("mouseout", () => hideColumnHelp())
+        .on("mousemove", () => updateHelp(d3.event))
+        .on("mouseout", () => hideHelp())
         .on("click", async f => {
             if (dataDisplay === "guides" || f.column === "cartoon") return;
 
@@ -1110,28 +1122,37 @@ function getSearchParams() {
  * @param {string} columnName
  */
 function showColumnHelp(event, columnName) {
-    d3.select("#column-help-text")
+    showGenericHelp(event, COLUMN_HELP_TEXT[columnName]);
+}
+
+/**
+ * Shows the help tooltip for any mouse event.
+ * @param {MouseEvent} event
+ * @param {string} text
+ */
+function showGenericHelp(event, text) {
+    d3.select("#help-text")
         .classed("shown", true)
         .style("top", `${(event.clientY + 10).toString(10)}px`)
-        .style("left", `${(event.clientX + 15).toString(10)}px`)
-        .text(COLUMN_HELP_TEXT[columnName]);
+        .style("left", `${Math.min(event.clientX + 15, window.innerWidth - 265).toString(10)}px`)
+        .text(text);
 }
 
 /**
  * Updates the position of the help tooltip.
  * @param {MouseEvent} event
  */
-function updateColumnHelp(event) {
-    d3.select("#column-help-text")
+function updateHelp(event) {
+    d3.select("#help-text")
         .style("top", `${(event.clientY + 10).toString(10)}px`)
-        .style("left", `${(event.clientX + 15).toString(10)}px`);
+        .style("left", `${Math.min(event.clientX + 15, window.innerWidth - 265).toString(10)}px`);
 }
 
 /**
  * Hides the help tooltip.
  */
-function hideColumnHelp() {
-    d3.select("#column-help-text").classed("shown", false);
+function hideHelp() {
+    d3.select("#help-text").classed("shown", false);
 }
 
 

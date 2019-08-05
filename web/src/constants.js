@@ -107,6 +107,11 @@ export const COLUMN_HELP_TEXT = {
     indelphi_freq_k562: "The frequency predicted by inDelphi for this exact deletion in K562 cells.",
 };
 
+export const DATASET_HELP_TEXT = {
+    "cas": "S. pyogenes Cas9 with “NGG” PAM requirement",
+    "xcas": "S. pyogenes Cas9 with “NG”, “GAA” or “GAT” PAM requirement engineered by Hu et al. 2018"
+};
+
 export const VARIANTS_LAYOUT = [
     {
         group_name: "IDs",

@@ -87,7 +87,7 @@ const geneURL = gene => `https://www.ncbi.nlm.nih.gov/gene/${gene}/`;
 const bookshelfURL = nbk => `https://www.ncbi.nlm.nih.gov/books/${nbk}/`;
 const pubMedURL = pm => `https://www.ncbi.nlm.nih.gov/pubmed/${pm}/`;
 const pmcURL = pmc => `https://www.ncbi.nlm.nih.gov/pmc/articles/${pmc}/`;
-const clinVarURL = cv => `https://www.ncbi.nlm.nih.gov/clinvar/variation/${cv}/`;
+const clinVarURL = cv => `https://www.ncbi.nlm.nih.gov/clinvar?term=((${cv}[AlleleID]))`;
 
 
 document.addEventListener("DOMContentLoaded", async function () {

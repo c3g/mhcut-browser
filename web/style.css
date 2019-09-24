@@ -817,6 +817,14 @@ table#variant-guides-table tbody td.lighter > div {
     color: #B0B0B0;
 }
 
+table#entry-table tbody td.no-results > div,
+table#variant-guides-table tbody td.no-results > div {
+    text-align: center;
+    height: 200px;
+    line-height: 190px;
+    font-size: 1rem;
+}
+
 table#entry-table tbody td > div pre,
 table#variant-guides-table tbody td > div pre {
     font-family: "Roboto Mono", monospace;

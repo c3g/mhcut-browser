@@ -608,35 +608,45 @@ function populateEntryTable() {
     column.append("div").text(f => f.column).append("span").attr("class", "material-icons");
     tableColumns.exit().remove();
 
-    const tableRows = d3.select("table#entry-table tbody").selectAll("tr")
-        .data(entries, () => Math.random().toString()); // TODO: Fix IDs
-    const rowEntry = tableRows.enter().append("tr");
 
-    headers.forEach(f => rowEntry.append("td")
-        .attr("class", e => getTableCellClasses(e, f))
-        .append("div")
-        .html(e => getTableCellContents(e, f)));
+    if (entries.length === 0) {
+        d3.select("table#entry-table tbody")
+            .html(`<tr><td colspan="${headers.length}" class="first last no-results">
+                <div>No results found.</div>
+            </td></tr>`);
+    } else {
+        const tableRows = d3.select("table#entry-table tbody").selectAll("tr")
+            .data(entries, () => Math.random().toString()); // TODO: Fix IDs
+        const rowEntry = tableRows.enter().append("tr");
 
-    rowEntry.select(".show-guides-modal").on("mousedown", async e => {
-        variantGuidesModal.show();
-        d3.select("#variant-for-guides").text(e["id"]);
-
-        const guides = await fetchJSON(`/api/datasets/${selectedDataset}/variants/${e["id"]}/guides`);
-        const variantGuides = d3.select("#variant-guides-table tbody").selectAll("tr").data(guides, g => g["id"]);
-        const variantGuideEntry = variantGuides.enter().append("tr");
-        headersFromLayout(GUIDES_LAYOUT, true).forEach(h => variantGuideEntry.append("td")
-            .attr("class", e => getTableCellClasses(e, h))
+        headers.forEach(f => rowEntry.append("td")
+            .attr("class", e => getTableCellClasses(e, f))
             .append("div")
-            .html(e => getTableCellContents(e, h)));
-        variantGuides.exit().remove();
-        d3.select("#export-variant-guides").on("click", () => {
-            const downloadURL = new URL(`/api/datasets/${selectedDataset}/variants/${e["id"]}/guides/tsv`,
-                window.location.origin);
-            window.location.href = downloadURL.toString();
-        });
-    });
+            .html(e => getTableCellContents(e, f)));
 
-    tableRows.exit().remove();
+        rowEntry.select(".show-guides-modal").on("mousedown", async e => {
+            variantGuidesModal.show();
+            d3.select("#variant-for-guides").text(e["id"]);
+
+            const guides = await fetchJSON(`/api/datasets/${selectedDataset}/variants/${e["id"]}/guides`);
+            const variantGuides = d3.select("#variant-guides-table tbody")
+                .selectAll("tr")
+                .data(guides, g => g["id"]);
+            const variantGuideEntry = variantGuides.enter().append("tr");
+            headersFromLayout(GUIDES_LAYOUT, true).forEach(h => variantGuideEntry.append("td")
+                .attr("class", e => getTableCellClasses(e, h))
+                .append("div")
+                .html(e => getTableCellContents(e, h)));
+            variantGuides.exit().remove();
+            d3.select("#export-variant-guides").on("click", () => {
+                const downloadURL = new URL(`/api/datasets/${selectedDataset}/variants/${e["id"]}/guides/tsv`,
+                    window.location.origin);
+                window.location.href = downloadURL.toString();
+            });
+        });
+
+        tableRows.exit().remove();
+    }
 
 
     // Fix frozen columns

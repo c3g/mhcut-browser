@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.0 (TBD)
+## Version 1.0.0 (2019-09-24)
 
 Final release version for publication. Incorporates changes from initial
 submission as well (listed separately).
@@ -9,32 +9,66 @@ submission as well (listed separately).
 
 #### Front End
 
-TODO
+  * Update dependencies
+  * Document functions
+  * Update tooltip text
+  * Revise layout
+  * Show cartoons in table instead of modal
+  * Set default `min_mh_1l` to 3
+  * Improve display by grouping columns
+      * Allows expanding/collapsing and hidden columns
+  * Add inDelphi scores, bar charts
+  * Fix some small user interface issues
+  * Fix ClinVar URLs linking to the wrong variants
+  * Fix loading forever when no results are found
+  * Improve loading performance
+  * Add terms and conditions
+  * Add bug reporting form
 
 #### Server and API
 
   * Update dependencies
-  * TODO
+  * Fix GC content in variants endpoint
+  * Add bug reporting support
+  * Add inDelphi scores
+
 
 #### Database
 
-TODO
+  * Add bug reporting support
+  * Add inDelphi scores
+
+
+#### Miscellaneous
+
+  * Add LICENSE
 
 
 ### Prior to Initial Submission:
 
 #### Front End
 
-TODO
+  * Update dependencies
+  * Fix some small user interface issues
+  * Remove dbSNP checkbox
+  * Add "developed by CiRA / C3G"
 
 #### Server and API
 
   * Update dependencies
-  * TODO
+  * Use `min_mh_1l` instead of `min_mh_l` for queries
+  * Make some string search operations case insensitive
+
 
 #### Database
 
-TODO
+  * Update schema to support new TSV format
+
+
+#### Miscellaneous
+
+  * Update documentation
+  * Clean up some vestigial stuff
 
 
 

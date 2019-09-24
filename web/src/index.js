@@ -797,7 +797,7 @@ async function reloadPage(reloadCounts) {
     if (itemsPerPage >= 100) d3.select("#table-display").classed("loading", true)
         .on("transitionend", () => transitioning = false);
 
-    let variantsURL = new URL(`/api/datasets/${selectedDataset}`, window.location.origin);
+    let variantsURL = new URL(`/api/datasets/${selectedDataset}/`, window.location.origin);
     let guidesURL = new URL(`/api/datasets/${selectedDataset}/guides`, window.location.origin);
     let variantCountURL = new URL(`/api/datasets/${selectedDataset}/variants/entries`, window.location.origin);
     let guideCountURL = new URL(`/api/datasets/${selectedDataset}/guides/entries`, window.location.origin);

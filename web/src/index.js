@@ -658,8 +658,9 @@ function updateFrozenColumnOffsets() {
         d3.select(`#${dataDisplay}-column-header__${header.column}`)
             .style("left", `${lastOffset}px`);
         d3.selectAll(`.${dataDisplay}-column__${header.column}`).style("left", `${lastOffset}px`);
-        lastOffset += d3.select(`.${dataDisplay}-column__${header.column}`).node()
-            .getBoundingClientRect().width;
+        lastOffset += (d3.select(`.${dataDisplay}-column__${header.column}`).node() ||
+            {getBoundingClientRect: () => ({width: dataDisplay === "variants" ? 67 : 46})}.getBoundingClientRect())
+            .width;
     });
 }
 

@@ -21,6 +21,7 @@ submission as well (listed separately).
   * Fix some small user interface issues
   * Fix ClinVar URLs linking to the wrong variants
   * Fix loading forever when no results are found
+  * Add "no results" message
   * Improve loading performance
   * Add terms and conditions
   * Add bug reporting form

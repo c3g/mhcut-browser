@@ -1,6 +1,6 @@
 {
   "name": "mhcut-browser-web",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TSV browser for SNP data.",
   "main": "src/index.js",
   "scripts": {
@@ -10,12 +10,12 @@
     "build-dev": "npx webpack --mode development"
   },
   "author": "David Lougheed <david.lougheed@mail.mcgill.ca>",
-  "license": "UNLICENSED",
+  "license": "GPL-3.0-only",
   "devDependencies": {
-    "webpack": "^4.40.2",
-    "webpack-cli": "^3.3.9"
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "d3": "^5.12.0"
+    "d3": "^5.14.2"
   }
 }

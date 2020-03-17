@@ -1,5 +1,32 @@
 # Changelog
 
+## Version 1.0.2 (2020-03-17)
+
+### Front End
+
+  * Update dependencies
+  * Add correct DOI ([10.1038/s41467-019-12829-8](https://dx.doi.org/10.1038/s41467-019-12829-8))
+  * Fix some `rel` attributes on links
+
+### Server and API
+
+  * Update dependencies
+
+
+
+## Version 1.0.1 (2019-12-09)
+
+### Front End
+
+  * Update dependencies
+  * Add license to `package.json`
+
+### Miscellaneous
+
+  * Add credits to `README.md`
+
+
+
 ## Version 1.0.0 (2019-09-24)
 
 Final release version for publication. Incorporates changes from initial

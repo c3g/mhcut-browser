@@ -1,6 +1,6 @@
 {
   "name": "mhcut-browser-web",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A TSV browser for SNP data.",
   "main": "src/index.js",
   "scripts": {

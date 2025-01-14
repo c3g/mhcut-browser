@@ -41,13 +41,13 @@ online at [https://mhcut-browser.genap.ca/](https://mhcut-browser.genap.ca/).
 
 ### Python 3
 
-Python 3.6 or later is needed to run the application server and database-
+Python 3.9 or later is needed to run the application server and database-
 generating script. See the `requirements.txt` file for required packages.
 
 
 ### NPM
 
-NPM version 6 or later is required to install front-end dependencies for the
+NPM version 10 or later is required to install front-end dependencies for the
 web application.
 
 
@@ -128,10 +128,10 @@ Using external NodeJS Aptitude repositories, this can be done with the
 following commands:
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install nodejs
 sudo npm install -g npm  # Update NPM to the latest version
-npm -v  # The version should be at least 6.x.x
+npm -v  # The version should be at least 10.x.x
 ```
 
 #### Set Up Python Virtual Environment

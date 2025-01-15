@@ -44,7 +44,7 @@ fi
 
 if ! [ -x "$(command -v npm)" ]; then
   echo "Attempting to install NPM from nodesource via apt..."
-  curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+  curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
   sudo apt-get install -y nodejs
 fi
 
@@ -52,7 +52,7 @@ echo "Updating NPM to the latest version..."
 sudo npm install -g npm
 
 echo "Setting up Python 3 virtual environment in project root..."
-virtualenv -p python3 ./env
+python3 -m venv ./env
 PS1="" source env/bin/activate
 pip install -r requirements.txt
 

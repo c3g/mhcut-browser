@@ -122,7 +122,7 @@ sudo apt install postgresql postgresql-contrib
 
 Install NPM via your method of choice (caution; the version in Aptitude
 repositories is often out of date) and make sure it is updated to at least
-version 6.
+version 22 (the latest LTS release as of time of writing).
 
 Using external NodeJS Aptitude repositories, this can be done with the
 following commands:
@@ -140,8 +140,7 @@ Create a Python 3 virtual environment in the main project directory with the
 following commands, ran from the root project directory:
 
 ```bash
-sudo -H pip3 install virtualenv  # If not done so already, install Python virtualenv
-virtualenv -p python3 ./env
+python3 -m venv ./env
 source env/bin/activate
 pip install -r requirements.txt
 ```
@@ -184,12 +183,14 @@ CREATE DATABASE mhcut_db WITH OWNER mhcut; -- For the Cas dataset
 CREATE DATABASE mhcut_db_2 WITH OWNER mhcut; -- For the xCas dataset
 \c mhcut_db
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+\c mhcut_db_2
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 \q
 ```
 
 Finally, edit the `pg_hba.conf` file (usually found in the
-`/etc/postgresql/11/main/` directory), adding the following line, and
-restart the database:
+`/etc/postgresql/11/main/` or `/var/lib/pgsql/data` directory), adding the
+following line, and restart the database:
 
 Before:
 ```

@@ -136,6 +136,9 @@ npm -v  # The version should be at least 10.x.x
 
 #### Set Up Python Virtual Environment
 
+Before setting up the virtual environment, you may need to install
+a package called `python3-dev` (Debian/similar) or `python3-devel` (RHEL).
+
 Create a Python 3 virtual environment in the main project directory with the
 following commands, ran from the root project directory:
 

@@ -302,23 +302,18 @@ def ingest_cartoons(conn, cartoons_path: str):
                 try:
                     if line == "\n":
                         if len(current_variant) > 0:
-                            if k < 14903120:
-                                current_stage = 0
-                                current_variant = []
-                                current_cartoon = ""
-
-                                pr.update(1)
-                                k += 1
-
+                            try:
+                                next_cartoon = {
+                                    "cartoon": current_cartoon,
+                                    "chr": current_variant[0],
+                                    "pos_start": int(current_variant[1]),
+                                    "pos_end": int(current_variant[2]),
+                                    "rs": current_variant[3]
+                                }
+                            except ValueError:
+                                # Invalid line, need to skip this plus the next cartoon
+                                current_stage = 2
                                 continue
-
-                            next_cartoon = {
-                                "cartoon": current_cartoon,
-                                "chr": current_variant[0],
-                                "pos_start": int(current_variant[1]),
-                                "pos_end": int(current_variant[2]),
-                                "rs": current_variant[3]
-                            }
 
                             try:
                                 c.execute(

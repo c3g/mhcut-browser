@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.1.0 (2025-01-14)
+## Version 1.1.0 (2025-01-30)
 
 ### Front End
 

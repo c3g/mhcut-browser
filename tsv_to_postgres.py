@@ -21,16 +21,12 @@
 import getpass
 import os
 import psycopg2
-import time
 
 from io import StringIO
-from multiprocessing import Process, Queue, Value
-from queue import Empty
 from tqdm import tqdm
 
 import sys
 
-NUM_PROCESSES = len(os.sched_getaffinity(0))
 CHROMOSOMES = ("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
                "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
                "chr20", "chr21", "chr22", "chrX", "chrY")

@@ -25,11 +25,11 @@ import psycopg2
 import psycopg2.extras
 import re
 import secrets
-import simplejson
 import smtplib
 
 from email.message import EmailMessage
 from flask import Flask, g, json, request, Response
+from json.decoder import JSONDecodeError
 from typing import Pattern
 
 
@@ -171,7 +171,7 @@ def build_search_query(raw_query, c):
 
             search_query_fragment += "))"
 
-    except (simplejson.errors.JSONDecodeError, TypeError, AttributeError):
+    except (JSONDecodeError, TypeError, AttributeError):
         if raw_query.strip() == "":
             return "true", search_query_data
 
@@ -286,12 +286,12 @@ def get_entries_with_cache(dataset: str, c, query):
     return num_entries
 
 
-@app.route("/datasets/", methods=["GET"])
+@app.get("/datasets/")
 def datasets() -> Response:
     return json.jsonify(sorted([{"id": k, **v} for k, v in DATASETS.items()], key=lambda x: x["id"]))
 
 
-@app.route("/datasets/<string:dataset>/", methods=["GET"])
+@app.get("/datasets/<string:dataset>/")
 def dataset_index(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute(build_variants_query(
@@ -311,7 +311,7 @@ def dataset_index(dataset: str) -> Response:
     return json.jsonify(results)
 
 
-@app.route("/datasets/<string:dataset>/tsv", methods=["GET"])
+@app.get("/datasets/<string:dataset>/tsv")
 def variants_tsv(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
@@ -338,14 +338,14 @@ def variants_tsv(dataset: str) -> Response:
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"variants.tsv\""})
 
 
-@app.route("/datasets/<string:dataset>/variants/<int:variant_id>/guides", methods=["GET"])
+@app.get("/datasets/<string:dataset>/variants/<int:variant_id>/guides")
 def variant_guides(dataset: str, variant_id: int):
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     c.execute("SELECT * FROM guides WHERE variant_id = %s", (variant_id,))
     return json.jsonify(c.fetchall())
 
 
-@app.route("/datasets/<string:dataset>/variants/<int:variant_id>/guides/tsv", methods=["GET"])
+@app.get("/datasets/<string:dataset>/variants/<int:variant_id>/guides/tsv")
 def variant_guides_tsv(dataset: str, variant_id: int) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     column_names = [i["column_name"] for i in get_guides_columns(c)]
@@ -366,7 +366,7 @@ def variant_guides_tsv(dataset: str, variant_id: int) -> Response:
                                                     f"filename=\"variant_{variant_id}_guides.tsv\""})
 
 
-@app.route("/datasets/<string:dataset>/guides", methods=["GET"])
+@app.get("/datasets/<string:dataset>/guides")
 def guides(dataset: str) -> Response:
     page = int(verify_domain(request.args.get("page", "1"), POS_INT_DOMAIN))
     items_per_page = int(verify_domain(request.args.get("items_per_page", "100"), POS_INT_DOMAIN))
@@ -398,7 +398,7 @@ def guides(dataset: str) -> Response:
     return json.jsonify(c.fetchall())
 
 
-@app.route("/datasets/<string:dataset>/guides/tsv", methods=["GET"])
+@app.get("/datasets/<string:dataset>/guides/tsv")
 def guides_tsv(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     search_params = get_search_params_from_request(c)
@@ -431,7 +431,7 @@ def guides_tsv(dataset: str) -> Response:
                     headers={"Content-Disposition": "Content-Disposition: attachment; filename=\"guides.tsv\""})
 
 
-@app.route("/datasets/<string:dataset>/combined/tsv", methods=["GET"])
+@app.get("/datasets/<string:dataset>/combined/tsv")
 def combined_tsv(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -479,14 +479,14 @@ def combined_tsv(dataset: str) -> Response:
                                                     "filename=\"variants_with_guides.tsv\""})
 
 
-@app.route("/datasets/<string:dataset>/variants/entries", methods=["GET"])
+@app.get("/datasets/<string:dataset>/variants/entries")
 def variants_entries(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     entries_query = build_variants_query(c, "COUNT(*)", get_search_params_from_request(c), outer_query=False)
     return json.jsonify(get_entries_with_cache(dataset, c, entries_query))
 
 
-@app.route("/datasets/<string:dataset>/guides/entries", methods=["GET"])
+@app.get("/datasets/<string:dataset>/guides/entries")
 def guides_entries(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     entries_query = c.mogrify(
@@ -496,13 +496,13 @@ def guides_entries(dataset: str) -> Response:
     return json.jsonify(get_entries_with_cache(dataset, c, entries_query))
 
 
-@app.route("/datasets/<string:dataset>/variants/fields", methods=["GET"])
+@app.get("/datasets/<string:dataset>/variants/fields")
 def variant_fields(dataset: str) -> Response:
     c = get_db(dataset).cursor(cursor_factory=psycopg2.extras.DictCursor)
     return json.jsonify({col["column_name"]: col for col in get_variants_columns(c)})
 
 
-@app.route("/datasets/<string:dataset>/metadata", methods=["GET"])
+@app.get("/datasets/<string:dataset>/metadata")
 def metadata(dataset: str) -> Response:
     """
     Returns various metadata and summary statistics about the entries in the database. Does not respect filtering
@@ -522,7 +522,7 @@ def metadata(dataset: str) -> Response:
     })
 
 
-@app.route("/token", methods=["GET"])
+@app.get("/token")
 def email_token() -> Response:
     token = secrets.token_hex(24)
     expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
@@ -530,7 +530,7 @@ def email_token() -> Response:
     return json.jsonify({"token": token, "expiry": int(expiry.timestamp())})
 
 
-@app.route("/report", methods=["POST"])
+@app.post("/report")
 def bug_report() -> Response:
     data = request.get_json()
     if "token" not in data:

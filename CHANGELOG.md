@@ -1,5 +1,24 @@
 # Changelog
 
+## Version 1.1.0 (2025-01-30)
+
+### Front End
+
+  * Update dependencies
+  * Drop compatibility for deployment with old NPM versions (<10)
+
+### Server and API
+
+  * Update dependencies and remove `simplejson` dependency
+  * Refactor to use new Flask route methods
+  * Drop compatibility for deployment with old Python versions (<3.9)
+
+### Miscellaneous
+
+  * Remove dead multiprocessing code from `tsv_to_postgres.py`
+
+
+
 ## Version 1.0.2 (2020-03-17)
 
 ### Front End
@@ -130,7 +149,7 @@ Renamed once again, this time to "MHcut Browser".
   * Include cartoons in variants endpoint.
   * Made several querying changes to aid performance with the complete
     data-set.
-  
+
 ### Database
 
   * Moved to **PostgreSQL**.

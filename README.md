@@ -41,13 +41,13 @@ online at [https://mhcut-browser.genap.ca/](https://mhcut-browser.genap.ca/).
 
 ### Python 3
 
-Python 3.6 or later is needed to run the application server and database-
+Python 3.9 or later is needed to run the application server and database-
 generating script. See the `requirements.txt` file for required packages.
 
 
 ### NPM
 
-NPM version 6 or later is required to install front-end dependencies for the
+NPM version 10 or later is required to install front-end dependencies for the
 web application.
 
 
@@ -122,26 +122,28 @@ sudo apt install postgresql postgresql-contrib
 
 Install NPM via your method of choice (caution; the version in Aptitude
 repositories is often out of date) and make sure it is updated to at least
-version 6.
+version 22 (the latest LTS release as of time of writing).
 
 Using external NodeJS Aptitude repositories, this can be done with the
 following commands:
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install nodejs
 sudo npm install -g npm  # Update NPM to the latest version
-npm -v  # The version should be at least 6.x.x
+npm -v  # The version should be at least 10.x.x
 ```
 
 #### Set Up Python Virtual Environment
+
+Before setting up the virtual environment, you may need to install
+a package called `python3-dev` (Debian/similar) or `python3-devel` (RHEL).
 
 Create a Python 3 virtual environment in the main project directory with the
 following commands, ran from the root project directory:
 
 ```bash
-sudo -H pip3 install virtualenv  # If not done so already, install Python virtualenv
-virtualenv -p python3 ./env
+python3 -m venv ./env
 source env/bin/activate
 pip install -r requirements.txt
 ```
@@ -184,12 +186,14 @@ CREATE DATABASE mhcut_db WITH OWNER mhcut; -- For the Cas dataset
 CREATE DATABASE mhcut_db_2 WITH OWNER mhcut; -- For the xCas dataset
 \c mhcut_db
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+\c mhcut_db_2
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 \q
 ```
 
 Finally, edit the `pg_hba.conf` file (usually found in the
-`/etc/postgresql/11/main/` directory), adding the following line, and
-restart the database:
+`/etc/postgresql/11/main/` or `/var/lib/pgsql/data` directory), adding the
+following line, and restart the database:
 
 Before:
 ```

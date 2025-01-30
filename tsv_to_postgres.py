@@ -2,7 +2,7 @@
 
 
 # MHcut browser is a web application for browsing data from the MHcut tool.
-# Copyright (C) 2018-2019  the Canadian Centre for Computational Genomics
+# Copyright (C) 2018-2025  the Canadian Centre for Computational Genomics
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import psycopg2
 
 from io import StringIO
 from tqdm import tqdm
+from typing import Tuple
 
 import sys
 
@@ -62,21 +63,7 @@ def str_or_null(x: str):
     return x.strip() if x != "NA" else "\\N"
 
 
-def main():
-    """
-    Main method, runs when the script is ran directly.
-    """
-
-    if len(sys.argv) != 6:
-        print("Usage: ./tsv_to_postgres.py variants_file.tsv guides_file.tsv cartoons_file.tsv database_name "
-              "database_user")
-        exit(1)
-
-    db_password = os.environ.get("DB_PASSWORD")
-    if db_password is None:
-        db_password = getpass.getpass(prompt="Password for Database User: ")
-
-    conn = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
+def schema_setup(conn):
     c = conn.cursor()
 
     with open("./sql/schema.sql", "r") as s:
@@ -84,24 +71,24 @@ def main():
 
     conn.commit()
 
-    # Get number of lines for progress bars.
-    n_variants = 0
-    n_guides = 0
-    with open(sys.argv[1], "r") as vs_file, open(sys.argv[2], "r") as gs_file:
+
+def get_n_variants_guides(variants_path: str, guides_path: str) -> Tuple[int, int]:
+    with open(variants_path, "r") as vs_file, open(guides_path, "r") as gs_file:
         # Skip headers:
         next(vs_file)
         next(gs_file)
 
-        for _ in vs_file:
-            n_variants += 1
+        n_variants = sum(1 for _ in vs_file)
+        n_guides = sum(1 for _ in gs_file)
 
-        for _ in gs_file:
-            n_guides += 1
+    return n_variants, n_guides
 
-    id_cache = {}  # Cache for IDs to avoid repeated query lookups
+
+def ingest_variants(conn, variants_path: str, n_variants: int, id_cache: dict):
+    c = conn.cursor()
     variant_copy = StringIO()
 
-    with open(sys.argv[1], "r", newline="") as vs_file:
+    with open(variants_path, "r", newline="") as vs_file:
         # reader = csv.DictReader(vs_file, delimiter="\t")
         i = 1
 
@@ -210,8 +197,14 @@ def main():
     c.execute("INSERT INTO summary_statistics VALUES(%s, (SELECT MAX(mh_l) FROM variants))", ("max_mh_l",))
 
     conn.commit()
+    c.close()
 
-    with open(sys.argv[2], "r", newline="") as gs_file:
+
+def ingest_guides(conn, guides_path: str, n_guides: int, id_cache: dict):
+    c = conn.cursor()
+    guide_copy = StringIO()
+
+    with open(guides_path, "r", newline="") as gs_file:
         # reader = csv.DictReader(gs_file, delimiter="\t")
 
         headers = next(gs_file)[:-1].split("\t")
@@ -240,7 +233,6 @@ def main():
         h_in_delphi_freq_hct116 = headers.index("inDelphiFreqHCT116")
         h_in_delphi_freq_k562 = headers.index("inDelphiFreqK562")
 
-        guide_copy = StringIO()
         j = 1
         for guide in tqdm(gs_file, total=n_guides, desc="guides"):
             guide = guide[:-1].split("\t")
@@ -284,10 +276,15 @@ def main():
     c.execute("CLUSTER guides USING guides_variant_id_idx")
 
     conn.commit()
+    c.close()
+
+
+def ingest_cartoons(conn, cartoons_path: str):
+    c = conn.cursor()
 
     print("Saving cartoons...")  # TODO: TQDM with real progress
 
-    with open(sys.argv[3], "r", newline="") as cs_file:
+    with open(cartoons_path, "r", newline="") as cs_file:
         # Skip variant header row
         next(cs_file)
         next(cs_file)
@@ -405,8 +402,46 @@ def main():
     print()
 
     conn.commit()
-
     c.close()
+
+
+def main():
+    """
+    Main method, runs when the script is run directly.
+    """
+
+    if len(sys.argv) != 6:
+        print("Usage: ./tsv_to_postgres.py variants_file.tsv guides_file.tsv cartoons_file.tsv database_name "
+              "database_user")
+        exit(1)
+
+    variants_path = sys.argv[1]
+    guides_path = sys.argv[2]
+    cartoons_path = sys.argv[3]
+
+    db_password = os.environ.get("DB_PASSWORD")
+    if db_password is None:
+        db_password = getpass.getpass(prompt="Password for Database User: ")
+
+    conn = psycopg2.connect("dbname={} user={} password={}".format(sys.argv[4], sys.argv[5], db_password))
+
+    # Set up database structure
+    schema_setup(conn)
+
+    # Get number of lines for progress bars.
+    n_variants, n_guides = get_n_variants_guides(variants_path, guides_path)
+
+    id_cache = {}  # Cache for IDs to avoid repeated query lookups
+
+    # Ingest variants
+    ingest_variants(conn, variants_path, n_variants, id_cache)
+
+    # Ingest guides
+    ingest_guides(conn, guides_path, n_guides, id_cache)
+
+    # Ingest cartoons
+    ingest_cartoons(conn, cartoons_path)
+
     conn.close()
 
 

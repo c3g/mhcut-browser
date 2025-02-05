@@ -5,9 +5,9 @@ After=network.target
 [Service]
 User=some_user_here
 Group=www-data
-WorkingDirectory=/path/to/mhcut/browser
-Environment="PATH=/path/to/mhcut/browser/env/bin"
-ExecStart=/path/to/mhcut/browser/env/bin/uwsgi --ini mcb_uwsgi.ini
+WorkingDirectory=/app/mhcut-browser
+Environment="PATH=/app/mhcut-browser/env/bin"
+ExecStart=/app/mhcut-browser/env/bin/uwsgi --ini mcb_uwsgi.ini
 
 [Install]
 WantedBy=multi-user.target

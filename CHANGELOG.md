@@ -16,6 +16,7 @@
 ### Miscellaneous
 
   * Remove dead multiprocessing code from `tsv_to_postgres.py`
+  * Refactor `tsv_to_postgres.py` into multiple functions
 
 
 

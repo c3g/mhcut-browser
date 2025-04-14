@@ -9,5 +9,8 @@ WorkingDirectory=/app/mhcut-browser
 Environment="PATH=/app/mhcut-browser/env/bin"
 ExecStart=/app/mhcut-browser/env/bin/uwsgi --ini mcb_uwsgi.ini
 
+Restart=on-failure
+RestartSec=5s
+
 [Install]
 WantedBy=multi-user.target
